@@ -1,0 +1,7 @@
+render/node_modules
+render/out/*
+!render/out/sky-is-blue.mp4
+!render/out/sky-is-blue_music-fx.mp4
+!render/out/captions.srt
+!render/out/timeline.json
+render/vo/*.wav

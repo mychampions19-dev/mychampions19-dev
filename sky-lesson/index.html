@@ -1,0 +1,934 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Why Is the Sky Blue?</title>
+<meta name="description" content="An 86-second paper-craft animation explaining Rayleigh scattering.">
+<style>
+  :root { --bg:#141312; --fg:#F3EAD8; --muted:#9A9388; --accent:#E8765A; --panel:#211F1D; --line:#34312D; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 'JetBrains Mono','DejaVu Sans Mono',Menlo,ui-monospace,monospace; }
+  .wrap { max-width:1280px; margin:0 auto; padding:24px 16px 40px; }
+  header h1 { font-size:20px; font-weight:600; margin:0 0 4px; }
+  header p { margin:0 0 16px; color:var(--muted); }
+  canvas { display:block; width:100%; height:auto; aspect-ratio:16/9; border-radius:10px; background:#1D1C1A; }
+  .controls { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:12px; }
+  button { font:inherit; color:var(--fg); background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:8px 12px; cursor:pointer; min-height:40px; }
+  button[aria-pressed="true"] { border-color:var(--accent); color:var(--accent); }
+  button:focus-visible, input:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+  input[type=range] { flex:1 1 200px; accent-color:var(--accent); min-height:40px; }
+  .time { color:var(--muted); min-width:9ch; text-align:right; font-variant-numeric:tabular-nums; }
+  footer { margin-top:16px; color:var(--muted); font-size:13px; }
+  footer a { color:var(--fg); }
+  body.render { background:#1D1C1A; overflow:hidden; }
+  body.render .wrap { max-width:none; padding:0; }
+  body.render header, body.render .controls, body.render footer { display:none; }
+  body.render canvas { width:1920px; height:1080px; border-radius:0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Why Is the Sky Blue?</h1>
+    <p>An 86-second lesson on Rayleigh scattering, made from torn paper. <a href="STORYBOARD.md" style="color:inherit">Storyboard &amp; script</a></p>
+  </header>
+  <canvas id="c" width="1920" height="1080" role="img" aria-label="Animation: why the sky is blue"></canvas>
+  <div class="controls">
+    <button id="play" aria-label="Play">▶ Play</button>
+    <input id="scrub" type="range" min="0" max="86" step="0.0417" value="0" aria-label="Seek">
+    <span class="time" id="time">0:00 / 1:26</span>
+    <button id="cc" aria-pressed="true">CC</button>
+    <button id="snd" aria-pressed="true">Sound</button>
+    <button id="vo" aria-pressed="false" title="Uses your browser's built-in voice">Narrate</button>
+  </div>
+  <footer>Space: play/pause · ←/→: 5 s · The rendered MP4 lives in <code>render/out/</code>.</footer>
+</div>
+<script>
+'use strict';
+/* ===================================================================
+   Constants, palette, maths
+   =================================================================== */
+const W = 1920, H = 1080, FPS = 24, DUR = 86;
+const SX = 60, SY = 96, SW = 1800, SH = 834;           // stage rect inside the terminal window
+const C = {
+  coral:'#E8765A', mustard:'#E3B23C', teal:'#3E9C9A', cream:'#F3EAD8', char:'#2B2926',
+  white:'#FFFCF4', paper2:'#F8F1E3', violet:'#7E62A3', term:'#1D1C1A', win:'#242220', bar:'#2E2B28'
+};
+const MONO = "'JetBrains Mono','DejaVu Sans Mono',Menlo,ui-monospace,monospace";
+const TAU = Math.PI * 2;
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, k) => a + (b - a) * k;
+const seg = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
+const ease = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+const eOut = k => 1 - Math.pow(1 - k, 3);
+const eIn = k => k * k * k;
+const eBack = k => { const c1 = 1.70158, c3 = c1 + 1; return k <= 0 ? 0 : 1 + c3 * Math.pow(k - 1, 3) + c1 * Math.pow(k - 1, 2); };
+const bump = (t, a, b) => { const k = seg(t, a, b); return Math.sin(Math.PI * k); };
+function hexRGB(c) { const n = parseInt(c.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
+function mix(a, b, k) {
+  k = clamp(k, 0, 1); const A = hexRGB(a), B = hexRGB(b);
+  return '#' + A.map((v, i) => Math.round(v + (B[i] - v) * k).toString(16).padStart(2, '0')).join('');
+}
+function hash(n) { n |= 0; n = Math.imul(n ^ (n >>> 16), 0x45d9f3b); n = Math.imul(n ^ (n >>> 16), 0x45d9f3b); n ^= n >>> 16; return (n >>> 0) / 4294967296; }
+const R = (a, b = 0, c = 0) => hash((a * 73856093) ^ (b * 19349663) ^ (c * 83492791));
+
+// Global clock state. BF = boil frame: paper re-jitters 8 times a second (every 3rd frame at 24 fps).
+let T = 0, BF = 0;
+const jit = (id, k, amt = 1.5) => (R(id, k, BF + 1) * 2 - 1) * amt;
+
+/* ===================================================================
+   Timeline — single source of truth for picture, captions, and audio.
+   render/ dumps this to timeline.json for the offline audio build.
+   =================================================================== */
+const SCENES = [
+  { n:1, name:'hook',          start:0,  end:9  },
+  { n:2, name:'familiar world',start:9,  end:21 },
+  { n:3, name:'disruption',    start:21, end:31 },
+  { n:4, name:'mechanism',     start:31, end:47 },
+  { n:5, name:'discovery',     start:47, end:63 },
+  { n:6, name:'consequence',   start:63, end:75 },
+  { n:7, name:'recap',         start:75, end:86 },
+];
+const VO = [
+  { t:0.6,  text:"Look up on a clear day. The sky is blue — but sunlight is white. So where does the blue come from?" },
+  { t:9.4,  text:"Sunlight is every colour travelling together. Each colour is a wave: red with long, lazy wiggles, blue with short, quick ones." },
+  { t:21.4, text:"To reach your eyes, it has to cross the air: trillions of nitrogen and oxygen molecules, far smaller than any wave." },
+  { t:31.4, text:"When a wave meets a molecule, it gets bounced off in a new direction. That's scattering. And short waves scatter much more than long ones. Blue scatters about five times more than red." },
+  { t:47.6, text:"So blue gets bounced all across the sky, and from every direction some of it heads to you. Violet scatters even more, but sunlight has less of it, and our eyes favour blue." },
+  { t:63.4, text:"At sunset, light skims through far more air. Most of the blue is scattered away before it arrives, leaving reds and oranges." },
+  { t:75.6, text:"Short waves scatter most. That's why the sky is blue by day, and glows red at sunset." },
+];
+const SEC_PER_WORD = 60 / 135;   // narration pace: 135 wpm, inside the 125–145 brief
+const SENT_PAUSE = 0.2;
+const words = s => s.trim().split(/\s+/).filter(w => /[A-Za-z0-9]/.test(w)).length;
+function splitChunks(text) {
+  const sents = text.match(/[^.?!]+[.?!]+/g) || [text];
+  const out = [];
+  for (let s of sents) {
+    s = s.trim();
+    if (s.length <= 72) { out.push({ s, end: true }); continue; }
+    // split long sentences at the punctuation nearest the middle
+    const cands = [...s.matchAll(/[,:—]\s/g)].map(m => m.index + 1);
+    const mid = s.length / 2;
+    const cut = cands.sort((a, b) => Math.abs(a - mid) - Math.abs(b - mid))[0] || Math.floor(mid);
+    out.push({ s: s.slice(0, cut).trim(), end: false }, { s: s.slice(cut).trim(), end: true });
+  }
+  return out;
+}
+const CAPTIONS = [];
+VO.forEach((v, li) => {
+  let t = v.t;
+  for (const ch of splitChunks(v.text)) {
+    const d = words(ch.s) * SEC_PER_WORD;
+    CAPTIONS.push({ line: li, start: +t.toFixed(3), end: +(t + d).toFixed(3), text: ch.s });
+    t += d + (ch.end ? SENT_PAUSE : 0);
+  }
+  v.dur = +(t - v.t - SENT_PAUSE).toFixed(3);   // target spoken length of the line
+});
+
+const SFX = [];
+const fx = (t, type, gain = 1) => SFX.push({ t: +t.toFixed(3), type, gain });
+// S1
+fx(0.15, 'slide', .7); fx(0.45, 'slide', .6); fx(0.75, 'slide', .5); fx(4.2, 'pop'); fx(7.2, 'whoosh', .8);
+// S2
+fx(9.1, 'slide', .6); fx(10.1, 'chime'); fx(15.3, 'hum'); fx(16.8, 'trill'); fx(19.4, 'whoosh', .6);
+// S3
+for (let i = 0; i < 9; i++) fx(21.25 + i * 0.21, 'pop', .35 + .05 * (i % 3));
+fx(25.55, 'thwip'); fx(29.2, 'whoosh', .9);
+// S4
+fx(33.43, 'tok'); fx(37.6, 'tick', .8); fx(39.89, 'pings');
+fx(42.7, 'tick', .6); fx(43.4, 'tick', .7); fx(44.0, 'tick', .8); fx(44.9, 'tick', .9); fx(45.25, 'pop', .8); fx(45.6, 'whoosh', .7);
+// S5
+for (let i = 0; i < 6; i++) fx(47.4 + i * 0.3, 'pop', .3);
+for (let i = 0; i < 8; i++) fx(49.4 + i * 0.66, 'ping', .35);
+fx(54.6, 'chime', .9); fx(55.6, 'slide', .6); fx(61.2, 'whoosh', .7);
+// S6
+fx(64.3, 'slide', .8); fx(65.2, 'pop', .7); fx(66.4, 'tick', .7); fx(68.6, 'longwhoosh');
+for (let i = 0; i < 8; i++) fx(68.6 + 3 * (0.12 + i * 0.1), 'peel', .6);
+fx(73.2, 'slide', .8);
+// S7
+fx(75.7, 'tick', .6); fx(79.4, 'pop', .5); fx(81.5, 'pop', .5); fx(84.3, 'end');
+
+function buildMusic() {
+  const notes = [], beat = 60 / 96, bar = beat * 4, e8 = beat / 2;
+  const CH = { C:[48,64,67,72,76], Am:[45,60,64,69,72], F:[41,60,65,69,72], G:[43,62,67,71,74], Dm:[38,62,65,69,74], Em:[40,59,64,67,71] };
+  const pat = [1, 3, 2, 4, 3, 2, 1, 2];
+  const nb = Math.ceil(DUR / bar);
+  for (let b = 0; b < nb; b++) {
+    const t0 = b * bar;
+    let ch;
+    if (t0 < 62.5)      ch = ['C', 'Am', 'F', 'G'][b % 4];
+    else if (t0 < 75)   ch = ['Am', 'F', 'Dm', 'Em', 'Am'][(b - 25) % 5];
+    else if (t0 < 82.5) ch = ['F', 'G', 'Am'][b - 30] || 'G';
+    else                ch = 'C';
+    const tones = CH[ch];
+    const fadeIn = clamp(b / 2 + .3, 0, 1);
+    const last = t0 >= 82.5;
+    notes.push({ t:+t0.toFixed(3), midi:tones[0], dur:bar * .95, vel:.55 * fadeIn, inst:'bass' });
+    if (last) {
+      [1, 2, 3, 4].forEach((i, k) => notes.push({ t:+(t0 + k * e8).toFixed(3), midi:tones[i], dur:3, vel:.42, inst:'marimba' }));
+      notes.push({ t:+t0.toFixed(3), midi:tones[1] - 12, dur:3.3, vel:.35, inst:'pad' }, { t:+t0.toFixed(3), midi:tones[2] - 12, dur:3.3, vel:.3, inst:'pad' });
+      continue;
+    }
+    pat.forEach((i, k) => {
+      const t = t0 + k * e8;
+      if (t > DUR - .5) return;
+      const accent = k === 0 ? 1 : (k % 2 ? .7 : .85);
+      notes.push({ t:+t.toFixed(3), midi:tones[i], dur:.6, vel:.38 * accent * fadeIn, inst:'marimba' });
+    });
+    if ((t0 >= 47 && t0 < 62.5) || (t0 >= 75)) {
+      notes.push({ t:+t0.toFixed(3), midi:tones[1] - 12, dur:bar, vel:.28, inst:'pad' }, { t:+t0.toFixed(3), midi:tones[2] - 12, dur:bar, vel:.24, inst:'pad' });
+    }
+  }
+  return notes;
+}
+const MUSIC = buildMusic();
+// Wind ambience level keyframes [time, gain]; thins inside the molecule close-ups.
+const WIND = [[0, 0], [1, 1], [20, 1], [22, .35], [46, .35], [48, 1], [74, .8], [84, .5], [86, 0]];
+const TIMELINE = { fps:FPS, duration:DUR, width:W, height:H, scenes:SCENES, vo:VO, captions:CAPTIONS, sfx:SFX, music:MUSIC, wind:WIND, secPerWord:SEC_PER_WORD };
+window.TIMELINE = TIMELINE;
+
+/* ===================================================================
+   Materials: torn paper, gouache, crayon, pencil
+   =================================================================== */
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+
+function tornPath(pts, id, torn = 3, step = 26) {
+  const out = [], n = pts.length;
+  for (let i = 0; i < n; i++) {
+    const [x1, y1] = pts[i], [x2, y2] = pts[(i + 1) % n];
+    const dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy) || 1, nx = -dy / L, ny = dx / L;
+    const m = Math.max(1, Math.round(L / step));
+    for (let j = 0; j < m; j++) {
+      const k = j / m, o = j === 0 ? 0 : (R(id, i * 97 + j) - .5) * 2 * torn, q = out.length;
+      out.push([x1 + dx * k + nx * o + jit(id, q), y1 + dy * k + ny * o + jit(id, q + 5000)]);
+    }
+  }
+  return out;
+}
+function tracePath(c, P) { c.beginPath(); P.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])); c.closePath(); }
+function circlePts(cx, cy, r, n = 28) { const a = []; for (let i = 0; i < n; i++) a.push([cx + Math.cos(i / n * TAU) * r, cy + Math.sin(i / n * TAU) * r]); return a; }
+function rectPts(x, y, w, h) { return [[x, y], [x + w, y], [x + w, y + h], [x, y + h]]; }
+
+// A torn-paper shape: ragged edge, soft cardboard shadow, optional dry-gouache streaks.
+function paper(c, pts, fill, id, o = {}) {
+  const P = tornPath(pts, id, o.torn ?? 3, o.step ?? 26);
+  c.save();
+  if (o.alpha != null) c.globalAlpha *= o.alpha;
+  if (o.shadow !== false) {
+    c.shadowColor = `rgba(43,41,38,${o.sh ?? .28})`; c.shadowBlur = o.blur ?? 10;
+    c.shadowOffsetX = o.sx ?? 5; c.shadowOffsetY = o.sy ?? 7;
+  }
+  tracePath(c, P); c.fillStyle = fill; c.fill();
+  c.restore();
+  if (o.gouache) gouache(c, P, fill, id, o);
+  if (o.edge) { c.save(); if (o.alpha != null) c.globalAlpha *= o.alpha; tracePath(c, P); c.strokeStyle = o.edge; c.lineWidth = 1.6; c.globalAlpha *= .55; c.stroke(); c.restore(); }
+  return P;
+}
+function gouache(c, P, fill, id, o) {
+  let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+  P.forEach(([x, y]) => { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); });
+  c.save(); if (o.alpha != null) c.globalAlpha *= o.alpha; tracePath(c, P); c.clip();
+  c.lineCap = 'round';
+  const n = o.streaks ?? 6;
+  for (let i = 0; i < n; i++) {
+    const y = lerp(y0, y1, R(id, i, 11)), x = lerp(x0, x1, R(id, i, 12) * .6), len = (x1 - x0) * (.25 + R(id, i, 13) * .5);
+    c.strokeStyle = mix(fill, i % 2 ? C.white : C.char, i % 2 ? .22 : .08);
+    c.globalAlpha = (o.alpha ?? 1) * .5; c.lineWidth = 10 + R(id, i, 14) * 26;
+    c.beginPath(); c.moveTo(x + jit(id, i), y + jit(id, i + 50)); c.quadraticCurveTo(x + len / 2, y - 6 + jit(id, i + 90, 3), x + len, y + 4); c.stroke();
+  }
+  c.restore();
+}
+// Crayon: a waxy multi-pass stroke that re-jitters with the boil.
+function crayon(c, pts, color, w, id, alpha = 1) {
+  if (alpha <= 0 || pts.length < 2) return;
+  c.save(); c.lineCap = 'round'; c.lineJoin = 'round'; c.strokeStyle = color;
+  for (let p = 0; p < 3; p++) {
+    c.globalAlpha = alpha * (p ? .4 : .9); c.lineWidth = w * (p ? .55 : 1);
+    c.beginPath();
+    const a = p ? 1.4 : .6;
+    pts.forEach((q, i) => { const x = q[0] + jit(id + p * 13, i, a), y = q[1] + jit(id + p * 17, i + 999, a); i ? c.lineTo(x, y) : c.moveTo(x, y); });
+    c.stroke();
+  }
+  c.restore();
+}
+const pencil = (c, pts, id, alpha = .85, w = 2.4, col = C.char) => crayon(c, pts, col, w, id, alpha);
+function ribbon(c, pts, col, w, id, alpha = 1) {
+  crayon(c, pts, mix(col, C.char, .3), w + 4, id, alpha * .75);
+  crayon(c, pts, col, w, id + 7, alpha);
+}
+function label(c, txt, x, y, o = {}) {
+  const a = o.alpha ?? 1; if (a <= 0) return;
+  const size = o.size ?? 26, id = o.id ?? (txt.length * 31 + 7);
+  c.save(); c.globalAlpha *= a; c.font = `${o.weight ?? 600} ${size}px ${MONO}`;
+  c.textAlign = o.align ?? 'left'; c.textBaseline = 'middle';
+  if (o.chip) {
+    const w = c.measureText(txt).width, pad = 14;
+    const bx = (o.align === 'center' ? x - w / 2 : o.align === 'right' ? x - w : x) - pad;
+    paper(c, rectPts(bx, y - size * .78, w + pad * 2, size * 1.56), o.chipCol ?? C.cream, id, { torn: 2, step: 18, blur: 6, sx: 3, sy: 4, sh: .22 });
+  }
+  c.fillStyle = o.color ?? C.char;
+  c.fillText(txt, x + jit(id, 1, .7), y + jit(id, 2, .7));
+  c.restore();
+}
+function arrow(c, x1, y1, x2, y2, id, alpha = 1, col = C.char) {
+  pencil(c, [[x1, y1], [lerp(x1, x2, .5), lerp(y1, y2, .5) - 4], [x2, y2]], id, alpha, 2.6, col);
+  const a = Math.atan2(y2 - y1, x2 - x1);
+  pencil(c, [[x2 - Math.cos(a - .45) * 16, y2 - Math.sin(a - .45) * 16], [x2, y2], [x2 - Math.cos(a + .45) * 16, y2 - Math.sin(a + .45) * 16]], id + 3, alpha, 2.6, col);
+}
+function bracket(c, x, y, len, dir, prog, id, alpha = 1) {
+  if (prog <= 0) return;
+  const L = len * prog;
+  pencil(c, [[x, y + dir * 12], [x, y]], id, alpha);
+  pencil(c, [[x, y], [x + L * .5, y], [x + L, y]], id + 1, alpha);
+  if (prog >= 1) pencil(c, [[x + len, y], [x + len, y + dir * 12]], id + 2, alpha);
+}
+
+// Paper grain + fibres, generated once from a seeded hash so every render matches.
+const tex = document.createElement('canvas'); tex.width = tex.height = 512;
+(function buildTexture() {
+  const t = tex.getContext('2d'), img = t.createImageData(512, 512);
+  for (let i = 0; i < 512 * 512; i++) {
+    const v = 128 + (hash(i * 7 + 3) - .5) * 90 + (hash((i >> 2) * 13 + 1) - .5) * 40;
+    img.data[i * 4] = img.data[i * 4 + 1] = img.data[i * 4 + 2] = v; img.data[i * 4 + 3] = 255;
+  }
+  t.putImageData(img, 0, 0);
+  t.lineCap = 'round';
+  for (let i = 0; i < 420; i++) {
+    const x = hash(i * 3 + 1) * 512, y = hash(i * 3 + 2) * 512, a = hash(i * 3 + 3) * TAU, l = 6 + hash(i * 5) * 22;
+    t.strokeStyle = hash(i * 11) > .5 ? 'rgba(255,255,255,.35)' : 'rgba(0,0,0,.25)'; t.lineWidth = .8;
+    t.beginPath(); t.moveTo(x, y); t.quadraticCurveTo(x + Math.cos(a) * l / 2 + 3, y + Math.sin(a) * l / 2, x + Math.cos(a) * l, y + Math.sin(a) * l); t.stroke();
+  }
+})();
+let texPat = null;
+function grain(c) {
+  texPat = texPat || c.createPattern(tex, 'repeat');
+  c.save(); c.globalCompositeOperation = 'soft-light'; c.globalAlpha = .55;
+  const ox = Math.floor(R(BF, 1) * 97), oy = Math.floor(R(BF, 2) * 97);
+  c.translate(-ox, -oy); c.fillStyle = texPat; c.fillRect(0, 0, SW + 200, SH + 200);
+  c.restore();
+  // soft vignette like a lit miniature stage
+  const g = c.createRadialGradient(SW / 2, SH / 2, SH * .45, SW / 2, SH / 2, SW * .62);
+  g.addColorStop(0, 'rgba(43,41,38,0)'); g.addColorStop(1, 'rgba(43,41,38,.22)');
+  c.fillStyle = g; c.fillRect(0, 0, SW, SH);
+}
+function bg(c, col) { c.fillStyle = col; c.fillRect(0, 0, SW, SH); }
+
+/* ===================================================================
+   Cast and props
+   =================================================================== */
+// Pip — the coral pixel guide. Always 12 px per pixel on screen, whatever the camera does.
+function pip(c, x, y, o = {}) {
+  const P = 12, a = o.alpha ?? 1; if (a <= 0) return;
+  const hop = o.hop || 0;
+  const walkUp = o.walk ? Math.floor(T * 7) % 2 : -1;
+  const bx = Math.round(x - 5 * P + jit(901, 1, 1)), by = Math.round(y - 8 * P - hop * 46 + jit(901, 2, 1) - (o.walk && walkUp ? 3 : 0));
+  c.save(); c.globalAlpha *= a;
+  c.fillStyle = 'rgba(43,41,38,.2)'; c.beginPath(); c.ellipse(x, y + 5, 5.4 * P * (1 - hop * .3), 7 * (1 - hop * .4), 0, 0, TAU); c.fill();
+  const body = mix(C.coral, C.mustard, (o.warm || 0) * .35);
+  const px = (col, r, fill) => { c.fillStyle = fill; c.fillRect(bx + col * P, by + r * P, P + .6, P + .6); };
+  c.fillStyle = body; c.fillRect(bx, by, 10 * P, 6 * P);
+  const armR = o.wave ? (Math.floor(T * 5) % 2 ? 0 : 1) : 2;
+  px(-1, 2, body); px(-1, 3, body); px(10, armR, body); px(10, armR + 1, body);
+  [[1, 0], [3, 1], [6, 0], [8, 1]].forEach(([col, g]) => { px(col, 6, body); if (!(o.walk && g === walkUp)) px(col, 7, body); });
+  const lx = clamp(Math.round(o.look?.[0] || 0), -1, 1), ly = clamp(Math.round(o.look?.[1] || 0), -1, 0);
+  const blink = o.blink ?? ((T + .7) % 3.7 < .13);
+  [2, 7].forEach(col => { if (blink) px(col + lx, 2 + ly, C.char); else { px(col + lx, 1 + ly, C.char); px(col + lx, 2 + ly, C.char); } });
+  c.restore();
+  return { hand:[bx + 11 * P, by + 2.5 * P], eye:[x, by + 1.5 * P] };
+}
+function molecule(c, x, y, r, ang, id, col = C.char, alpha = 1) {
+  if (r <= .5 || alpha <= 0) return;
+  const d = r * .62, ca = Math.cos(ang) * d, sa = Math.sin(ang) * d;
+  const o = { torn: r * .07, step: Math.max(5, r * .45), blur: Math.min(8, 2 + r * .15), sx: 2 + r * .05, sy: 3 + r * .06, alpha };
+  paper(c, circlePts(x - ca, y - sa, r, 18), col, id, o);
+  paper(c, circlePts(x + ca, y + sa, r, 18), mix(col, C.cream, .14), id + 1, o);
+  c.save(); c.globalAlpha *= alpha * .45; c.strokeStyle = C.cream; c.lineWidth = Math.max(1, r * .12); c.lineCap = 'round';
+  c.beginPath(); c.arc(x + ca, y + sa, r * .62, -2.4, -1.4); c.stroke(); c.restore();
+}
+const molAng = () => .45 + Math.sin(T * .5) * .3;
+function beam(c, x0, y0, x1, y1, w = 18, alpha = 1, col = C.white) {
+  if (alpha <= 0) return;
+  const L = Math.hypot(x1 - x0, y1 - y0); if (L < 1) return;
+  c.save(); c.globalAlpha *= alpha; c.lineCap = 'round';
+  c.strokeStyle = 'rgba(227,178,60,.28)'; c.lineWidth = w + 22; c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1, y1); c.stroke();
+  c.strokeStyle = col; c.lineWidth = w; c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1, y1); c.stroke();
+  c.restore();
+  const nx = -(y1 - y0) / L * w / 2, ny = (x1 - x0) / L * w / 2;
+  pencil(c, [[x0 + nx, y0 + ny], [lerp(x0, x1, .5) + nx, lerp(y0, y1, .5) + ny], [x1 + nx, y1 + ny]], 611, .3 * alpha, 1.4);
+  pencil(c, [[x0 - nx, y0 - ny], [lerp(x0, x1, .5) - nx, lerp(y0, y1, .5) - ny], [x1 - nx, y1 - ny]], 617, .3 * alpha, 1.4);
+}
+// A travelling sine wave anchored to world x, so it flows rather than wobbles.
+function wavePts(x0, x1, yFn, amp, lam, speed = 140, step = 6) {
+  const pts = [];
+  if (x1 <= x0) return pts;
+  for (let x = x0; x <= x1 + .01; x += step) pts.push([x, yFn(x) + amp * Math.sin(TAU * (x - speed * T) / lam)]);
+  return pts;
+}
+// A short squiggle along a ray: scattered light keeps its colour and wavelength.
+function rayWave(c, x, y, ang, r0, r1, col, lam, id, alpha = 1, w = 6) {
+  if (r1 <= r0 || alpha <= 0) return;
+  const pts = [], ca = Math.cos(ang), sa = Math.sin(ang);
+  for (let r = r0; r <= r1; r += 5) { const o = 6 * Math.sin(TAU * (r - 160 * T) / lam); pts.push([x + ca * r - sa * o, y + sa * r + ca * o]); }
+  ribbon(c, pts, col, w, id, alpha);
+}
+function sunDisk(c, x, y, r, eve = 0, alpha = 1) {
+  c.save(); c.globalAlpha *= alpha;
+  const g = c.createRadialGradient(x, y, r * .6, x, y, r * 2.6);
+  g.addColorStop(0, `rgba(255,236,190,${.55 - eve * .15})`); g.addColorStop(1, 'rgba(255,236,190,0)');
+  c.fillStyle = g; c.beginPath(); c.arc(x, y, r * 2.6, 0, TAU); c.fill(); c.restore();
+  const a = alpha;
+  for (let i = 0; i < 12; i++) {
+    const ang = i / 12 * TAU + T * .12, r0 = r * 1.3, r1 = r * (1.55 + (i % 2) * .15);
+    crayon(c, [[x + Math.cos(ang) * r0, y + Math.sin(ang) * r0], [x + Math.cos(ang) * r1, y + Math.sin(ang) * r1]], mix(C.mustard, C.coral, eve), 5, 700 + i, a * .9);
+  }
+  paper(c, circlePts(x, y, r * 1.12, 30), mix(C.mustard, C.coral, eve * .8), 720, { alpha: a, blur: 14, sh: .18 });
+  paper(c, circlePts(x, y, r * .86, 26), mix(C.white, C.mustard, eve * .7), 724, { alpha: a, shadow: false, gouache: true, streaks: 3 });
+}
+function hillPts(base, amp, f, ph, dy) {
+  const pts = [[-60, SH + 60 + dy]];
+  for (let x = -60; x <= SW + 60; x += 90) pts.push([x, base + dy + amp * Math.sin(x * f + ph) + amp * .4 * Math.sin(x * f * 2.3 + ph * 1.7)]);
+  pts.push([SW + 60, SH + 60 + dy]);
+  return pts;
+}
+function landscape(c, o) {
+  const lay = o.lay ?? 1, eve = o.eve || 0, sky = o.sky ?? 1;
+  const top = mix(mix(C.cream, C.teal, .15 + .85 * sky), C.coral, eve * .9);
+  const low = mix(mix(C.cream, C.teal, .06 + .5 * sky), C.mustard, eve * .95);
+  const g = c.createLinearGradient(0, 0, 0, SH * .7); g.addColorStop(0, top); g.addColorStop(1, low);
+  c.save(); c.globalAlpha *= o.skyA ?? 1;
+  c.fillStyle = g; c.fillRect(0, 0, SW, SH);
+  // wide dry-brush sky strokes
+  c.save(); c.lineCap = 'round';
+  for (let i = 0; i < 7; i++) {
+    c.strokeStyle = mix(top, C.white, .3); c.globalAlpha = .18; c.lineWidth = 30 + R(9, i) * 40;
+    const y = 60 + i * 62 + jit(900, i, 2);
+    c.beginPath(); c.moveTo(-40 + R(9, i, 1) * 300, y); c.quadraticCurveTo(SW * .5, y - 18, SW - R(9, i, 2) * 400, y + 10); c.stroke();
+  }
+  c.restore(); c.restore();
+  if (o.sun) sunDisk(c, o.sun[0], o.sun[1], o.sunR ?? 70, eve, o.sunA ?? 1);
+  // clouds drift slowly
+  [[420, 120, 1], [1120, 90, .8], [1560, 210, .9]].forEach(([x, y, s], i) => {
+    const cx = x + T * (6 + i * 2) % 60, cy = y;
+    const k = seg(lay, .05 * i, .5 + .05 * i);
+    const pts = [];
+    for (let j = 0; j < 16; j++) { const a = j / 16 * TAU, rr = (j % 3 ? 58 : 76) * s; pts.push([cx + Math.cos(a) * rr * 1.7, cy + Math.sin(a) * rr * .55]); }
+    paper(c, pts, mix(C.white, C.coral, eve * .25), 740 + i, { alpha: k * (1 - eve * .3) * .95, torn: 5, blur: 8, sh: .14 });
+  });
+  const L = [
+    { base: 505, amp: 42, f: .0042, ph: 1.2, col: mix(mix(C.teal, C.char, .38), C.char, eve * .35), id: 760, k: seg(lay, .1, .6) },
+    { base: 590, amp: 34, f: .0031, ph: 3.1, col: mix(mix(C.teal, C.cream, .3), mix(C.coral, C.char, .15), eve * .6), id: 770, k: seg(lay, .25, .8) },
+    { base: 690, amp: 16, f: .0025, ph: .4, col: mix(mix(C.mustard, C.cream, .42), C.coral, eve * .3), id: 780, k: seg(lay, .4, 1) },
+  ];
+  L.forEach((l, i) => {
+    const dy = (1 - eBack(l.k)) * 420;
+    if (l.k <= 0) return;
+    paper(c, hillPts(l.base, l.amp, l.f, l.ph, dy), l.col, l.id, { torn: 5, step: 30, gouache: true, streaks: 7, sh: .3, blur: 12 });
+    // crayon hatching on each layer
+    for (let h = 0; h < 14; h++) {
+      const hx = 40 + h * 128 + R(l.id, h) * 60, hy = l.base + dy + 30 + R(l.id, h, 1) * 60 + i * 8;
+      crayon(c, [[hx, hy], [hx + 26, hy - 12]], mix(l.col, C.char, .25), 3, l.id + h * 3, .5);
+    }
+  });
+}
+
+/* ===================================================================
+   Scene 1 — hook (0–9 s)
+   =================================================================== */
+function cam(c, cx, cy, s) { c.translate(SW / 2, SH / 2); c.scale(s, s); c.translate(-cx, -cy); }
+const camPt = (p, cx, cy, s) => [(p[0] - cx) * s + SW / 2, (p[1] - cy) * s + SH / 2];
+
+function s1(c, u) {
+  const SUN = [1340, 170];
+  const push = eIn(seg(u, 7.0, 9.0)), k = ease(seg(u, 7.0, 8.6));
+  const s = 1 + push * 9, cx = lerp(SW / 2, SUN[0], k), cy = lerp(SH / 2, SUN[1], k);
+  c.save(); cam(c, cx, cy, s);
+  landscape(c, { sky: 1, sun: SUN, lay: seg(u, 0, 1.6) });
+  const la = seg(u, 2.2, 2.7) * (1 - seg(u, 6.6, 7.1));
+  label(c, 'sky: blue', 250, 300, { alpha: la, chip: true, size: 30 });
+  arrow(c, 330, 268, 390, 190, 810, la);
+  const lb = seg(u, 4.6, 5.1) * (1 - seg(u, 6.6, 7.1));
+  label(c, 'sunlight: white?', 1340, 330, { alpha: lb, chip: true, size: 30, align: 'center' });
+  c.restore();
+  const walkK = seg(u, 1.0, 3.4), px = lerp(-90, 700, walkK);
+  const p = camPt([px, 706], cx, cy, s);
+  const look = u > 3.5 ? [1, -1] : [1, 0];
+  pip(c, p[0], p[1], { walk: u > 1 && u < 3.4, look, hop: bump(u, 4.2, 4.55) * .4 });
+  const q = seg(u, 4.2, 4.6);
+  if (q > 0 && u < 7.2) {
+    const qp = camPt([px + 70, 560], cx, cy, s);
+    c.save(); c.translate(qp[0], qp[1]); c.scale(eBack(q), eBack(q));
+    label(c, '?', 0, 0, { size: 72, weight: 800, color: C.coral, align: 'center', alpha: 1 - seg(u, 6.6, 7.0) });
+    c.restore();
+  }
+  const fl = seg(u, 7.9, 8.8);
+  if (fl > 0) { c.save(); c.globalAlpha = fl; bg(c, C.cream); c.restore(); }
+  const bl = eOut(seg(u, 8.2, 9.0)) * 400;
+  if (bl > 1) beam(c, 0, 417, bl, 417, 18);
+}
+
+/* ===================================================================
+   Scene 2 — familiar world (9–21 s): white light → colours → waves
+   =================================================================== */
+const WAVES = [
+  { name: 'red',    col: C.coral,   ty: 235, ang: -.2, lam: 285 },
+  { name: 'yellow', col: C.mustard, ty: 417, ang: 0,   lam: 235 },
+  { name: 'blue',   col: C.teal,    ty: 600, ang: .2,  lam: 185 },
+];
+function s2(c, u) {
+  bg(c, C.cream);
+  const PX = 700, PY = 417;
+  const rec = ease(seg(u, 10.3, 12)), pin = eBack(seg(u, 0, .9)), pout = ease(seg(u, 10.1, 11.1));
+  const beamEnd = rec > 0 ? lerp(PX, SW + 20, rec) : lerp(400, PX, eOut(seg(u, 0, 1)));
+  beam(c, 0, PY, beamEnd, PY, 18);
+  const fan = eOut(seg(u, 1.1, 3.3)), wv = ease(seg(u, 3.5, 5.5));
+  WAVES.forEach((w, i) => {
+    if (fan <= 0) return;
+    let xs = lerp(760, 820, wv); xs = lerp(xs, PX, rec);
+    let xe = 760 + (1650 - 760) * fan; xe = lerp(xe, SW + 20, rec);
+    const amp = 55 * wv * (1 - rec);
+    const yFn = x => lerp(lerp(PY + Math.tan(w.ang) * (x - 760), w.ty, wv), PY, rec);
+    ribbon(c, wavePts(xs, xe, yFn, amp, w.lam), mix(w.col, C.white, rec), 12, 200 + i * 10);
+    label(c, w.name, 1676, w.ty, { alpha: seg(u, 5.3, 5.8) * (1 - seg(u, 9.9, 10.4)), size: 26, color: mix(w.col, C.char, .35) });
+  });
+  if (pout < 1) {
+    const py = PY + (1 - pin) * 320 + pout * 460;
+    paper(c, [[PX, py - 110], [PX - 98, py + 76], [PX + 98, py + 76]], mix(C.cream, C.teal, .3), 230, { torn: 2.5, step: 18, edge: C.char, alpha: 1 - pout * .6, gouache: true, streaks: 3 });
+    pencil(c, [[PX - 20, py - 60], [PX - 52, py + 40]], 233, .5 * (1 - pout), 3, C.white);
+  }
+  const la = 1 - seg(u, 9.9, 10.4);
+  bracket(c, 1000, 235 - 92, 285, 1, eOut(seg(u, 6.3, 7.0)), 240, la);
+  label(c, 'long', 1000 + 142, 235 - 122, { alpha: seg(u, 6.8, 7.2) * la, align: 'center', size: 28 });
+  bracket(c, 1000, 600 + 92, 185, -1, eOut(seg(u, 7.8, 8.4)), 250, la);
+  label(c, 'short', 1000 + 92, 600 + 124, { alpha: seg(u, 8.3, 8.7) * la, align: 'center', size: 28 });
+  let look = [1, 0];
+  if (u > 6 && u < 7.6) look = [1, -1]; else if (u >= 7.6 && u < 10) look = [1, 0];
+  pip(c, 150, 800, { look, hop: bump(u, 1.15, 1.5) * .35 });
+}
+
+/* ===================================================================
+   Scene 3 — disruption (21–31 s): the air is full of tiny molecules
+   =================================================================== */
+const MOLS = (() => {
+  const a = [{ x: 760, y: 560, o: 0 }];
+  for (let gy = 0; gy < 6; gy++) for (let gx = 0; gx < 12; gx++) {
+    const x = 70 + gx * 150 + (R(31, gx, gy) - .5) * 90, y = 60 + gy * 135 + (R(32, gx, gy) - .5) * 70;
+    if (x < 460 && y > 600) continue;                   // leave room for Pip
+    if (Math.hypot(x - 760, y - 560) < 90) continue;
+    a.push({ x, y, o: R(33, gx, gy) < .22 ? 1 : 0 });  // ~78% N2, ~21% O2
+  }
+  return a;
+})();
+function s3(c, u) {
+  bg(c, C.cream);
+  const dive = ease(seg(u, 8.2, 10));
+  beam(c, 0, 417, SW + 20, 417, 18);
+  for (let i = 0; i < 3; i++) {                        // glints travelling along the beam
+    const gx = (u * 520 + i * 640) % (SW + 200) - 100;
+    c.save(); c.globalAlpha = .8; c.fillStyle = C.white; c.beginPath(); c.ellipse(gx, 417, 34, 6, 0, 0, TAU); c.fill(); c.restore();
+  }
+  MOLS.forEach((m, i) => {
+    const k = eBack(seg(u, .2 + i * .028, .55 + i * .028));
+    molecule(c, m.x, m.y, 9 * k, molAng() + i, 300 + i * 3, m.o ? mix(C.char, C.teal, .45) : C.char);
+  });
+  const lA = seg(u, 2.4, 2.9) * (1 - seg(u, 7.6, 8));
+  const n2 = MOLS.find((m, i) => i > 3 && !m.o && m.y > 170 && m.y < 330 && m.x > 1100) || MOLS[30];
+  label(c, 'N₂', n2.x + 22, n2.y - 30, { alpha: lA, chip: true, size: 24 });
+  const o2 = MOLS.find((m, i) => i > 12 && m.o && m.y < 380) || MOLS[20];
+  label(c, 'O₂', o2.x + 22, o2.y - 30, { alpha: lA, chip: true, size: 24 });
+  const wk = seg(u, 3, 5), px = lerp(150, 520, wk);
+  const hp = pip(c, px, 800, { walk: u > 3 && u < 5, look: [1, -1] });
+  const lz = eBack(seg(u, 4.5, 5.3));
+  if (lz > 0) {
+    const cx = lerp(760, 700, dive), cy = lerp(560, 417, dive), Rl = lerp(140 * lz, 1500, eIn(dive));
+    if (dive < .35) crayon(c, [hp.hand, [cx - Rl * .7, cy + Rl * .7]], C.char, 14, 330, 1 - dive * 2.8);
+    c.save(); c.beginPath(); c.arc(cx, cy, Rl, 0, TAU); c.clip();
+    c.fillStyle = C.paper2; c.fillRect(0, 0, SW, SH);
+    const wa = 1 - seg(dive, 0, .4);
+    ribbon(c, wavePts(cx - Rl, cx + Rl, () => cy, 36, 230), C.teal, 9, 340, wa);
+    molecule(c, cx, cy, lerp(26, 44, dive), molAng(), 900);
+    c.restore();
+    c.save(); c.shadowColor = 'rgba(43,41,38,.3)'; c.shadowBlur = 12; c.shadowOffsetY = 6;
+    c.strokeStyle = C.char; c.lineWidth = 16; c.beginPath(); c.arc(cx, cy, Rl, 0, TAU); c.stroke(); c.restore();
+    c.save(); c.strokeStyle = 'rgba(255,252,244,.55)'; c.lineWidth = 4; c.beginPath(); c.arc(cx, cy, Rl - 14, -2.5, -1.6); c.stroke(); c.restore();
+  }
+  label(c, 'molecule ≪ wave', 930, 600, { alpha: seg(u, 5.8, 6.3) * (1 - seg(u, 7.9, 8.3)), chip: true, size: 28 });
+}
+
+/* ===================================================================
+   Scene 4 — mechanism (31–47 s): scattering, and why blue wins
+   =================================================================== */
+function blueRays(c, M, k, stretch, alpha) {
+  for (let i = 0; i < 14; i++) {
+    const ang = i / 14 * TAU + .1, len = (190 + R(41, i) * 170) * k * stretch;
+    rayWave(c, M[0], M[1], ang, 60 * Math.min(1, k * 2), 60 + len, C.teal, 44, 400 + i * 5, alpha, 6);
+  }
+}
+function s4(c, u) {
+  const tr = ease(seg(u, 14.6, 16)), fade = 1 - tr;
+  bg(c, C.paper2);
+  if (tr > 0) landscape(c, { sky: 0, sun: [260, 140], sunA: tr, lay: tr, skyA: tr });
+  const M = [lerp(700, 900, tr), lerp(417, 200, tr)], mr = lerp(44, 10, tr);
+  // red wave: mostly carries straight on
+  const rf = seg(u, .8, 5);
+  if (rf > 0) {
+    const a = lerp(1, .3, seg(u, 5, 6)) * fade;
+    ribbon(c, wavePts(0, Math.min(rf * (SW + 200), SW + 20), () => 417, 40, 285), C.coral, 11, 420, a);
+    const k = eOut(seg(u, 2.43, 3.4));
+    for (let i = 0; i < 8; i++) rayWave(c, M[0], M[1], i / 8 * TAU + .2, 58, 58 + (40 + R(42, i) * 40) * k, C.coral, 70, 430 + i * 5, .45 * fade * (k > 0 ? 1 : 0), 4);
+  }
+  label(c, 'red: mostly straight on', 1150, 330, { alpha: seg(u, 3.6, 4.1) * (1 - seg(u, 7.2, 7.6)) * fade, chip: true, size: 26 });
+  // blue wave: scattered everywhere
+  const bfK = seg(u, 7.8, 10.6);
+  if (bfK > 0) ribbon(c, wavePts(0, Math.min(bfK * (SW + 200), SW + 20), () => 417, 40, 185), C.teal, 11, 440, lerp(1, .35, seg(u, 10.6, 11.6)) * fade);
+  const bk = eOut(seg(u, 8.9, 9.8));
+  if (bk > 0) blueRays(c, M, bk, 1 + eIn(tr) * 5, 1 - seg(u, 15.3, 16) * .0);
+  molecule(c, M[0], M[1], mr, molAng(), 900);
+  label(c, 'N₂', M[0] + 80, M[1] - 70, { alpha: seg(u, .3, .8) * (1 - seg(u, 3, 3.4)), chip: true, size: 26 });
+  const sc = seg(u, 6.6, 7.1) * fade;
+  label(c, 'scattering', 700, 96, { alpha: sc, size: 46, weight: 700, align: 'center' });
+  const ul = eOut(seg(u, 6.9, 7.5));
+  if (ul > 0) crayon(c, [[570, 132], [lerp(570, 830, ul * .5), 129], [lerp(570, 830, ul), 134]], C.mustard, 8, 450, sc);
+  // bar chart: blue ≈ 5× red  ( (680/450)^4 ≈ 5.2 )
+  const b1 = eOut(seg(u, 11.7, 12.3)), b2 = eOut(seg(u, 12.4, 14.0)), ba = seg(u, 11.4, 11.8) * fade;
+  pencil(c, [[1290, 700], [1470, 701], [1650, 700]], 460, ba);
+  if (b1 > 0) paper(c, rectPts(1330, 700 - 64 * b1, 100, 64 * b1), C.coral, 462, { alpha: fade, torn: 2, step: 20, gouache: true, streaks: 2 });
+  if (b2 > 0) paper(c, rectPts(1490, 700 - 320 * b2, 100, 320 * b2), C.teal, 466, { alpha: fade, torn: 2, step: 20, gouache: true, streaks: 4 });
+  label(c, 'red', 1380, 734, { alpha: ba, align: 'center', size: 24 });
+  label(c, 'blue', 1540, 734, { alpha: ba, align: 'center', size: 24 });
+  label(c, '1×', 1380, 700 - 64 * b1 - 26, { alpha: b1 * fade, align: 'center', size: 28, weight: 700 });
+  label(c, '≈5×', 1540, 700 - 320 * b2 - 26, { alpha: seg(u, 13.6, 14) * fade, align: 'center', size: 30, weight: 700 });
+  const pw = seg(u, 10.5, 12);
+  if (pw > 0) pip(c, lerp(1900, 1720, pw), 800, { walk: pw < 1, look: [-1, -1], hop: bump(u, 14.2, 14.7), alpha: fade });
+}
+
+/* ===================================================================
+   Scene 5 — discovery (47–63 s): blue arrives from every direction
+   =================================================================== */
+const beamY = x => 140 + (x - 260) * (190 / 1540);
+const SKYM = (() => {
+  const a = [{ x: 900, y: 200 }];
+  for (let i = 0; i < 21; i++) {
+    const x = 400 + i * 66 + (R(51, i) - .5) * 40;
+    const y = clamp(beamY(x) + (R(52, i) - .5) * 300, 50, 430);
+    if (Math.hypot(x - 900, y - 200) < 60) continue;
+    a.push({ x, y });
+  }
+  return a;
+})();
+function s5(c, u) {
+  const ex = ease(seg(u, 14.2, 16));
+  const sun = [lerp(260, 140, ex), lerp(140, 540, eIn(seg(u, 14.2, 16)))];
+  const sky = lerp(0, 1, ease(seg(u, 2, 8.5)));
+  landscape(c, { sky, eve: ex, sun, lay: 1 });
+  beam(c, sun[0], sun[1], SW + 20, 330, 14, (1 - ex) * .9);
+  if (u < 1.5) blueRays(c, [900, 200], 1, 6, 1 - seg(u, 0, 1.4));
+  const px = lerp(1900, 900, eOut(seg(u, .4, 2.4)));
+  const E = [px, 628];
+  SKYM.forEach((m, i) => {
+    const k = i === 0 ? 1 : eBack(seg(u, .3 + i * .06, .7 + i * .06));
+    const ts = 1.4 + i * .22, pk = seg(u, ts, ts + 1.0), pa = (1 - ex) * .9;
+    if (pk > 0 && px < 1000) {
+      const d = Math.hypot(E[0] - m.x, E[1] - m.y), ux = (E[0] - m.x) / d, uy = (E[1] - m.y) / d;
+      const end = Math.min(d - 80, 20 + (d - 100) * pk);
+      c.save(); c.setLineDash([14, 12]); c.lineDashOffset = -T * 70;
+      c.strokeStyle = C.teal; c.globalAlpha = pa; c.lineWidth = 5; c.lineCap = 'round';
+      c.beginPath(); c.moveTo(m.x + ux * 20, m.y + uy * 20); c.lineTo(m.x + ux * end, m.y + uy * end); c.stroke(); c.restore();
+      const ring = (u - ts) % 1.6 / 1.6;
+      c.save(); c.globalAlpha = pa * .5 * (1 - ring); c.strokeStyle = C.teal; c.lineWidth = 3;
+      c.beginPath(); c.arc(m.x, m.y, 16 + ring * 30, 0, TAU); c.stroke(); c.restore();
+    }
+    molecule(c, m.x, m.y, 10 * k, molAng() + i, 520 + i * 3, C.char, 1 - ex * .6);
+  });
+  let look = [0, -1];
+  if (u > 3 && u < 4.5) look = [-1, -1]; else if (u >= 4.5 && u < 6) look = [0, -1]; else if (u >= 6 && u < 7.5) look = [1, -1];
+  if (u < 2.4) look = [-1, 0];
+  pip(c, px, 706, { walk: u > .4 && u < 2.4, look, hop: bump(u, 7.6, 8.1), warm: ex * .5 });
+  const va = seg(u, 8.6, 9.1) * (1 - seg(u, 14.0, 14.5));
+  if (va > 0) {
+    const dy = (1 - eBack(seg(u, 8.6, 9.2))) * 60;
+    paper(c, rectPts(70, 560 + dy, 470, 190), C.cream, 560, { alpha: va, torn: 3, step: 22 });
+    ribbon(c, wavePts(100, 230, () => 610 + dy, 8, 26, 100, 3), C.violet, 7, 562, va);
+    label(c, 'violet?', 250, 610 + dy, { alpha: va, size: 26, weight: 700, color: C.violet });
+    label(c, '− less in sunlight', 100, 660 + dy, { alpha: va * seg(u, 10.6, 11), size: 24 });
+    label(c, '− eyes less keen', 100, 705 + dy, { alpha: va * seg(u, 12.6, 13), size: 24 });
+    // tiny pencil eye
+    const ex0 = 470, ey0 = 705 + dy;
+    pencil(c, [[ex0 - 30, ey0], [ex0, ey0 - 14], [ex0 + 30, ey0], [ex0, ey0 + 14], [ex0 - 30, ey0]], 566, va * seg(u, 12.6, 13));
+    c.save(); c.globalAlpha = va * seg(u, 12.6, 13); c.fillStyle = C.char; c.beginPath(); c.arc(ex0, ey0, 6, 0, TAU); c.fill(); c.restore();
+  }
+}
+
+/* ===================================================================
+   Scene 6 — consequence (63–75 s): the long evening path
+   =================================================================== */
+const EC = [900, 2400], ER = 1850, AR = 2030;
+const SS0 = [120, 530], SS1 = [880, 482];         // sunset path, inside the atmosphere band
+function pathCol(f) { return f < .5 ? mix(C.white, C.mustard, f * 2) : mix(C.mustard, C.coral, (f - .5) * 2); }
+function diagram(c, o) {
+  const dy = (1 - eBack(o.rise ?? 1)) * 460, warm = o.warm || 0, day = o.day || 0;
+  const g = c.createLinearGradient(0, 0, 0, SH);
+  g.addColorStop(0, mix(mix(C.paper2, C.teal, day * .45), C.coral, warm * .45));
+  g.addColorStop(1, mix(mix(C.paper2, C.teal, day * .2), C.mustard, warm * .5));
+  c.fillStyle = g; c.fillRect(0, 0, SW, SH);
+  paper(c, circlePts(EC[0], EC[1] + dy, AR, 220), mix(mix(C.teal, C.cream, .6), C.mustard, warm * .35), 600, { torn: 4, step: 40, alpha: .92, blur: 18, sh: .15 });
+  paper(c, circlePts(EC[0], EC[1] + dy, ER, 220), mix(C.teal, C.char, .38), 604, { torn: 5, step: 40, gouache: true, streaks: 8 });
+  label(c, 'air', 1500, 432 + dy, { alpha: o.labels ?? 0, size: 24, color: mix(C.teal, C.char, .5) });
+  if (o.you) { c.save(); c.fillStyle = C.coral; c.fillRect(900 - 24, 550 + dy - 40, 48, 40); c.restore(); }
+  const na = o.noon || 0;
+  if (na > 0) {
+    sunDisk(c, 900, 70 + dy * .2, 34, 0, na);
+    beam(c, 900, 112, 900, lerp(112, 456 + dy, o.noonP ?? 1), 12, na);
+    label(c, 'noon: short path', 940, 250, { alpha: na * (o.labels ?? 0), chip: true, size: 26 });
+  }
+  const sa = o.sunset || 0;
+  if (sa > 0) {
+    sunDisk(c, 60, 528 + dy, 58, 1, sa);
+    const sp = o.sp || 0, N = 60;
+    for (let i = 0; i < N; i++) {
+      const f0 = i / N, f1 = (i + 1) / N; if (f0 >= sp) break;
+      const f1c = Math.min(f1, sp);
+      c.save(); c.globalAlpha = sa; c.lineCap = 'round'; c.strokeStyle = pathCol(f0); c.lineWidth = 14;
+      c.beginPath(); c.moveTo(lerp(SS0[0], SS1[0], f0), lerp(SS0[1], SS1[1], f0) + dy); c.lineTo(lerp(SS0[0], SS1[0], f1c), lerp(SS0[1], SS1[1], f1c) + dy); c.stroke(); c.restore();
+    }
+    for (let i = 0; i < 8; i++) {                     // blue peeling away along the path
+      const f = .12 + i * .1, age = (o.peelU ?? 0) - 3 * f;
+      if (age <= 0 || age > 2.6) continue;
+      const bx = lerp(SS0[0], SS1[0], f) + age * 14, by = lerp(SS0[1], SS1[1], f) + dy - 16 - age * 70;
+      rayWave(c, bx, by, -1.2 - i * .1, 0, 50, C.teal, 24, 620 + i * 5, sa * (1 - age / 2.6), 5);
+    }
+    label(c, 'sunset: long path', 300, 440, { alpha: sa * (o.labels ?? 0), chip: true, size: 26 });
+  }
+}
+function panelRect(side) { return { x: side ? 954 : 90, y: 200, s: .42 }; }
+function drawPanel(c, px, py, s, o, frameA = 1, pulse = 0) {
+  c.save();
+  const pw = SW * s, ph = SH * s;
+  c.translate(px + pw / 2, py + ph / 2); c.scale(1 + pulse * .035, 1 + pulse * .035); c.translate(-pw / 2, -ph / 2);
+  if (frameA > 0) paper(c, rectPts(-16, -16, pw + 32, ph + 32), C.cream, o.id ?? 640, { alpha: frameA, torn: 3, step: 24, blur: 14 });
+  c.save(); c.beginPath(); c.rect(0, 0, pw, ph); c.clip(); c.scale(s, s);
+  diagram(c, o);
+  c.restore();
+  if (pulse > 0) { c.save(); c.globalAlpha = pulse; c.strokeStyle = o.day ? C.teal : C.coral; c.lineWidth = 6; c.strokeRect(-10, -10, pw + 20, ph + 20); c.restore(); }
+  c.restore();
+}
+function s6(c, u) {
+  const m = ease(seg(u, 1.2, 3.2)), fold = ease(seg(u, 10.2, 12));
+  const labels = seg(u, 3.6, 4.1) * (1 - seg(u, 9.8, 10.3));
+  const o = {
+    rise: seg(u, 1.2, 3.2), warm: ease(seg(u, 8, 10)),
+    noon: seg(u, 3.4, 3.9) * (1 - seg(u, 9.8, 10.4)), noonP: eOut(seg(u, 3.5, 4.4)),
+    sunset: seg(u, 1.2, 2.2), sp: ease(seg(u, 5.6, 8.6)), peelU: u - 5.6, labels
+  };
+  const sunsetLabel = seg(u, 6, 6.5) * (1 - seg(u, 9.8, 10.3));
+  if (fold <= 0) {
+    diagram(c, { ...o, labels: 0 });
+    label(c, 'noon: short path', 940, 250, { alpha: o.noon * labels, chip: true, size: 26 });
+    label(c, 'sunset: long path', 300, 440, { alpha: sunsetLabel, chip: true, size: 26 });
+    label(c, 'air', 1500, 432, { alpha: labels, size: 24, color: mix(C.teal, C.char, .5) });
+  } else {
+    bg(c, C.paper2);
+    const L = panelRect(0), Rt = panelRect(1);
+    drawPanel(c, lerp(-900, L.x, fold), L.y, L.s, { rise: 1, day: 1, noon: 1, noonP: 1, you: 1, id: 650 }, fold);
+    const s = lerp(1, Rt.s, fold);
+    drawPanel(c, lerp(0, Rt.x, fold), lerp(0, Rt.y, fold), s, { ...o, labels: 0, you: fold > .5, id: 660 }, fold);
+  }
+  if (m < 1) landscape(c, { sky: 1, eve: 1, sun: [lerp(140, 60, m), 540], sunA: 1 - m, lay: 1 - m, skyA: 1 - m });
+  // Pip: from the hill, hops up onto the Earth diagram, then down below the panels
+  const k1 = ease(seg(u, 2.0, 3.0)), k2 = ease(seg(u, 10.2, 11.2));
+  let py = lerp(706, 550, k1) - Math.sin(Math.PI * k1) * 80;
+  py = lerp(py, 790, k2) - Math.sin(Math.PI * k2) * 60;
+  const look = u > 5.6 && u < 9 ? [-1, 0] : u >= 3.4 && u < 5.6 ? [0, -1] : [0, 0];
+  pip(c, 900, py, { look, warm: 1 - ease(seg(u, 0, 2)) * .5 + ease(seg(u, 8.6, 9.5)) * .5, blink: (u > 9.0 && u < 9.15) || undefined });
+}
+
+/* ===================================================================
+   Scene 7 — recap (75–86 s)
+   =================================================================== */
+function s7(c, u) {
+  bg(c, C.paper2);
+  const L = panelRect(0), Rt = panelRect(1);
+  drawPanel(c, L.x, L.y, L.s, { rise: 1, day: 1, noon: 1, noonP: 1, you: 1, id: 650 }, 1, bump(u, 4.3, 5.1));
+  drawPanel(c, Rt.x, Rt.y, Rt.s, { rise: 1, warm: 1, sunset: 1, sp: 1, peelU: 99, you: 1, id: 660 }, 1, bump(u, 6.4, 7.2));
+  const ta = seg(u, .2, .7);
+  label(c, 'day', L.x + 378, 150, { alpha: ta, align: 'center', size: 30, weight: 700, color: mix(C.teal, C.char, .3) });
+  label(c, 'sunset', Rt.x + 378, 150, { alpha: ta, align: 'center', size: 30, weight: 700, color: mix(C.coral, C.char, .25) });
+  const txt = 'short waves scatter most', n = Math.floor(txt.length * seg(u, .6, 2.6));
+  c.save(); c.font = `700 44px ${MONO}`; const tw = c.measureText(txt).width; c.restore();
+  const x0 = 900 - tw / 2;
+  if (n > 0) label(c, txt.slice(0, n), x0, 70, { size: 44, weight: 700 });
+  const ul = eOut(seg(u, 2.4, 3.2));
+  if (ul > 0) crayon(c, [[x0 - 10, 106], [x0 - 10 + (tw + 20) * ul * .5, 102], [x0 - 10 + (tw + 20) * ul, 107]], C.mustard, 9, 700, 1);
+  pip(c, 900, 790, { wave: u > 7.5 && u < 10, look: [0, 0] });
+}
+
+/* ===================================================================
+   Terminal chrome + captions
+   =================================================================== */
+function rrect(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+let showCaptions = true;
+function chrome(c, t, sc) {
+  c.fillStyle = C.term; c.fillRect(0, 0, W, H);
+  c.save(); c.shadowColor = 'rgba(0,0,0,.5)'; c.shadowBlur = 30; c.shadowOffsetY = 10;
+  rrect(c, 30, 24, 1860, 1032, 18); c.fillStyle = C.win; c.fill(); c.restore();
+  c.save(); rrect(c, 30, 24, 1860, 1032, 18); c.clip(); c.fillStyle = C.bar; c.fillRect(30, 24, 1860, 60); c.restore();
+  [C.coral, C.mustard, C.teal].forEach((col, i) => { c.fillStyle = col; c.beginPath(); c.arc(66 + i * 30, 54, 8, 0, TAU); c.fill(); });
+  c.font = `500 22px ${MONO}`; c.textBaseline = 'middle'; c.fillStyle = '#A8A195'; c.textAlign = 'center';
+  c.fillText('sky.why — ~/lessons', W / 2, 54);
+  c.textAlign = 'right'; c.fillStyle = '#7F786E';
+  c.fillText(`${String(sc.n).padStart(2, '0')}/07 · ${sc.name}`, 1860, 54);
+}
+function captionBar(c, t) {
+  const y = 992;
+  c.font = `600 34px ${MONO}`; c.textBaseline = 'middle'; c.textAlign = 'left';
+  c.fillStyle = C.mustard; c.fillText('›', 72, y);
+  if (t >= 84) {
+    const s = 'lesson complete ✓', n = Math.floor(s.length * seg(t, 84, 84.8));
+    c.fillStyle = C.teal; c.fillText(s.slice(0, n), 112, y);
+    return;
+  }
+  const cap = showCaptions && CAPTIONS.find(k => t >= k.start && t < k.end + .35);
+  if (cap) { c.fillStyle = C.cream; c.fillText(cap.text, 112, y); }
+  else if (Math.floor(t * 2) % 2 === 0) { c.fillStyle = C.cream; c.fillRect(112, y - 17, 18, 34); }
+}
+const SCENE_FN = [s1, s2, s3, s4, s5, s6, s7];
+function renderFrame(t) {
+  t = clamp(t, 0, DUR - 1e-6);
+  T = t; BF = Math.floor(t * 8);
+  const i = SCENES.findIndex(s => t >= s.start && t < s.end), sc = SCENES[i];
+  chrome(ctx, t, sc);
+  ctx.save(); ctx.translate(SX, SY); ctx.beginPath(); ctx.rect(0, 0, SW, SH); ctx.clip();
+  SCENE_FN[i](ctx, t - sc.start);
+  grain(ctx);
+  const fo = seg(t, 85.1, 86);
+  if (fo > 0) { ctx.globalAlpha = fo; bg(ctx, C.win); ctx.globalAlpha = 1; }
+  ctx.restore();
+  captionBar(ctx, t);
+}
+window.renderAt = t => { renderFrame(t); return true; };
+
+/* ===================================================================
+   Live audio (Web Audio) — the same cue list the offline mix uses
+   =================================================================== */
+let AC = null, master = null, windSrc = null, soundOn = true, narrate = false, voTimers = [];
+const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+function noiseBuf() { const b = AC.createBuffer(1, AC.sampleRate * 2, AC.sampleRate), d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = hash(i) * 2 - 1; return b; }
+let NB = null;
+function env(g, t0, a, peak, dec) { g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(peak, t0 + a); g.gain.exponentialRampToValueAtTime(.0001, t0 + a + dec); }
+function tone(t0, f, type, peak, dec, a = .005, f1 = null) {
+  const o = AC.createOscillator(), g = AC.createGain(); o.type = type; o.frequency.setValueAtTime(f, t0);
+  if (f1) o.frequency.exponentialRampToValueAtTime(f1, t0 + a + dec);
+  env(g, t0, a, peak, dec); o.connect(g).connect(master); o.start(t0); o.stop(t0 + a + dec + .05);
+}
+function noise(t0, dur, peak, type, f0, f1, q = 1) {
+  const s = AC.createBufferSource(); s.buffer = NB; const fl = AC.createBiquadFilter(); fl.type = type; fl.Q.value = q;
+  fl.frequency.setValueAtTime(f0, t0); fl.frequency.exponentialRampToValueAtTime(f1, t0 + dur);
+  const g = AC.createGain(); g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(peak, t0 + dur * .3); g.gain.linearRampToValueAtTime(0, t0 + dur);
+  s.connect(fl).connect(g).connect(master); s.start(t0, R(t0 * 100) * 1.5); s.stop(t0 + dur + .05);
+}
+function playNote(n, t0) {
+  const f = mtof(n.midi);
+  if (n.inst === 'marimba') { tone(t0, f, 'sine', .22 * n.vel, .55); tone(t0, f * 4, 'sine', .05 * n.vel, .12); }
+  else if (n.inst === 'bass') tone(t0, f, 'triangle', .25 * n.vel, 1.3, .01);
+  else if (n.inst === 'pad') {
+    [-6, 6].forEach(d => { const o = AC.createOscillator(), fl = AC.createBiquadFilter(), g = AC.createGain(); o.type = 'sawtooth'; o.frequency.value = f; o.detune.value = d; fl.type = 'lowpass'; fl.frequency.value = 900;
+      g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(.035 * n.vel, t0 + .5); g.gain.setValueAtTime(.035 * n.vel, t0 + n.dur - .3); g.gain.linearRampToValueAtTime(0, t0 + n.dur + .5);
+      o.connect(fl).connect(g).connect(master); o.start(t0); o.stop(t0 + n.dur + .6); });
+  }
+}
+function playFx(e, t0) {
+  const g = e.gain;
+  switch (e.type) {
+    case 'slide': noise(t0, .38, .16 * g, 'lowpass', 2400, 500, .7); break;
+    case 'pop': tone(t0, 900, 'sine', .22 * g, .09, .002, 300); break;
+    case 'tok': tone(t0, 320, 'sine', .3 * g, .12, .002, 180); break;
+    case 'tick': tone(t0, 2400, 'square', .03 * g, .03, .001); break;
+    case 'ping': tone(t0, 1800 + R(t0 * 10) * 900, 'sine', .07 * g, .25); break;
+    case 'pings': for (let i = 0; i < 10; i++) tone(t0 + i * .05, 1500 + i * 140, 'sine', .07 * g, .35); break;
+    case 'chime': [1, 2.76, 5.4].forEach((r, i) => tone(t0, 880 * r, 'sine', .12 * g / (i + 1), 1.8)); break;
+    case 'end': [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(t0 + i * .06, f, 'sine', .1 * g, 2.4)); break;
+    case 'thwip': tone(t0, 300, 'sine', .15 * g, .18, .005, 1400); break;
+    case 'hum': tone(t0, 110, 'triangle', .22 * g, 1.1, .08); break;
+    case 'trill': for (let i = 0; i < 8; i++) tone(t0 + i * .07, i % 2 ? 1500 : 1200, 'sine', .06 * g, .09); break;
+    case 'whoosh': noise(t0, 1.1, .2 * g, 'bandpass', 300, 3000, 1.2); break;
+    case 'longwhoosh': noise(t0, 3.1, .16 * g, 'bandpass', 2600, 400, 1.4); break;
+    case 'peel': noise(t0, .12, .18 * g, 'highpass', 3000, 5000, .8); break;
+  }
+}
+function startAudio(from) {
+  stopAudio();
+  if (!soundOn) return;
+  AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+  if (AC.state === 'suspended') AC.resume();
+  NB = NB || noiseBuf();
+  master = AC.createGain(); master.gain.value = .9; master.connect(AC.destination);
+  const now = AC.currentTime + .05;
+  MUSIC.forEach(n => { if (n.t >= from) playNote(n, now + n.t - from); });
+  SFX.forEach(e => { if (e.t >= from) playFx(e, now + e.t - from); });
+  windSrc = AC.createBufferSource(); windSrc.buffer = NB; windSrc.loop = true;
+  const wf = AC.createBiquadFilter(); wf.type = 'lowpass'; wf.frequency.value = 420;
+  const wg = AC.createGain(); wg.gain.setValueAtTime(0, now);
+  WIND.forEach(([t, v]) => { if (t >= from) wg.gain.linearRampToValueAtTime(v * .05, now + t - from); });
+  windSrc.connect(wf).connect(wg).connect(master); windSrc.start(now);
+}
+function stopAudio() {
+  if (master) { try { master.disconnect(); } catch (e) {} master = null; }
+  if (windSrc) { try { windSrc.stop(); } catch (e) {} windSrc = null; }
+}
+function startVO(from) {
+  stopVO();
+  if (!narrate || !('speechSynthesis' in window)) return;
+  VO.forEach(v => {
+    if (v.t + 1 < from) return;
+    voTimers.push(setTimeout(() => { const s = new SpeechSynthesisUtterance(v.text); s.rate = 1.0; speechSynthesis.speak(s); }, Math.max(0, (v.t - from) * 1000)));
+  });
+}
+function stopVO() { voTimers.forEach(clearTimeout); voTimers = []; if ('speechSynthesis' in window) speechSynthesis.cancel(); }
+
+/* ===================================================================
+   Player
+   =================================================================== */
+const params = new URLSearchParams(location.search);
+let playing = false, t0 = 0, wall0 = 0, cur = +(params.get('t') || 0);
+const $ = id => document.getElementById(id);
+const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+function draw() { renderFrame(cur); $('scrub').value = cur; $('time').textContent = `${fmt(cur)} / ${fmt(DUR)}`; }
+function tick(now) {
+  if (!playing) return;
+  cur = t0 + (now - wall0) / 1000;
+  if (cur >= DUR) { cur = DUR - .001; pause(); }
+  // quantise to 24 fps so the browser shows exactly the frames the MP4 has
+  const q = Math.floor(cur * FPS) / FPS;
+  const save = cur; cur = q; draw(); cur = save;
+  requestAnimationFrame(tick);
+}
+function play() {
+  if (cur >= DUR - .05) cur = 0;
+  playing = true; t0 = cur; wall0 = performance.now();
+  $('play').textContent = '❚❚ Pause'; $('play').setAttribute('aria-label', 'Pause');
+  startAudio(cur); startVO(cur); requestAnimationFrame(tick);
+}
+function pause() { playing = false; stopAudio(); stopVO(); $('play').textContent = '▶ Play'; $('play').setAttribute('aria-label', 'Play'); }
+function seek(t) { cur = clamp(t, 0, DUR - .001); if (playing) { play(); } else draw(); }
+if (params.has('render')) {
+  document.body.classList.add('render');
+  if (params.get('cc') === '0') showCaptions = false;
+} else {
+  $('play').onclick = () => playing ? pause() : play();
+  $('scrub').oninput = e => seek(+e.target.value);
+  $('cc').onclick = e => { showCaptions = !showCaptions; e.currentTarget.setAttribute('aria-pressed', showCaptions); if (!playing) draw(); };
+  $('snd').onclick = e => { soundOn = !soundOn; e.currentTarget.setAttribute('aria-pressed', soundOn); if (playing) startAudio(cur); };
+  $('vo').onclick = e => { narrate = !narrate; e.currentTarget.setAttribute('aria-pressed', narrate); if (playing) startVO(cur); };
+  addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT' && e.key !== ' ') return;
+    if (e.key === ' ') { e.preventDefault(); playing ? pause() : play(); }
+    if (e.key === 'ArrowRight') seek(cur + 5);
+    if (e.key === 'ArrowLeft') seek(cur - 5);
+  });
+}
+draw();
+</script>
+</body>
+</html>

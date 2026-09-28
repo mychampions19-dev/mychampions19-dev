@@ -1,0 +1,2881 @@
+{
+ "fps": 24,
+ "duration": 86,
+ "width": 1920,
+ "height": 1080,
+ "scenes": [
+  {
+   "n": 1,
+   "name": "hook",
+   "start": 0,
+   "end": 9
+  },
+  {
+   "n": 2,
+   "name": "familiar world",
+   "start": 9,
+   "end": 21
+  },
+  {
+   "n": 3,
+   "name": "disruption",
+   "start": 21,
+   "end": 31
+  },
+  {
+   "n": 4,
+   "name": "mechanism",
+   "start": 31,
+   "end": 47
+  },
+  {
+   "n": 5,
+   "name": "discovery",
+   "start": 47,
+   "end": 63
+  },
+  {
+   "n": 6,
+   "name": "consequence",
+   "start": 63,
+   "end": 75
+  },
+  {
+   "n": 7,
+   "name": "recap",
+   "start": 75,
+   "end": 86
+  }
+ ],
+ "vo": [
+  {
+   "t": 0.6,
+   "text": "Look up on a clear day. The sky is blue — but sunlight is white. So where does the blue come from?",
+   "dur": 9.733
+  },
+  {
+   "t": 9.4,
+   "text": "Sunlight is every colour travelling together. Each colour is a wave: red with long, lazy wiggles, blue with short, quick ones.",
+   "dur": 9.533
+  },
+  {
+   "t": 21.4,
+   "text": "To reach your eyes, it has to cross the air: trillions of nitrogen and oxygen molecules, far smaller than any wave.",
+   "dur": 9.333
+  },
+  {
+   "t": 31.4,
+   "text": "When a wave meets a molecule, it gets bounced off in a new direction. That's scattering. And short waves scatter much more than long ones. Blue scatters about five times more than red.",
+   "dur": 15.267
+  },
+  {
+   "t": 47.6,
+   "text": "So blue gets bounced all across the sky, and from every direction some of it heads to you. Violet scatters even more, but sunlight has less of it, and our eyes favour blue.",
+   "dur": 14.867
+  },
+  {
+   "t": 63.4,
+   "text": "At sunset, light skims through far more air. Most of the blue is scattered away before it arrives, leaving reds and oranges.",
+   "dur": 9.978
+  },
+  {
+   "t": 75.6,
+   "text": "Short waves scatter most. That's why the sky is blue by day, and glows red at sunset.",
+   "dur": 7.756
+  }
+ ],
+ "captions": [
+  {
+   "line": 0,
+   "start": 0.6,
+   "end": 3.267,
+   "text": "Look up on a clear day."
+  },
+  {
+   "line": 0,
+   "start": 3.467,
+   "end": 7.022,
+   "text": "The sky is blue — but sunlight is white."
+  },
+  {
+   "line": 0,
+   "start": 7.222,
+   "end": 10.333,
+   "text": "So where does the blue come from?"
+  },
+  {
+   "line": 1,
+   "start": 9.4,
+   "end": 12.067,
+   "text": "Sunlight is every colour travelling together."
+  },
+  {
+   "line": 1,
+   "start": 12.267,
+   "end": 15.822,
+   "text": "Each colour is a wave: red with long,"
+  },
+  {
+   "line": 1,
+   "start": 15.822,
+   "end": 18.933,
+   "text": "lazy wiggles, blue with short, quick ones."
+  },
+  {
+   "line": 2,
+   "start": 21.4,
+   "end": 25.844,
+   "text": "To reach your eyes, it has to cross the air:"
+  },
+  {
+   "line": 2,
+   "start": 25.844,
+   "end": 30.733,
+   "text": "trillions of nitrogen and oxygen molecules, far smaller than any wave."
+  },
+  {
+   "line": 3,
+   "start": 31.4,
+   "end": 37.622,
+   "text": "When a wave meets a molecule, it gets bounced off in a new direction."
+  },
+  {
+   "line": 3,
+   "start": 37.822,
+   "end": 38.711,
+   "text": "That's scattering."
+  },
+  {
+   "line": 3,
+   "start": 38.911,
+   "end": 42.911,
+   "text": "And short waves scatter much more than long ones."
+  },
+  {
+   "line": 3,
+   "start": 43.111,
+   "end": 46.667,
+   "text": "Blue scatters about five times more than red."
+  },
+  {
+   "line": 4,
+   "start": 47.6,
+   "end": 51.156,
+   "text": "So blue gets bounced all across the sky,"
+  },
+  {
+   "line": 4,
+   "start": 51.156,
+   "end": 55.6,
+   "text": "and from every direction some of it heads to you."
+  },
+  {
+   "line": 4,
+   "start": 55.8,
+   "end": 57.578,
+   "text": "Violet scatters even more,"
+  },
+  {
+   "line": 4,
+   "start": 57.578,
+   "end": 62.467,
+   "text": "but sunlight has less of it, and our eyes favour blue."
+  },
+  {
+   "line": 5,
+   "start": 63.4,
+   "end": 66.956,
+   "text": "At sunset, light skims through far more air."
+  },
+  {
+   "line": 5,
+   "start": 67.156,
+   "end": 71.6,
+   "text": "Most of the blue is scattered away before it arrives,"
+  },
+  {
+   "line": 5,
+   "start": 71.6,
+   "end": 73.378,
+   "text": "leaving reds and oranges."
+  },
+  {
+   "line": 6,
+   "start": 75.6,
+   "end": 77.378,
+   "text": "Short waves scatter most."
+  },
+  {
+   "line": 6,
+   "start": 77.578,
+   "end": 83.356,
+   "text": "That's why the sky is blue by day, and glows red at sunset."
+  }
+ ],
+ "sfx": [
+  {
+   "t": 0.15,
+   "type": "slide",
+   "gain": 0.7
+  },
+  {
+   "t": 0.45,
+   "type": "slide",
+   "gain": 0.6
+  },
+  {
+   "t": 0.75,
+   "type": "slide",
+   "gain": 0.5
+  },
+  {
+   "t": 4.2,
+   "type": "pop",
+   "gain": 1
+  },
+  {
+   "t": 7.2,
+   "type": "whoosh",
+   "gain": 0.8
+  },
+  {
+   "t": 9.1,
+   "type": "slide",
+   "gain": 0.6
+  },
+  {
+   "t": 10.1,
+   "type": "chime",
+   "gain": 1
+  },
+  {
+   "t": 15.3,
+   "type": "hum",
+   "gain": 1
+  },
+  {
+   "t": 16.8,
+   "type": "trill",
+   "gain": 1
+  },
+  {
+   "t": 19.4,
+   "type": "whoosh",
+   "gain": 0.6
+  },
+  {
+   "t": 21.25,
+   "type": "pop",
+   "gain": 0.35
+  },
+  {
+   "t": 21.46,
+   "type": "pop",
+   "gain": 0.39999999999999997
+  },
+  {
+   "t": 21.67,
+   "type": "pop",
+   "gain": 0.44999999999999996
+  },
+  {
+   "t": 21.88,
+   "type": "pop",
+   "gain": 0.35
+  },
+  {
+   "t": 22.09,
+   "type": "pop",
+   "gain": 0.39999999999999997
+  },
+  {
+   "t": 22.3,
+   "type": "pop",
+   "gain": 0.44999999999999996
+  },
+  {
+   "t": 22.51,
+   "type": "pop",
+   "gain": 0.35
+  },
+  {
+   "t": 22.72,
+   "type": "pop",
+   "gain": 0.39999999999999997
+  },
+  {
+   "t": 22.93,
+   "type": "pop",
+   "gain": 0.44999999999999996
+  },
+  {
+   "t": 25.55,
+   "type": "thwip",
+   "gain": 1
+  },
+  {
+   "t": 29.2,
+   "type": "whoosh",
+   "gain": 0.9
+  },
+  {
+   "t": 33.43,
+   "type": "tok",
+   "gain": 1
+  },
+  {
+   "t": 37.6,
+   "type": "tick",
+   "gain": 0.8
+  },
+  {
+   "t": 39.89,
+   "type": "pings",
+   "gain": 1
+  },
+  {
+   "t": 42.7,
+   "type": "tick",
+   "gain": 0.6
+  },
+  {
+   "t": 43.4,
+   "type": "tick",
+   "gain": 0.7
+  },
+  {
+   "t": 44,
+   "type": "tick",
+   "gain": 0.8
+  },
+  {
+   "t": 44.9,
+   "type": "tick",
+   "gain": 0.9
+  },
+  {
+   "t": 45.25,
+   "type": "pop",
+   "gain": 0.8
+  },
+  {
+   "t": 45.6,
+   "type": "whoosh",
+   "gain": 0.7
+  },
+  {
+   "t": 47.4,
+   "type": "pop",
+   "gain": 0.3
+  },
+  {
+   "t": 47.7,
+   "type": "pop",
+   "gain": 0.3
+  },
+  {
+   "t": 48,
+   "type": "pop",
+   "gain": 0.3
+  },
+  {
+   "t": 48.3,
+   "type": "pop",
+   "gain": 0.3
+  },
+  {
+   "t": 48.6,
+   "type": "pop",
+   "gain": 0.3
+  },
+  {
+   "t": 48.9,
+   "type": "pop",
+   "gain": 0.3
+  },
+  {
+   "t": 49.4,
+   "type": "ping",
+   "gain": 0.35
+  },
+  {
+   "t": 50.06,
+   "type": "ping",
+   "gain": 0.35
+  },
+  {
+   "t": 50.72,
+   "type": "ping",
+   "gain": 0.35
+  },
+  {
+   "t": 51.38,
+   "type": "ping",
+   "gain": 0.35
+  },
+  {
+   "t": 52.04,
+   "type": "ping",
+   "gain": 0.35
+  },
+  {
+   "t": 52.7,
+   "type": "ping",
+   "gain": 0.35
+  },
+  {
+   "t": 53.36,
+   "type": "ping",
+   "gain": 0.35
+  },
+  {
+   "t": 54.02,
+   "type": "ping",
+   "gain": 0.35
+  },
+  {
+   "t": 54.6,
+   "type": "chime",
+   "gain": 0.9
+  },
+  {
+   "t": 55.6,
+   "type": "slide",
+   "gain": 0.6
+  },
+  {
+   "t": 61.2,
+   "type": "whoosh",
+   "gain": 0.7
+  },
+  {
+   "t": 64.3,
+   "type": "slide",
+   "gain": 0.8
+  },
+  {
+   "t": 65.2,
+   "type": "pop",
+   "gain": 0.7
+  },
+  {
+   "t": 66.4,
+   "type": "tick",
+   "gain": 0.7
+  },
+  {
+   "t": 68.6,
+   "type": "longwhoosh",
+   "gain": 1
+  },
+  {
+   "t": 68.96,
+   "type": "peel",
+   "gain": 0.6
+  },
+  {
+   "t": 69.26,
+   "type": "peel",
+   "gain": 0.6
+  },
+  {
+   "t": 69.56,
+   "type": "peel",
+   "gain": 0.6
+  },
+  {
+   "t": 69.86,
+   "type": "peel",
+   "gain": 0.6
+  },
+  {
+   "t": 70.16,
+   "type": "peel",
+   "gain": 0.6
+  },
+  {
+   "t": 70.46,
+   "type": "peel",
+   "gain": 0.6
+  },
+  {
+   "t": 70.76,
+   "type": "peel",
+   "gain": 0.6
+  },
+  {
+   "t": 71.06,
+   "type": "peel",
+   "gain": 0.6
+  },
+  {
+   "t": 73.2,
+   "type": "slide",
+   "gain": 0.8
+  },
+  {
+   "t": 75.7,
+   "type": "tick",
+   "gain": 0.6
+  },
+  {
+   "t": 79.4,
+   "type": "pop",
+   "gain": 0.5
+  },
+  {
+   "t": 81.5,
+   "type": "pop",
+   "gain": 0.5
+  },
+  {
+   "t": 84.3,
+   "type": "end",
+   "gain": 1
+  }
+ ],
+ "music": [
+  {
+   "t": 0,
+   "midi": 48,
+   "dur": 2.375,
+   "vel": 0.165,
+   "inst": "bass"
+  },
+  {
+   "t": 0,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.11399999999999999,
+   "inst": "marimba"
+  },
+  {
+   "t": 0.313,
+   "midi": 72,
+   "dur": 0.6,
+   "vel": 0.07979999999999998,
+   "inst": "marimba"
+  },
+  {
+   "t": 0.625,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.0969,
+   "inst": "marimba"
+  },
+  {
+   "t": 0.938,
+   "midi": 76,
+   "dur": 0.6,
+   "vel": 0.07979999999999998,
+   "inst": "marimba"
+  },
+  {
+   "t": 1.25,
+   "midi": 72,
+   "dur": 0.6,
+   "vel": 0.0969,
+   "inst": "marimba"
+  },
+  {
+   "t": 1.563,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.07979999999999998,
+   "inst": "marimba"
+  },
+  {
+   "t": 1.875,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.0969,
+   "inst": "marimba"
+  },
+  {
+   "t": 2.188,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.07979999999999998,
+   "inst": "marimba"
+  },
+  {
+   "t": 2.5,
+   "midi": 45,
+   "dur": 2.375,
+   "vel": 0.44000000000000006,
+   "inst": "bass"
+  },
+  {
+   "t": 2.5,
+   "midi": 60,
+   "dur": 0.6,
+   "vel": 0.30400000000000005,
+   "inst": "marimba"
+  },
+  {
+   "t": 2.813,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.2128,
+   "inst": "marimba"
+  },
+  {
+   "t": 3.125,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.2584,
+   "inst": "marimba"
+  },
+  {
+   "t": 3.438,
+   "midi": 72,
+   "dur": 0.6,
+   "vel": 0.2128,
+   "inst": "marimba"
+  },
+  {
+   "t": 3.75,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.2584,
+   "inst": "marimba"
+  },
+  {
+   "t": 4.063,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.2128,
+   "inst": "marimba"
+  },
+  {
+   "t": 4.375,
+   "midi": 60,
+   "dur": 0.6,
+   "vel": 0.2584,
+   "inst": "marimba"
+  },
+  {
+   "t": 4.688,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.2128,
+   "inst": "marimba"
+  },
+  {
+   "t": 5,
+   "midi": 41,
+   "dur": 2.375,
+   "vel": 0.55,
+   "inst": "bass"
+  },
+  {
+   "t": 5,
+   "midi": 60,
+   "dur": 0.6,
+   "vel": 0.38,
+   "inst": "marimba"
+  },
+  {
+   "t": 5.313,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 5.625,
+   "midi": 65,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 5.938,
+   "midi": 72,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 6.25,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 6.563,
+   "midi": 65,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 6.875,
+   "midi": 60,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 7.188,
+   "midi": 65,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 7.5,
+   "midi": 43,
+   "dur": 2.375,
+   "vel": 0.55,
+   "inst": "bass"
+  },
+  {
+   "t": 7.5,
+   "midi": 62,
+   "dur": 0.6,
+   "vel": 0.38,
+   "inst": "marimba"
+  },
+  {
+   "t": 7.813,
+   "midi": 71,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 8.125,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 8.438,
+   "midi": 74,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 8.75,
+   "midi": 71,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 9.063,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 9.375,
+   "midi": 62,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 9.688,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 10,
+   "midi": 48,
+   "dur": 2.375,
+   "vel": 0.55,
+   "inst": "bass"
+  },
+  {
+   "t": 10,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.38,
+   "inst": "marimba"
+  },
+  {
+   "t": 10.313,
+   "midi": 72,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 10.625,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 10.938,
+   "midi": 76,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 11.25,
+   "midi": 72,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 11.563,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 11.875,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 12.188,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 12.5,
+   "midi": 45,
+   "dur": 2.375,
+   "vel": 0.55,
+   "inst": "bass"
+  },
+  {
+   "t": 12.5,
+   "midi": 60,
+   "dur": 0.6,
+   "vel": 0.38,
+   "inst": "marimba"
+  },
+  {
+   "t": 12.813,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 13.125,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 13.438,
+   "midi": 72,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 13.75,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 14.063,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 14.375,
+   "midi": 60,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 14.688,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 15,
+   "midi": 41,
+   "dur": 2.375,
+   "vel": 0.55,
+   "inst": "bass"
+  },
+  {
+   "t": 15,
+   "midi": 60,
+   "dur": 0.6,
+   "vel": 0.38,
+   "inst": "marimba"
+  },
+  {
+   "t": 15.313,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 15.625,
+   "midi": 65,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 15.938,
+   "midi": 72,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 16.25,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 16.563,
+   "midi": 65,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 16.875,
+   "midi": 60,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 17.188,
+   "midi": 65,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 17.5,
+   "midi": 43,
+   "dur": 2.375,
+   "vel": 0.55,
+   "inst": "bass"
+  },
+  {
+   "t": 17.5,
+   "midi": 62,
+   "dur": 0.6,
+   "vel": 0.38,
+   "inst": "marimba"
+  },
+  {
+   "t": 17.813,
+   "midi": 71,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 18.125,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 18.438,
+   "midi": 74,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 18.75,
+   "midi": 71,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 19.063,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 19.375,
+   "midi": 62,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 19.688,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 20,
+   "midi": 48,
+   "dur": 2.375,
+   "vel": 0.55,
+   "inst": "bass"
+  },
+  {
+   "t": 20,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.38,
+   "inst": "marimba"
+  },
+  {
+   "t": 20.313,
+   "midi": 72,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 20.625,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 20.938,
+   "midi": 76,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 21.25,
+   "midi": 72,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 21.563,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 21.875,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 22.188,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 22.5,
+   "midi": 45,
+   "dur": 2.375,
+   "vel": 0.55,
+   "inst": "bass"
+  },
+  {
+   "t": 22.5,
+   "midi": 60,
+   "dur": 0.6,
+   "vel": 0.38,
+   "inst": "marimba"
+  },
+  {
+   "t": 22.813,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 23.125,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 23.438,
+   "midi": 72,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 23.75,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 24.063,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 24.375,
+   "midi": 60,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 24.688,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 25,
+   "midi": 41,
+   "dur": 2.375,
+   "vel": 0.55,
+   "inst": "bass"
+  },
+  {
+   "t": 25,
+   "midi": 60,
+   "dur": 0.6,
+   "vel": 0.38,
+   "inst": "marimba"
+  },
+  {
+   "t": 25.313,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 25.625,
+   "midi": 65,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 25.938,
+   "midi": 72,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 26.25,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 26.563,
+   "midi": 65,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 26.875,
+   "midi": 60,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 27.188,
+   "midi": 65,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 27.5,
+   "midi": 43,
+   "dur": 2.375,
+   "vel": 0.55,
+   "inst": "bass"
+  },
+  {
+   "t": 27.5,
+   "midi": 62,
+   "dur": 0.6,
+   "vel": 0.38,
+   "inst": "marimba"
+  },
+  {
+   "t": 27.813,
+   "midi": 71,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 28.125,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 28.438,
+   "midi": 74,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 28.75,
+   "midi": 71,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 29.063,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 29.375,
+   "midi": 62,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 29.688,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 30,
+   "midi": 48,
+   "dur": 2.375,
+   "vel": 0.55,
+   "inst": "bass"
+  },
+  {
+   "t": 30,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.38,
+   "inst": "marimba"
+  },
+  {
+   "t": 30.313,
+   "midi": 72,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 30.625,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 30.938,
+   "midi": 76,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 31.25,
+   "midi": 72,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 31.563,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 31.875,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 32.188,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 32.5,
+   "midi": 45,
+   "dur": 2.375,
+   "vel": 0.55,
+   "inst": "bass"
+  },
+  {
+   "t": 32.5,
+   "midi": 60,
+   "dur": 0.6,
+   "vel": 0.38,
+   "inst": "marimba"
+  },
+  {
+   "t": 32.813,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 33.125,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 33.438,
+   "midi": 72,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 33.75,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 34.063,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 34.375,
+   "midi": 60,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 34.688,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 35,
+   "midi": 41,
+   "dur": 2.375,
+   "vel": 0.55,
+   "inst": "bass"
+  },
+  {
+   "t": 35,
+   "midi": 60,
+   "dur": 0.6,
+   "vel": 0.38,
+   "inst": "marimba"
+  },
+  {
+   "t": 35.313,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 35.625,
+   "midi": 65,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 35.938,
+   "midi": 72,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 36.25,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 36.563,
+   "midi": 65,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 36.875,
+   "midi": 60,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 37.188,
+   "midi": 65,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 37.5,
+   "midi": 43,
+   "dur": 2.375,
+   "vel": 0.55,
+   "inst": "bass"
+  },
+  {
+   "t": 37.5,
+   "midi": 62,
+   "dur": 0.6,
+   "vel": 0.38,
+   "inst": "marimba"
+  },
+  {
+   "t": 37.813,
+   "midi": 71,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 38.125,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 38.438,
+   "midi": 74,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 38.75,
+   "midi": 71,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 39.063,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 39.375,
+   "midi": 62,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 39.688,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 40,
+   "midi": 48,
+   "dur": 2.375,
+   "vel": 0.55,
+   "inst": "bass"
+  },
+  {
+   "t": 40,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.38,
+   "inst": "marimba"
+  },
+  {
+   "t": 40.313,
+   "midi": 72,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 40.625,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 40.938,
+   "midi": 76,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 41.25,
+   "midi": 72,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 41.563,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 41.875,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 42.188,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 42.5,
+   "midi": 45,
+   "dur": 2.375,
+   "vel": 0.55,
+   "inst": "bass"
+  },
+  {
+   "t": 42.5,
+   "midi": 60,
+   "dur": 0.6,
+   "vel": 0.38,
+   "inst": "marimba"
+  },
+  {
+   "t": 42.813,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 43.125,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 43.438,
+   "midi": 72,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 43.75,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 44.063,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 44.375,
+   "midi": 60,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 44.688,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 45,
+   "midi": 41,
+   "dur": 2.375,
+   "vel": 0.55,
+   "inst": "bass"
+  },
+  {
+   "t": 45,
+   "midi": 60,
+   "dur": 0.6,
+   "vel": 0.38,
+   "inst": "marimba"
+  },
+  {
+   "t": 45.313,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 45.625,
+   "midi": 65,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 45.938,
+   "midi": 72,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 46.25,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 46.563,
+   "midi": 65,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 46.875,
+   "midi": 60,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 47.188,
+   "midi": 65,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 47.5,
+   "midi": 43,
+   "dur": 2.375,
+   "vel": 0.55,
+   "inst": "bass"
+  },
+  {
+   "t": 47.5,
+   "midi": 62,
+   "dur": 0.6,
+   "vel": 0.38,
+   "inst": "marimba"
+  },
+  {
+   "t": 47.813,
+   "midi": 71,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 48.125,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 48.438,
+   "midi": 74,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 48.75,
+   "midi": 71,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 49.063,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 49.375,
+   "midi": 62,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 49.688,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 47.5,
+   "midi": 50,
+   "dur": 2.5,
+   "vel": 0.28,
+   "inst": "pad"
+  },
+  {
+   "t": 47.5,
+   "midi": 55,
+   "dur": 2.5,
+   "vel": 0.24,
+   "inst": "pad"
+  },
+  {
+   "t": 50,
+   "midi": 48,
+   "dur": 2.375,
+   "vel": 0.55,
+   "inst": "bass"
+  },
+  {
+   "t": 50,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.38,
+   "inst": "marimba"
+  },
+  {
+   "t": 50.313,
+   "midi": 72,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 50.625,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 50.938,
+   "midi": 76,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 51.25,
+   "midi": 72,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 51.563,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 51.875,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 52.188,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 50,
+   "midi": 52,
+   "dur": 2.5,
+   "vel": 0.28,
+   "inst": "pad"
+  },
+  {
+   "t": 50,
+   "midi": 55,
+   "dur": 2.5,
+   "vel": 0.24,
+   "inst": "pad"
+  },
+  {
+   "t": 52.5,
+   "midi": 45,
+   "dur": 2.375,
+   "vel": 0.55,
+   "inst": "bass"
+  },
+  {
+   "t": 52.5,
+   "midi": 60,
+   "dur": 0.6,
+   "vel": 0.38,
+   "inst": "marimba"
+  },
+  {
+   "t": 52.813,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 53.125,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 53.438,
+   "midi": 72,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 53.75,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 54.063,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 54.375,
+   "midi": 60,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 54.688,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 52.5,
+   "midi": 48,
+   "dur": 2.5,
+   "vel": 0.28,
+   "inst": "pad"
+  },
+  {
+   "t": 52.5,
+   "midi": 52,
+   "dur": 2.5,
+   "vel": 0.24,
+   "inst": "pad"
+  },
+  {
+   "t": 55,
+   "midi": 41,
+   "dur": 2.375,
+   "vel": 0.55,
+   "inst": "bass"
+  },
+  {
+   "t": 55,
+   "midi": 60,
+   "dur": 0.6,
+   "vel": 0.38,
+   "inst": "marimba"
+  },
+  {
+   "t": 55.313,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 55.625,
+   "midi": 65,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 55.938,
+   "midi": 72,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 56.25,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 56.563,
+   "midi": 65,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 56.875,
+   "midi": 60,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 57.188,
+   "midi": 65,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 55,
+   "midi": 48,
+   "dur": 2.5,
+   "vel": 0.28,
+   "inst": "pad"
+  },
+  {
+   "t": 55,
+   "midi": 53,
+   "dur": 2.5,
+   "vel": 0.24,
+   "inst": "pad"
+  },
+  {
+   "t": 57.5,
+   "midi": 43,
+   "dur": 2.375,
+   "vel": 0.55,
+   "inst": "bass"
+  },
+  {
+   "t": 57.5,
+   "midi": 62,
+   "dur": 0.6,
+   "vel": 0.38,
+   "inst": "marimba"
+  },
+  {
+   "t": 57.813,
+   "midi": 71,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 58.125,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 58.438,
+   "midi": 74,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 58.75,
+   "midi": 71,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 59.063,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 59.375,
+   "midi": 62,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 59.688,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 57.5,
+   "midi": 50,
+   "dur": 2.5,
+   "vel": 0.28,
+   "inst": "pad"
+  },
+  {
+   "t": 57.5,
+   "midi": 55,
+   "dur": 2.5,
+   "vel": 0.24,
+   "inst": "pad"
+  },
+  {
+   "t": 60,
+   "midi": 48,
+   "dur": 2.375,
+   "vel": 0.55,
+   "inst": "bass"
+  },
+  {
+   "t": 60,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.38,
+   "inst": "marimba"
+  },
+  {
+   "t": 60.313,
+   "midi": 72,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 60.625,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 60.938,
+   "midi": 76,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 61.25,
+   "midi": 72,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 61.563,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 61.875,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 62.188,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 60,
+   "midi": 52,
+   "dur": 2.5,
+   "vel": 0.28,
+   "inst": "pad"
+  },
+  {
+   "t": 60,
+   "midi": 55,
+   "dur": 2.5,
+   "vel": 0.24,
+   "inst": "pad"
+  },
+  {
+   "t": 62.5,
+   "midi": 45,
+   "dur": 2.375,
+   "vel": 0.55,
+   "inst": "bass"
+  },
+  {
+   "t": 62.5,
+   "midi": 60,
+   "dur": 0.6,
+   "vel": 0.38,
+   "inst": "marimba"
+  },
+  {
+   "t": 62.813,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 63.125,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 63.438,
+   "midi": 72,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 63.75,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 64.063,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 64.375,
+   "midi": 60,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 64.688,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 65,
+   "midi": 41,
+   "dur": 2.375,
+   "vel": 0.55,
+   "inst": "bass"
+  },
+  {
+   "t": 65,
+   "midi": 60,
+   "dur": 0.6,
+   "vel": 0.38,
+   "inst": "marimba"
+  },
+  {
+   "t": 65.313,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 65.625,
+   "midi": 65,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 65.938,
+   "midi": 72,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 66.25,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 66.563,
+   "midi": 65,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 66.875,
+   "midi": 60,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 67.188,
+   "midi": 65,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 67.5,
+   "midi": 38,
+   "dur": 2.375,
+   "vel": 0.55,
+   "inst": "bass"
+  },
+  {
+   "t": 67.5,
+   "midi": 62,
+   "dur": 0.6,
+   "vel": 0.38,
+   "inst": "marimba"
+  },
+  {
+   "t": 67.813,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 68.125,
+   "midi": 65,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 68.438,
+   "midi": 74,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 68.75,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 69.063,
+   "midi": 65,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 69.375,
+   "midi": 62,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 69.688,
+   "midi": 65,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 70,
+   "midi": 40,
+   "dur": 2.375,
+   "vel": 0.55,
+   "inst": "bass"
+  },
+  {
+   "t": 70,
+   "midi": 59,
+   "dur": 0.6,
+   "vel": 0.38,
+   "inst": "marimba"
+  },
+  {
+   "t": 70.313,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 70.625,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 70.938,
+   "midi": 71,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 71.25,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 71.563,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 71.875,
+   "midi": 59,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 72.188,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 72.5,
+   "midi": 45,
+   "dur": 2.375,
+   "vel": 0.55,
+   "inst": "bass"
+  },
+  {
+   "t": 72.5,
+   "midi": 60,
+   "dur": 0.6,
+   "vel": 0.38,
+   "inst": "marimba"
+  },
+  {
+   "t": 72.813,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 73.125,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 73.438,
+   "midi": 72,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 73.75,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 74.063,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 74.375,
+   "midi": 60,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 74.688,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 75,
+   "midi": 41,
+   "dur": 2.375,
+   "vel": 0.55,
+   "inst": "bass"
+  },
+  {
+   "t": 75,
+   "midi": 60,
+   "dur": 0.6,
+   "vel": 0.38,
+   "inst": "marimba"
+  },
+  {
+   "t": 75.313,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 75.625,
+   "midi": 65,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 75.938,
+   "midi": 72,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 76.25,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 76.563,
+   "midi": 65,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 76.875,
+   "midi": 60,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 77.188,
+   "midi": 65,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 75,
+   "midi": 48,
+   "dur": 2.5,
+   "vel": 0.28,
+   "inst": "pad"
+  },
+  {
+   "t": 75,
+   "midi": 53,
+   "dur": 2.5,
+   "vel": 0.24,
+   "inst": "pad"
+  },
+  {
+   "t": 77.5,
+   "midi": 43,
+   "dur": 2.375,
+   "vel": 0.55,
+   "inst": "bass"
+  },
+  {
+   "t": 77.5,
+   "midi": 62,
+   "dur": 0.6,
+   "vel": 0.38,
+   "inst": "marimba"
+  },
+  {
+   "t": 77.813,
+   "midi": 71,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 78.125,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 78.438,
+   "midi": 74,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 78.75,
+   "midi": 71,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 79.063,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 79.375,
+   "midi": 62,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 79.688,
+   "midi": 67,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 77.5,
+   "midi": 50,
+   "dur": 2.5,
+   "vel": 0.28,
+   "inst": "pad"
+  },
+  {
+   "t": 77.5,
+   "midi": 55,
+   "dur": 2.5,
+   "vel": 0.24,
+   "inst": "pad"
+  },
+  {
+   "t": 80,
+   "midi": 45,
+   "dur": 2.375,
+   "vel": 0.55,
+   "inst": "bass"
+  },
+  {
+   "t": 80,
+   "midi": 60,
+   "dur": 0.6,
+   "vel": 0.38,
+   "inst": "marimba"
+  },
+  {
+   "t": 80.313,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 80.625,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 80.938,
+   "midi": 72,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 81.25,
+   "midi": 69,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 81.563,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 81.875,
+   "midi": 60,
+   "dur": 0.6,
+   "vel": 0.323,
+   "inst": "marimba"
+  },
+  {
+   "t": 82.188,
+   "midi": 64,
+   "dur": 0.6,
+   "vel": 0.26599999999999996,
+   "inst": "marimba"
+  },
+  {
+   "t": 80,
+   "midi": 48,
+   "dur": 2.5,
+   "vel": 0.28,
+   "inst": "pad"
+  },
+  {
+   "t": 80,
+   "midi": 52,
+   "dur": 2.5,
+   "vel": 0.24,
+   "inst": "pad"
+  },
+  {
+   "t": 82.5,
+   "midi": 48,
+   "dur": 2.375,
+   "vel": 0.55,
+   "inst": "bass"
+  },
+  {
+   "t": 82.5,
+   "midi": 64,
+   "dur": 3,
+   "vel": 0.42,
+   "inst": "marimba"
+  },
+  {
+   "t": 82.813,
+   "midi": 67,
+   "dur": 3,
+   "vel": 0.42,
+   "inst": "marimba"
+  },
+  {
+   "t": 83.125,
+   "midi": 72,
+   "dur": 3,
+   "vel": 0.42,
+   "inst": "marimba"
+  },
+  {
+   "t": 83.438,
+   "midi": 76,
+   "dur": 3,
+   "vel": 0.42,
+   "inst": "marimba"
+  },
+  {
+   "t": 82.5,
+   "midi": 52,
+   "dur": 3.3,
+   "vel": 0.35,
+   "inst": "pad"
+  },
+  {
+   "t": 82.5,
+   "midi": 55,
+   "dur": 3.3,
+   "vel": 0.3,
+   "inst": "pad"
+  },
+  {
+   "t": 85,
+   "midi": 48,
+   "dur": 2.375,
+   "vel": 0.55,
+   "inst": "bass"
+  },
+  {
+   "t": 85,
+   "midi": 64,
+   "dur": 3,
+   "vel": 0.42,
+   "inst": "marimba"
+  },
+  {
+   "t": 85.313,
+   "midi": 67,
+   "dur": 3,
+   "vel": 0.42,
+   "inst": "marimba"
+  },
+  {
+   "t": 85.625,
+   "midi": 72,
+   "dur": 3,
+   "vel": 0.42,
+   "inst": "marimba"
+  },
+  {
+   "t": 85.938,
+   "midi": 76,
+   "dur": 3,
+   "vel": 0.42,
+   "inst": "marimba"
+  },
+  {
+   "t": 85,
+   "midi": 52,
+   "dur": 3.3,
+   "vel": 0.35,
+   "inst": "pad"
+  },
+  {
+   "t": 85,
+   "midi": 55,
+   "dur": 3.3,
+   "vel": 0.3,
+   "inst": "pad"
+  }
+ ],
+ "wind": [
+  [
+   0,
+   0
+  ],
+  [
+   1,
+   1
+  ],
+  [
+   20,
+   1
+  ],
+  [
+   22,
+   0.35
+  ],
+  [
+   46,
+   0.35
+  ],
+  [
+   48,
+   1
+  ],
+  [
+   74,
+   0.8
+  ],
+  [
+   84,
+   0.5
+  ],
+  [
+   86,
+   0
+  ]
+ ],
+ "secPerWord": 0.4444444444444444
+}
