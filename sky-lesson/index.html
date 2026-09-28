@@ -40,7 +40,7 @@
     <span class="time" id="time">0:00 / 1:26</span>
     <button id="cc" aria-pressed="true">CC</button>
     <button id="snd" aria-pressed="true">Sound</button>
-    <button id="vo" aria-pressed="false" title="Uses your browser's built-in voice">Narrate</button>
+    <button id="vo" aria-pressed="true" title="Narration by ElevenLabs voice “Andrew”">Narrate</button>
   </div>
   <footer>Space: play/pause · ←/→: 5 s · The rendered MP4 lives in <code>render/out/</code>.</footer>
 </div>
@@ -91,13 +91,13 @@ const SCENES = [
   { n:7, name:'recap',         start:75, end:86 },
 ];
 const VO = [
-  { t:0.6,  text:"Look up on a clear day. The sky is blue — but sunlight is white. So where does the blue come from?" },
-  { t:9.4,  text:"Sunlight is every colour travelling together. Each colour is a wave: red with long, lazy wiggles, blue with short, quick ones." },
-  { t:21.4, text:"To reach your eyes, it has to cross the air: trillions of nitrogen and oxygen molecules, far smaller than any wave." },
-  { t:31.4, text:"When a wave meets a molecule, it gets bounced off in a new direction. That's scattering. And short waves scatter much more than long ones. Blue scatters about five times more than red." },
-  { t:47.6, text:"So blue gets bounced all across the sky, and from every direction some of it heads to you. Violet scatters even more, but sunlight has less of it, and our eyes favour blue." },
-  { t:63.4, text:"At sunset, light skims through far more air. Most of the blue is scattered away before it arrives, leaving reds and oranges." },
-  { t:75.6, text:"Short waves scatter most. That's why the sky is blue by day, and glows red at sunset." },
+  { t:0.6,  text:"Look up on a clear day. The sky is blue — but sunlight is white. So where does the blue come from?", spoken:5.76 },
+  { t:9.4,  text:"Sunlight is every colour travelling together. Each colour is a wave: red with long, lazy wiggles, blue with short, quick ones.", spoken:8.14 },
+  { t:21.4, text:"To reach your eyes, it has to cross the air: trillions of nitrogen and oxygen molecules, far smaller than any wave.", spoken:7.21 },
+  { t:31.4, text:"When a wave meets a molecule, it gets bounced off in a new direction. That's scattering. And short waves scatter much more than long ones. Blue scatters about five times more than red.", spoken:11.21 },
+  { t:47.6, text:"So blue gets bounced all across the sky, and from every direction some of it heads to you. Violet scatters even more, but sunlight has less of it, and our eyes favour blue.", spoken:11.35 },
+  { t:63.4, text:"At sunset, light skims through far more air. Most of the blue is scattered away before it arrives, leaving reds and oranges.", spoken:7.88 },
+  { t:75.6, text:"Short waves scatter most. That's why the sky is blue by day, and glows red at sunset.", spoken:5.59 },
 ];
 const SEC_PER_WORD = 60 / 135;   // narration pace: 135 wpm, inside the 125–145 brief
 const SENT_PAUSE = 0.2;
@@ -116,10 +116,27 @@ function splitChunks(text) {
   }
   return out;
 }
+// Recorded narration (render/vo/line_N.mp3, ElevenLabs "Andrew") sets each line's real length;
+// captions then share it out by syllable count, since the read has its own natural pauses.
+const syllables = s => (s.toLowerCase().match(/[a-z']+/g) || []).reduce((n, w) => {
+  let k = (w.match(/[aeiouy]+/g) || []).length;
+  if (w.endsWith('e') && !/(le|ee)$/.test(w) && k > 1) k--;
+  return n + Math.max(1, k);
+}, 0);
 const CAPTIONS = [];
 VO.forEach((v, li) => {
   let t = v.t;
-  for (const ch of splitChunks(v.text)) {
+  const chunks = splitChunks(v.text), total = chunks.reduce((n, c) => n + syllables(c.s), 0);
+  if (v.spoken) {
+    for (const ch of chunks) {
+      const d = v.spoken * syllables(ch.s) / total;
+      CAPTIONS.push({ line: li, start: +t.toFixed(3), end: +(t + d).toFixed(3), text: ch.s });
+      t += d;
+    }
+    v.dur = v.spoken;
+    return;
+  }
+  for (const ch of chunks) {
     const d = words(ch.s) * SEC_PER_WORD;
     CAPTIONS.push({ line: li, start: +t.toFixed(3), end: +(t + d).toFixed(3), text: ch.s });
     t += d + (ch.end ? SENT_PAUSE : 0);
@@ -812,7 +829,7 @@ window.renderAt = t => { renderFrame(t); return true; };
 /* ===================================================================
    Live audio (Web Audio) — the same cue list the offline mix uses
    =================================================================== */
-let AC = null, master = null, windSrc = null, soundOn = true, narrate = false, voTimers = [];
+let AC = null, master = null, windSrc = null, soundOn = true, narrate = true, voTimers = [];
 const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
 function noiseBuf() { const b = AC.createBuffer(1, AC.sampleRate * 2, AC.sampleRate), d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = hash(i) * 2 - 1; return b; }
 let NB = null;
@@ -877,15 +894,30 @@ function stopAudio() {
   if (master) { try { master.disconnect(); } catch (e) {} master = null; }
   if (windSrc) { try { windSrc.stop(); } catch (e) {} windSrc = null; }
 }
+let voAudio = [];
 function startVO(from) {
   stopVO();
-  if (!narrate || !('speechSynthesis' in window)) return;
-  VO.forEach(v => {
-    if (v.t + 1 < from) return;
-    voTimers.push(setTimeout(() => { const s = new SpeechSynthesisUtterance(v.text); s.rate = 1.0; speechSynthesis.speak(s); }, Math.max(0, (v.t - from) * 1000)));
+  if (!narrate) return;
+  VO.forEach((v, i) => {
+    if (v.t + v.dur < from) return;
+    const el = new Audio(`render/vo/line_${i + 1}.mp3`);
+    el.preload = 'auto'; voAudio.push(el);
+    const go = () => {
+      const off = Math.max(0, from - v.t);
+      el.currentTime = off;
+      el.play().catch(() => {
+        if (off > 0 || !('speechSynthesis' in window)) return;   // file missing: fall back to the browser voice
+        speechSynthesis.speak(new SpeechSynthesisUtterance(v.text));
+      });
+    };
+    voTimers.push(setTimeout(go, Math.max(0, (v.t - from) * 1000)));
   });
 }
-function stopVO() { voTimers.forEach(clearTimeout); voTimers = []; if ('speechSynthesis' in window) speechSynthesis.cancel(); }
+function stopVO() {
+  voTimers.forEach(clearTimeout); voTimers = [];
+  voAudio.forEach(a => a.pause()); voAudio = [];
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+}
 
 /* ===================================================================
    Player

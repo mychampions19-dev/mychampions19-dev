@@ -7,7 +7,9 @@ Reads out/timeline.json (dumped from index.html by `node render.mjs timeline`) a
   out/captions.srt  captions matching the burned-in caption bar
 
 The voiceover is a timing guide made with espeak-ng + MBROLA. To swap in a real read,
-drop one WAV per line into vo/line_1.wav ... vo/line_7.wav and re-run; those files win.
+drop one WAV or MP3 per line into vo/line_1 ... vo/line_7 and re-run; those files win.
+Set each line's `spoken` length in index.html's VO table so the captions follow the read,
+then re-render the frames (the captions are burned in).
 """
 import json
 import os
@@ -191,27 +193,27 @@ vo = np.zeros(N)
 report = []
 
 
-def place(src, t0, window, tag):
+def place(src, t0, window, tag, min_tempo=0.92, gain=None):
     base = src + ".48k.wav"
     to48k(src, base)
     natural = len(trim(read_wav(base))) / SR
-    # Fit into the caption window: speed up if long; never slow below 0.92x.
-    tempo = min(max(natural / window, 0.92), 1.6)
+    # Fit into the caption window: speed up if long; slow down by at most 1/min_tempo.
+    tempo = min(max(natural / window, min_tempo), 1.6)
     fit = src + ".fit.wav"
     to48k(base, fit, tempo)
     a = trim(read_wav(fit))
-    a = a / (np.max(np.abs(a)) + 1e-9) * 0.8
+    a = a * gain if gain is not None else a / (np.max(np.abs(a)) + 1e-9) * 0.8
     add(vo, t0, a)
     report.append(f"{tag}: {natural:.2f}s -> {len(a) / SR:.2f}s in a {window:.2f}s window")
 
 
 with tempfile.TemporaryDirectory() as tmp:
     for i, line in enumerate(tl["vo"], 1):
-        user = os.path.join(HERE, "vo", f"line_{i}.wav")
-        if os.path.exists(user):  # a real recording: one file per line, placed at the line cue
+        user = next((f for f in (os.path.join(HERE, "vo", f"line_{i}.{e}") for e in ("wav", "mp3")) if os.path.exists(f)), None)
+        if user:  # a real recording: placed whole at its cue; index.html times the captions to it
             dst = os.path.join(tmp, f"user{i}.wav")
-            subprocess.run([FFMPEG, "-y", "-loglevel", "error", "-i", user, dst], check=True)
-            place(dst, line["t"], line["dur"], f"line {i} (recorded)")
+            to48k(user, dst)
+            place(dst, line["t"], line["dur"] + 0.3, f"line {i} (recorded)", min_tempo=1.0)
             continue
         # scratch: one phrase per caption chunk, so the voice lands exactly on its caption
         for j, cap in enumerate(c for c in tl["captions"] if c["line"] == i - 1):

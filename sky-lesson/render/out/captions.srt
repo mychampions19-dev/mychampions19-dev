@@ -1,84 +1,84 @@
 1
-00:00:00,600 --> 00:00:03,617
+00:00:00,600 --> 00:00:02,521
 Look up on a clear day.
 
 2
-00:00:03,467 --> 00:00:07,372
+00:00:02,171 --> 00:00:04,877
 The sky is blue — but sunlight is white.
 
 3
-00:00:07,222 --> 00:00:10,683
+00:00:04,527 --> 00:00:06,710
 So where does the blue come from?
 
 4
-00:00:09,400 --> 00:00:12,417
+00:00:09,400 --> 00:00:13,203
 Sunlight is every colour travelling together.
 
 5
-00:00:12,267 --> 00:00:16,172
+00:00:12,853 --> 00:00:15,423
 Each colour is a wave: red with long,
 
 6
-00:00:15,822 --> 00:00:19,283
+00:00:15,073 --> 00:00:17,890
 lazy wiggles, blue with short, quick ones.
 
 7
-00:00:21,400 --> 00:00:26,194
+00:00:21,400 --> 00:00:24,076
 To reach your eyes, it has to cross the air:
 
 8
-00:00:25,844 --> 00:00:31,083
+00:00:23,726 --> 00:00:28,960
 trillions of nitrogen and oxygen molecules, far smaller than any wave.
 
 9
-00:00:31,400 --> 00:00:37,972
+00:00:31,400 --> 00:00:36,520
 When a wave meets a molecule, it gets bounced off in a new direction.
 
 10
-00:00:37,822 --> 00:00:39,061
+00:00:36,170 --> 00:00:37,474
 That's scattering.
 
 11
-00:00:38,911 --> 00:00:43,261
+00:00:37,124 --> 00:00:40,336
 And short waves scatter much more than long ones.
 
 12
-00:00:43,111 --> 00:00:47,017
+00:00:39,986 --> 00:00:42,960
 Blue scatters about five times more than red.
 
 13
-00:00:47,600 --> 00:00:51,506
+00:00:47,600 --> 00:00:50,530
 So blue gets bounced all across the sky,
 
 14
-00:00:51,156 --> 00:00:55,950
+00:00:50,180 --> 00:00:54,141
 and from every direction some of it heads to you.
 
 15
-00:00:55,800 --> 00:00:57,928
+00:00:53,791 --> 00:00:55,947
 Violet scatters even more,
 
 16
-00:00:57,578 --> 00:01:02,817
+00:00:55,597 --> 00:00:59,300
 but sunlight has less of it, and our eyes favour blue.
 
 17
-00:01:03,400 --> 00:01:07,306
+00:01:03,400 --> 00:01:05,966
 At sunset, light skims through far more air.
 
 18
-00:01:07,156 --> 00:01:11,950
+00:01:05,616 --> 00:01:09,906
 Most of the blue is scattered away before it arrives,
 
 19
-00:01:11,600 --> 00:01:13,728
+00:01:09,556 --> 00:01:11,630
 leaving reds and oranges.
 
 20
-00:01:15,600 --> 00:01:17,728
+00:01:15,600 --> 00:01:17,627
 Short waves scatter most.
 
 21
-00:01:17,578 --> 00:01:23,706
+00:01:17,277 --> 00:01:21,540
 That's why the sky is blue by day, and glows red at sunset.
 

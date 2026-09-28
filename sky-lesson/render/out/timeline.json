@@ -51,164 +51,171 @@
   {
    "t": 0.6,
    "text": "Look up on a clear day. The sky is blue — but sunlight is white. So where does the blue come from?",
-   "dur": 9.733
+   "spoken": 5.76,
+   "dur": 5.76
   },
   {
    "t": 9.4,
    "text": "Sunlight is every colour travelling together. Each colour is a wave: red with long, lazy wiggles, blue with short, quick ones.",
-   "dur": 9.533
+   "spoken": 8.14,
+   "dur": 8.14
   },
   {
    "t": 21.4,
    "text": "To reach your eyes, it has to cross the air: trillions of nitrogen and oxygen molecules, far smaller than any wave.",
-   "dur": 9.333
+   "spoken": 7.21,
+   "dur": 7.21
   },
   {
    "t": 31.4,
    "text": "When a wave meets a molecule, it gets bounced off in a new direction. That's scattering. And short waves scatter much more than long ones. Blue scatters about five times more than red.",
-   "dur": 15.267
+   "spoken": 11.21,
+   "dur": 11.21
   },
   {
    "t": 47.6,
    "text": "So blue gets bounced all across the sky, and from every direction some of it heads to you. Violet scatters even more, but sunlight has less of it, and our eyes favour blue.",
-   "dur": 14.867
+   "spoken": 11.35,
+   "dur": 11.35
   },
   {
    "t": 63.4,
    "text": "At sunset, light skims through far more air. Most of the blue is scattered away before it arrives, leaving reds and oranges.",
-   "dur": 9.978
+   "spoken": 7.88,
+   "dur": 7.88
   },
   {
    "t": 75.6,
    "text": "Short waves scatter most. That's why the sky is blue by day, and glows red at sunset.",
-   "dur": 7.756
+   "spoken": 5.59,
+   "dur": 5.59
   }
  ],
  "captions": [
   {
    "line": 0,
    "start": 0.6,
-   "end": 3.267,
+   "end": 2.171,
    "text": "Look up on a clear day."
   },
   {
    "line": 0,
-   "start": 3.467,
-   "end": 7.022,
+   "start": 2.171,
+   "end": 4.527,
    "text": "The sky is blue — but sunlight is white."
   },
   {
    "line": 0,
-   "start": 7.222,
-   "end": 10.333,
+   "start": 4.527,
+   "end": 6.36,
    "text": "So where does the blue come from?"
   },
   {
    "line": 1,
    "start": 9.4,
-   "end": 12.067,
+   "end": 12.853,
    "text": "Sunlight is every colour travelling together."
   },
   {
    "line": 1,
-   "start": 12.267,
-   "end": 15.822,
+   "start": 12.853,
+   "end": 15.073,
    "text": "Each colour is a wave: red with long,"
   },
   {
    "line": 1,
-   "start": 15.822,
-   "end": 18.933,
+   "start": 15.073,
+   "end": 17.54,
    "text": "lazy wiggles, blue with short, quick ones."
   },
   {
    "line": 2,
    "start": 21.4,
-   "end": 25.844,
+   "end": 23.726,
    "text": "To reach your eyes, it has to cross the air:"
   },
   {
    "line": 2,
-   "start": 25.844,
-   "end": 30.733,
+   "start": 23.726,
+   "end": 28.61,
    "text": "trillions of nitrogen and oxygen molecules, far smaller than any wave."
   },
   {
    "line": 3,
    "start": 31.4,
-   "end": 37.622,
+   "end": 36.17,
    "text": "When a wave meets a molecule, it gets bounced off in a new direction."
   },
   {
    "line": 3,
-   "start": 37.822,
-   "end": 38.711,
+   "start": 36.17,
+   "end": 37.124,
    "text": "That's scattering."
   },
   {
    "line": 3,
-   "start": 38.911,
-   "end": 42.911,
+   "start": 37.124,
+   "end": 39.986,
    "text": "And short waves scatter much more than long ones."
   },
   {
    "line": 3,
-   "start": 43.111,
-   "end": 46.667,
+   "start": 39.986,
+   "end": 42.61,
    "text": "Blue scatters about five times more than red."
   },
   {
    "line": 4,
    "start": 47.6,
-   "end": 51.156,
+   "end": 50.18,
    "text": "So blue gets bounced all across the sky,"
   },
   {
    "line": 4,
-   "start": 51.156,
-   "end": 55.6,
+   "start": 50.18,
+   "end": 53.791,
    "text": "and from every direction some of it heads to you."
   },
   {
    "line": 4,
-   "start": 55.8,
-   "end": 57.578,
+   "start": 53.791,
+   "end": 55.597,
    "text": "Violet scatters even more,"
   },
   {
    "line": 4,
-   "start": 57.578,
-   "end": 62.467,
+   "start": 55.597,
+   "end": 58.95,
    "text": "but sunlight has less of it, and our eyes favour blue."
   },
   {
    "line": 5,
    "start": 63.4,
-   "end": 66.956,
+   "end": 65.616,
    "text": "At sunset, light skims through far more air."
   },
   {
    "line": 5,
-   "start": 67.156,
-   "end": 71.6,
+   "start": 65.616,
+   "end": 69.556,
    "text": "Most of the blue is scattered away before it arrives,"
   },
   {
    "line": 5,
-   "start": 71.6,
-   "end": 73.378,
+   "start": 69.556,
+   "end": 71.28,
    "text": "leaving reds and oranges."
   },
   {
    "line": 6,
    "start": 75.6,
-   "end": 77.378,
+   "end": 77.277,
    "text": "Short waves scatter most."
   },
   {
    "line": 6,
-   "start": 77.578,
-   "end": 83.356,
+   "start": 77.277,
+   "end": 81.19,
    "text": "That's why the sky is blue by day, and glows red at sunset."
   }
  ],
