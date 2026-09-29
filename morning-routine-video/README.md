@@ -1,6 +1,6 @@
 # Morning Routine Video: Production Pack
 
-Full-screen 16:9 overlays at 1080p / 30fps, edited in CapCut. **Status: all 9 sections built. Code graphics done; Flow shots pending (see checklist).**
+Full-screen 16:9 overlays at 1080p / 30fps, edited in CapCut. **Status: all graphics and all Flow shots done. Only host footage + final voice remain.**
 
 ## Folder layout
 ```
@@ -198,14 +198,14 @@ Timecodes match `04_audio/S08_Beth_TestRead.mp3` (102.7 s). Word timings are in 
 | B06 | 00:38.3 → 00:45.6 | `S08-B06_MG_Step3Sunlight_v1` | first 7.3 s | "3" on **"Step 3"** |
 | B07 | 00:45.6 → 00:52.6 | **HOST** | — | "This sets your master circadian clock…" |
 | B08 | 00:52.6 → 00:57.4 | `S08-B08_MG_Step4Walk_v1` | first 4.7 s | "4" on **"Step 4"** |
-| B09 | 00:57.4 → 01:01.9 | `S08-B09_3D_SunriseWalk_v1` *(Flow)* | 4.5 s | "Walking clears morning blood sugar…" |
+| B09 | 00:57.4 → 01:01.9 | `S08-B09_3D_SunriseWalk_v8` ✅ | **use 0.8 s → 5.3 s** | "Walking clears morning blood sugar…" |
 | B10 | 01:01.9 → 01:09.8 | `S08-B10_MG_Step5CoffeeLater_v1` | first 7.9 s | "5" on **"Step 5"** |
 | B11 | 01:09.8 → 01:16.9 | `S08-B11_MG_SmoothEnergy_v1` | first 7.1 s | ✨ on **"smoother, cleaner energy"** |
 | B12 | 01:16.9 → 01:26.7 | `S08-B12_MG_Step6ProteinFirst_v1` | first 9.8 s | "6" on **"Step 6"**; foods on their words |
 | B13 | 01:26.7 → 01:29.6 | **HOST** | — | "This stabilizes blood sugar…" |
 | B14 | 01:29.6 → 01:33.7 | `S08-B14_MG_Step7Calm_v1` | first 4.1 s | "7" on **"Step 7"** |
 | B15 | 01:33.7 → 01:38.2 | `S08-B15_MG_Breathing_v1` | first 4.5 s | "deep nasal breathing" |
-| B16 | 01:38.2 → 01:42.7 | `S08-B16_3D_BrainCalm_v1` *(Flow)* | 4.5 s | "Shift your nervous system…" |
+| B16 | 01:38.2 → 01:42.7 | `S08-B16_3D_BrainCalm_v8` ✅ | **use 1.2 s → 5.7 s** (fireplace lights → fat melts to sparkles) | "Shift your nervous system…" |
 
 **Host on screen in Section 8: 10.0 s of 102.7 s (10%).**
 
@@ -248,7 +248,7 @@ Timecodes match `04_audio/S09_Beth_TestRead.mp3` (21.8 s).
 - [x] S05-B03_3D_DessertInDisguise · [x] S05-B08_3D_SugarRollercoaster
 - [x] S06-B04_3D_WindowSlam · [x] S06-B10_3D_MuscleSideDoor
 - [x] S07-B03_3D_BrainDanger · [x] S07-B05_3D_CavemanThreat
-- [x] S08-B05_3D_HydratedBlood · [ ] S08-B09_3D_SunriseWalk · [ ] S08-B16_3D_BrainCalm
+- [x] S08-B05_3D_HydratedBlood · [x] S08-B09_3D_SunriseWalk · [x] S08-B16_3D_BrainCalm
 
 Prompts are in `02_flow_prompts/` (one file per section). Send the clips back and I'll cut them into the animatics.
 
