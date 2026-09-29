@@ -98,10 +98,10 @@ Timecodes match `04_audio/S03_Beth_TestRead.mp3` (45.7 s). Word timings are in `
 |---|---|---|---|---|
 | B01 | 00:00.0 → 00:03.0 | `S03-B01_MG_Mistake2Title_v1` | first 3.0 s | "#2" on **"two"** |
 | B02 | 00:03.0 → 00:10.0 | `S03-B02_MG_OvernightDehydration_v1` | first 7.0 s | 7 · 8 · 9 on **"seven, eight, or nine"** |
-| B03 | 00:10.0 → 00:15.4 | `S03-B03_3D_DehydratedBlood_v1` *(Flow)* | 5.4 s | "more concentrated" |
+| B03 | 00:10.0 → 00:15.4 | `S03-B03_3D_DehydratedBlood_v1` ✅ | **use 2.0 s → 7.4 s** | "more concentrated" |
 | B04 | 00:15.4 → 00:17.4 | **HOST** | — | "So what do most people reach for first?" |
 | B05 | 00:17.4 → 00:23.1 | `S03-B05_MG_CaffeineStressedSystem_v1` | first 5.7 s | CAFFEINE! on **"Caffeine"**; badges on **"dehydrated"** / **"cortisol-elevated"** |
-| B06 | 00:23.1 → 00:27.3 | `S03-B06_3D_GasolineOnFire_v1` *(Flow)* | 4.2 s, pour + fireball | **"gasoline onto a flickering fire"** |
+| B06 | 00:23.1 → 00:27.3 | `S03-B06_3D_GasolineOnFire_v1` ✅ | **use 3.6 s → 7.8 s** (pour → fireball → frazzled gremlin) | **"gasoline onto a flickering fire"** |
 | B07 | 00:27.3 → 00:30.6 | `S03-B07_MG_JitteryCrash_v1` | first 3.3 s | JITTERY on **"9:30 AM"**; CRASH on **"crashing"** |
 | B08 | 00:30.6 → 00:32.4 | **HOST** | — | "Here's a key metabolic insight:" |
 | B09 | 00:32.4 → 00:39.7 | `S03-B09_MG_HungerMask_v1` | first 7.3 s | mask flies off on **"wearing a mask"** |
@@ -194,7 +194,7 @@ Timecodes match `04_audio/S08_Beth_TestRead.mp3` (102.7 s). Word timings are in 
 | B02 | 00:04.4 → 00:13.6 | `S08-B02_MG_BlueprintOverview_v1` | first 9.2 s | title on **"7-Step"**; pills on **"metabolism"** / **"hormones"** / **"fat-burning machine"** |
 | B03 | 00:13.6 → 00:23.8 | `S08-B03_MG_Step1PhoneOff_v1` | first 10.2 s | "1" on **"Step 1"** |
 | B04 | 00:23.8 → 00:33.4 | `S08-B04_MG_Step2Hydrate_v1` | first 9.6 s | "2" on **"Step 2"** |
-| B05 | 00:33.4 → 00:38.3 | `S08-B05_3D_HydratedBlood_v1` *(Flow)* | 4.8 s | "Rehydrating blood volume…" |
+| B05 | 00:33.4 → 00:38.3 | `S08-B05_3D_HydratedBlood_v1` ✅ | **use 1.6 s → 6.4 s** (water wave → cells plump up) | "Rehydrating blood volume…" |
 | B06 | 00:38.3 → 00:45.6 | `S08-B06_MG_Step3Sunlight_v1` | first 7.3 s | "3" on **"Step 3"** |
 | B07 | 00:45.6 → 00:52.6 | **HOST** | — | "This sets your master circadian clock…" |
 | B08 | 00:52.6 → 00:57.4 | `S08-B08_MG_Step4Walk_v1` | first 4.7 s | "4" on **"Step 4"** |
@@ -240,15 +240,15 @@ Timecodes match `04_audio/S09_Beth_TestRead.mp3` (21.8 s).
 | **Total** | **≈ 8:35** | **≈ 14%** | **58** | **16 new** |
 
 ### FLOW CHECKLIST: every shot still to generate
-**New characters first (save to Ingredients):** CHAR-05_Brain ✅ · CHAR-06_Coffee · CHAR-07_Muscle · CHAR-08_Glucose
+**New characters first (save to Ingredients):** CHAR-05_Brain ✅ · CHAR-06_Coffee ✅ · CHAR-07_Muscle · CHAR-08_Glucose
 
 - [x] S02-B02_3D_PhoneAlarmWake · [x] S02-B06_3D_BrainEngineStart · [x] S02-B15_3D_CortisolDirectsFat
-- [ ] S03-B03_3D_DehydratedBlood · [ ] S03-B06_3D_GasolineOnFire
+- [x] S03-B03_3D_DehydratedBlood · [x] S03-B06_3D_GasolineOnFire
 - [ ] S04-B02_3D_BrainMasterClock · [ ] S04-B06_3D_FluorescentGloom
 - [ ] S05-B03_3D_DessertInDisguise · [ ] S05-B08_3D_SugarRollercoaster
 - [ ] S06-B04_3D_WindowSlam · [ ] S06-B10_3D_MuscleSideDoor
 - [ ] S07-B03_3D_BrainDanger · [ ] S07-B05_3D_CavemanThreat
-- [ ] S08-B05_3D_HydratedBlood · [ ] S08-B09_3D_SunriseWalk · [ ] S08-B16_3D_BrainCalm
+- [x] S08-B05_3D_HydratedBlood · [ ] S08-B09_3D_SunriseWalk · [ ] S08-B16_3D_BrainCalm
 
 Prompts are in `02_flow_prompts/` (one file per section). Send the clips back and I'll cut them into the animatics.
 
