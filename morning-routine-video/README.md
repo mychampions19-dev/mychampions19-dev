@@ -174,9 +174,9 @@ Timecodes match `04_audio/S07_Beth_TestRead.mp3` (37.2 s). Word timings are in `
 |---|---|---|---|---|
 | B01 | 00:00.0 → 00:04.9 | `S07-B01_MG_Mistake7Title_v1` | first 4.9 s | "#7" on **"seventh"** |
 | B02 | 00:04.9 → 00:11.4 | `S07-B02_MG_StressStack_v1` | first 6.5 s | blocks land on **"phone"** / **"caffeine"** / **"dark"** / **"stress before 8 AM"** |
-| B03 | 00:11.4 → 00:14.3 | `S07-B03_3D_BrainDanger_v1` *(Flow)* | 2.9 s | **"danger"** |
+| B03 | 00:11.4 → 00:14.3 | `S07-B03_3D_BrainDanger_v7` ✅ | **use 0.6 s → 3.5 s** (alarms go red → panic) | **"danger"** |
 | B04 | 00:14.3 → 00:17.2 | `S07-B04_MG_AdrenalFlood_v1` | first 2.9 s | flood on **"flood your system"** |
-| B05 | 00:17.2 → 00:20.6 | `S07-B05_3D_CavemanThreat_v1` *(Flow)* | 3.4 s | "evolutionary… under threat" |
+| B05 | 00:17.2 → 00:20.6 | `S07-B05_3D_CavemanThreat_v7` ✅ | **use 0.6 s → 4.0 s** (tiger leaps → brain freezes) | "evolutionary… under threat" |
 | B06 | 00:20.6 → 00:23.1 | `S07-B06_MG_SurvivalPriority_v1` | first 2.5 s | ✅ on **"survival"**; ❌ on **"not fat loss"** |
 | B07 | 00:23.1 → 00:28.5 | `S07-B07_MG_ProtectiveFatRisks_v1` | first 5.5 s | fat wraps on **"heart, liver, kidneys"** |
 | B08 | 00:28.5 → 00:32.6 | **HOST** | — | "…it's rarely a lack of willpower." |
@@ -247,7 +247,7 @@ Timecodes match `04_audio/S09_Beth_TestRead.mp3` (21.8 s).
 - [x] S04-B02_3D_BrainMasterClock · [x] S04-B06_3D_FluorescentGloom
 - [x] S05-B03_3D_DessertInDisguise · [x] S05-B08_3D_SugarRollercoaster
 - [x] S06-B04_3D_WindowSlam · [x] S06-B10_3D_MuscleSideDoor
-- [ ] S07-B03_3D_BrainDanger · [ ] S07-B05_3D_CavemanThreat
+- [x] S07-B03_3D_BrainDanger · [x] S07-B05_3D_CavemanThreat
 - [x] S08-B05_3D_HydratedBlood · [ ] S08-B09_3D_SunriseWalk · [ ] S08-B16_3D_BrainCalm
 
 Prompts are in `02_flow_prompts/` (one file per section). Send the clips back and I'll cut them into the animatics.

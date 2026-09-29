@@ -91,9 +91,9 @@ SECTIONS = {
     "S07": dict(folder="S07_SurvivalMode", voice="04_audio/S07_Beth_TestRead.mp3", segs=[
         ("mg", "S07_SurvivalMode/S07-B01_MG_Mistake7Title_v1.mp4", 0, 4.85),
         ("mg", "S07_SurvivalMode/S07-B02_MG_StressStack_v1.mp4", 0, 6.51),
-        ("3d", "S07_SurvivalMode/S07-B03_3D_BrainDanger_v1.mp4", 1.0, 2.93, "S07-B03_3D_BrainDanger — alarm lights, brain panics"),
+        ("3d", "S07_SurvivalMode/S07-B03_3D_BrainDanger_v7.mp4", 0.6, 2.93, "S07-B03_3D_BrainDanger — alarm lights, brain panics"),
         ("mg", "S07_SurvivalMode/S07-B04_MG_AdrenalFlood_v1.mp4", 0, 2.90),
-        ("3d", "S07_SurvivalMode/S07-B05_3D_CavemanThreat_v1.mp4", 1.0, 3.36, "S07-B05_3D_CavemanThreat — caveman brain faces a sabre-tooth tiger"),
+        ("3d", "S07_SurvivalMode/S07-B05_3D_CavemanThreat_v7.mp4", 0.6, 3.36, "S07-B05_3D_CavemanThreat — caveman brain faces a sabre-tooth tiger"),
         ("mg", "S07_SurvivalMode/S07-B06_MG_SurvivalPriority_v1.mp4", 0, 2.52),
         ("mg", "S07_SurvivalMode/S07-B07_MG_ProtectiveFatRisks_v1.mp4", 0, 5.46),
         ("host", None, 0, 4.10, "S07-B08 · \"…it's rarely a lack of willpower.\""),
