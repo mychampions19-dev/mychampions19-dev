@@ -1,0 +1,164 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>S01-B06 Burn vs Store</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  #title60 { left:50%; top:90px; font-size:120px; }
+  #title60 .amber { color:#ffd166; }
+  #ringWrap { left:960px; top:570px; width:0; height:0; }
+  #ringWrap svg { position:absolute; left:-280px; top:-280px; width:560px; height:560px; overflow:visible; }
+  #sun { position:absolute; left:0; top:0; font-size:170px; transform:translate(-50%,-50%); }
+  #mins { position:absolute; left:0; top:150px; transform:translate(-50%,-50%); font-size:70px; font-weight:700; font-family:'Nunito'; letter-spacing:3px; white-space:nowrap; }
+  #decides { left:50%; top:900px; }
+  .panel { position:absolute; top:0; bottom:0; width:960px; overflow:hidden; }
+  #pL { left:0; background: radial-gradient(ellipse at 50% 60%, #ff7a3d 0%, #d93a1f 45%, #5a0f1c 100%); }
+  #pR { right:0; background: radial-gradient(ellipse at 50% 60%, #6a7dff 0%, #3a2fc4 45%, #120a45 100%); }
+  .dim { position:absolute; inset:0; background:#05021a; }
+  .ptitle { position:absolute; left:50%; top:90px; font-size:84px; }
+  .cellFat { position:absolute; --c1:#fff3b0; --c2:#f2b400; }
+  .spark { position:absolute; width:26px; height:26px; border-radius:50%;
+    background: radial-gradient(circle, #fff7c2, #ffb13b 45%, rgba(255,90,54,0) 70%); }
+  #lever { left:960px; top:650px; width:0; height:0; }
+  #leverBase { position:absolute; left:-110px; top:-70px; width:220px; height:140px; border-radius:40px;
+    background: linear-gradient(#4b3d99, #1c1250); box-shadow: inset 0 4px 0 rgba(255,255,255,.3), 0 20px 40px rgba(0,0,0,.6); }
+  #arm { position:absolute; left:-18px; top:-300px; width:36px; height:300px; transform-origin:50% 100%;
+    background: linear-gradient(90deg,#cfd3e6,#ffffff 40%,#8e93ad); border-radius:18px; }
+  #knobL { position:absolute; left:-52px; top:-100px; width:140px; height:140px; --c1:#ffffff; --c2:#d9d4ff; }
+  #divider { position:absolute; left:955px; top:0; bottom:0; width:10px; background: linear-gradient(#fff0, #ffffffcc, #fff0); }
+  .big { position:absolute; font-size:190px; transform:translate(-50%,-50%); }
+  #shield { position:absolute; left:480px; top:600px; width:600px; height:600px; margin:-300px 0 0 -300px; border-radius:50%;
+    background: radial-gradient(circle at 50% 50%, rgba(140,170,255,0) 55%, rgba(160,190,255,.35) 80%, rgba(220,230,255,.8) 96%, rgba(255,255,255,0) 100%);
+    box-shadow: 0 0 60px rgba(150,180,255,.8), inset 0 0 50px rgba(150,180,255,.6); }
+  #shield::after { content:''; position:absolute; left:18%; top:10%; width:30%; height:16%; border-radius:50%; background: rgba(255,255,255,.35); transform: rotate(-30deg); }
+  .meter { position:absolute; left:480px; top:930px; transform:translateX(-50%); font-size:56px; }
+</style></head>
+<body><div id="stage">
+  <div id="cells" class="layer"></div>
+
+  <!-- split-screen phase -->
+  <div id="split" class="layer">
+    <div class="panel" id="pL"><div id="fatL" class="layer"></div><div id="sparks" class="layer"></div>
+      <div class="ptitle h3d burn" id="tL">FAT BURNING <span class="emoji">🔥</span></div>
+      <div class="meter h3d burn" id="mL"><span class="emoji">⚡</span> ENERGY</div>
+      <div class="dim" id="dL"></div></div>
+    <div class="panel" id="pR"><div id="fatR" class="layer"></div>
+      <div id="shield"></div>
+      <div class="big emoji" id="lock" style="left:480px; top:600px">🔒</div>
+      <div class="ptitle h3d store" id="tR">FAT STORAGE <span class="emoji">🔒</span></div>
+      <div class="meter h3d store" id="mR"><span class="emoji">📦</span> STORED</div>
+      <div class="dim" id="dR"></div></div>
+    <div id="divider"></div>
+    <div id="lever" class="abs"><div id="arm"><div id="knobL" class="glossy"></div></div><div id="leverBase"></div></div>
+  </div>
+
+  <!-- 60-minute ring phase -->
+  <div id="title60" class="abs h3d">THE FIRST <span class="amber">60 MINUTES</span></div>
+  <div id="ringWrap" class="abs">
+    <svg viewBox="-280 -280 560 560">
+      <circle r="240" fill="rgba(10,5,40,.6)" stroke="rgba(255,255,255,.12)" stroke-width="44"/>
+      <circle id="arc" r="240" fill="none" stroke="url(#rg)" stroke-width="44" stroke-linecap="round" transform="rotate(-90)"
+        stroke-dasharray="1508" stroke-dashoffset="1508"/>
+      <defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd166"/><stop offset="1" stop-color="#ff5a36"/></linearGradient></defs>
+    </svg>
+    <div id="sun" class="emoji">☀️</div>
+    <div id="mins">0 MIN</div>
+  </div>
+  <div id="decides" class="abs"><span class="pill" style="font-size:60px;background:linear-gradient(135deg,#ff5a36,#9b5cff)">YOUR METABOLISM DECIDES</span></div>
+</div>
+<script src="../lib.js"></script>
+<script>
+const cells = makeCells(24, [['#ffb13b','#c2551f'], ['#9b5cff','#3d1c8f'], ['#7fa0ff','#2a3fa8']], 21, $('#cells'));
+const FAT = [[480,600,150],[330,520,110],[630,520,120],[360,700,120],[600,700,110],[480,430,95],[480,780,100]];
+const fatL = FAT.map(([x,y,s]) => { const c = el('div','cellFat glossy',$('#fatL')); return {c,x,y,s}; });
+const fatR = FAT.map(([x,y,s]) => { const c = el('div','cellFat glossy',$('#fatR')); return {c,x,y,s}; });
+const sr = rand(5), sparks = Array.from({length: 40}, () => {
+  const s = el('div','spark',$('#sparks')); return { s, x: 250 + sr()*460, y0: 520 + sr()*300, sp: 180 + sr()*260, ph: sr()*2, sz: .5 + sr()*1.4 }; });
+
+function placeFat(list, scale, jitter, t) {
+  list.forEach((f, i) => {
+    const s = f.s * scale, jx = Math.sin(t*23+i)*jitter, jy = Math.cos(t*19+i*2)*jitter;
+    css(f.c, { width: s+'px', height: s+'px', left: (f.x - s/2 + jx)+'px', top: (f.y - s/2 + jy)+'px' });
+  });
+}
+
+function render(t) {
+  entryPunch(t);
+  cells.update(t);
+
+  // ---- Phase 1: first 60 minutes ring ----
+  const out1 = ease.inOut(prog(t, 4.2, .45));
+  const tp = pop(t, .2, .5);
+  css($('#title60'), { transform: `translate(-50%, ${-out1*300}px) scale(${tp})`, opacity: 1 - out1 });
+  const rp = pop(t, .1, .5), fill = ease.inOut(prog(t, .35, 2.0));
+  $('#arc').setAttribute('stroke-dashoffset', (1508 * (1 - fill)).toFixed(1));
+  $('#mins').textContent = Math.round(fill * 60) + ' MIN';
+  $('#sun').style.transform = `translate(-50%, ${lerp(10, -50, fill) - 50}%) scale(${.7 + fill * .3})`;
+  css($('#ringWrap'), { transform: `scale(${rp * lerp(1, .2, out1)})`, opacity: 1 - out1 });
+  const dp = pop(t, 2.45, .5);
+  css($('#decides'), { transform: `translate(-50%, ${out1*200}px) scale(${dp})`, opacity: (t > 2.45 ? 1 : 0) * (1 - out1) });
+
+  // ---- Phase 2: split screen ----
+  const sp = ease.out(prog(t, 4.3, .55));
+  $('#pL').style.transform = `translateX(${lerp(-960, 0, sp)}px)`;
+  $('#pR').style.transform = `translateX(${lerp(960, 0, sp)}px)`;
+  $('#split').style.opacity = t > 4.25 ? 1 : 0;
+  $('#divider').style.opacity = sp;
+  const lp = pop(t, 4.6, .45);
+  // lever angle: neutral → left (burn) at 6.6 → right (store) at 8.4
+  const toL = ease.back(prog(t, 6.55, .22)), toR = ease.back(prog(t, 8.35, .22));
+  const ang = lerp(0, -38, toL) + lerp(0, 76, toR);
+  $('#lever').style.transform = `scale(${lp})`;
+  $('#arm').style.transform = `rotate(${ang}deg)`;
+  $('#knobL').style.setProperty('--c2', t < 6.55 ? '#d9d4ff' : t < 8.35 ? '#ff8a3d' : '#6a7dff');
+
+  const titleP = pop(t, 4.75, .45);
+  for (const id of ['#tL', '#tR']) css($(id), { transform: `translateX(-50%) scale(${titleP})` });
+
+  // Brightness per side
+  const burnOn = t >= 6.55 && t < 8.35, storeOn = t >= 8.35;
+  const dimL = t < 6.55 ? .25 : burnOn ? 0 : lerp(0, .62, ease.out(prog(t, 8.35, .3)));
+  const dimR = t < 6.55 ? .25 : burnOn ? lerp(.25, .6, ease.out(prog(t, 6.55, .3))) : lerp(.6, 0, ease.out(prog(t, 8.35, .3)));
+  $('#dL').style.opacity = dimL; $('#dR').style.opacity = dimR;
+
+  // Left: fat shrinks & burns into sparks while burn is on
+  const burnAmt = ease.out(prog(t, 6.6, 1.6));
+  const cellP = pop(t, 4.9, .5);
+  placeFat(fatL, cellP * lerp(1, .55, burnAmt), burnOn ? 4 : 0, t);
+  sparks.forEach(s => {
+    const life = ((t - 6.6) * s.sp / 400 + s.ph) % 1.2;
+    const on = t > 6.6 ? 1 : 0;
+    css(s.s, { left: s.x + 'px', top: (s.y0 - life * 420) + 'px', opacity: on * Math.max(0, 1 - life / 1.2) * (storeOn ? .3 : 1),
+      transform: `scale(${s.sz * (1 - life / 1.5)})` });
+  });
+  const mlp = pop(t, 6.9, .4);
+  css($('#mL'), { transform: `translateX(-50%) scale(${mlp})`, opacity: t > 6.9 ? 1 : 0 });
+
+  // Right: fat inflates, lock slams, shield guards
+  const grow = ease.out(prog(t, 8.4, 1.2));
+  placeFat(fatR, cellP * lerp(1, 1.35, grow), 0, t);
+  const lk = prog(t, 8.75, .22);
+  css($('#lock'), { transform: `translate(-50%,-50%) scale(${t < 8.75 ? 0 : lerp(2.6, 1, ease.back(lk))})`, opacity: t > 8.75 ? 1 : 0 });
+  const sh = pop(t, 9.55, .45);
+  css($('#shield'), { transform: `scale(${sh * (1 + Math.sin(t*6)*.015)})`, opacity: (t > 9.55 ? 1 : 0) });
+  const mrp = pop(t, 9.0, .4);
+  css($('#mR'), { transform: `translateX(-50%) scale(${mrp})`, opacity: t > 9.0 ? 1 : 0 });
+
+  // Camera shake on each lever clunk
+  const sk = (a) => t > a && t < a + .35 ? Math.sin(t * 120) * 9 * (1 - prog(t, a, .35)) : 0;
+  $('#stage').style.transform += ` translate(${sk(6.55) + sk(8.35)}px, ${sk(8.75) * .6}px)`;
+}
+
+window.CLIP = {
+  duration: 10.5,
+  render,
+  sfx: [
+    [0.0, 'whoosh', {dur: .45}], [0.2, 'pop', {freq: 520}],
+    ...Array.from({length: 12}, (_, i) => [0.4 + i * .165, 'tick', {vol: .22}]),
+    [2.35, 'ding', {freq: 1319, dur: 1.2, vol: .3}], [2.45, 'pop', {freq: 620}],
+    [4.2, 'whoosh', {dur: .6, vol: .55}], [4.6, 'pop', {freq: 400}], [4.75, 'pop', {freq: 760, vol: .3}],
+    [5.6, 'riser', {dur: .95, vol: .18}],
+    [6.55, 'clunk', {vol: .85}], [6.6, 'sizzle', {dur: 1.7, vol: .14}], [6.9, 'pop', {freq: 880, vol: .3}],
+    [8.35, 'clunk', {vol: .85}], [8.4, 'freeze', {dur: 1.8, vol: .2}],
+    [8.75, 'impact', {vol: .7}], [9.0, 'pop', {freq: 500, vol: .3}], [9.55, 'ding', {freq: 784, dur: 1.0, vol: .25}],
+  ],
+};
+</script></body></html>

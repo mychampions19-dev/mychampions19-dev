@@ -1,0 +1,49 @@
+/* ===== "Bio-Pop" theme — shared by every motion graphic in the series ===== */
+@font-face { font-family: 'Fredoka'; font-weight: 400; src: url(fonts/Fredoka-400.ttf); }
+@font-face { font-family: 'Fredoka'; font-weight: 600; src: url(fonts/Fredoka-600.ttf); }
+@font-face { font-family: 'Fredoka'; font-weight: 700; src: url(fonts/Fredoka-700.ttf); }
+@font-face { font-family: 'Nunito'; font-weight: 700; src: url(fonts/Nunito-700.ttf); }
+@font-face { font-family: 'Nunito'; font-weight: 900; src: url(fonts/Nunito-900.ttf); }
+
+:root {
+  --night-1: #1b0f45;   --night-2: #070320;
+  --burn-1: #ff5a36;    --burn-2: #ffb13b;     /* fat burning = hot coral → amber */
+  --store-1: #3d6bff;   --store-2: #9b5cff;    /* fat storage = electric blue → violet */
+  --mint: #2ee6a8;      --warn: #ff3b5c;       --fat: #ffd23f;
+  --ink: #ffffff;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--night-2); }
+body { font-family: 'Fredoka', sans-serif; color: var(--ink); }
+
+#stage { position: absolute; inset: 0; overflow: hidden;
+  background: radial-gradient(ellipse at 50% 40%, var(--night-1) 0%, var(--night-2) 75%); }
+.layer { position: absolute; inset: 0; }
+.abs { position: absolute; }
+.center { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+
+/* Floating blood-cell / bokeh particles */
+.cell { position: absolute; border-radius: 50%; pointer-events: none; }
+
+/* Chunky 3D headline text: extruded edge + soft drop shadow */
+.h3d { font-weight: 700; letter-spacing: 2px; line-height: 1; white-space: nowrap;
+  text-shadow: 0 2px 0 #d9d4ff, 0 4px 0 #c2b8ff, 0 6px 0 #a898f5, 0 8px 0 #8f7ce6,
+               0 10px 0 #7560d0, 0 14px 18px rgba(0,0,0,.55), 0 22px 40px rgba(0,0,0,.35); }
+.h3d.burn { text-shadow: 0 2px 0 #ffd9a8, 0 4px 0 #ffc07a, 0 6px 0 #ff9f52, 0 8px 0 #f47a36,
+               0 10px 0 #d9551f, 0 14px 18px rgba(0,0,0,.55), 0 22px 40px rgba(0,0,0,.35); }
+.h3d.store { text-shadow: 0 2px 0 #bfd0ff, 0 4px 0 #9fb3ff, 0 6px 0 #7f94ff, 0 8px 0 #6a72f5,
+               0 10px 0 #5549d6, 0 14px 18px rgba(0,0,0,.55), 0 22px 40px rgba(0,0,0,.35); }
+.h3d.warn { text-shadow: 0 2px 0 #ffc2cc, 0 4px 0 #ff97a8, 0 6px 0 #ff6b83, 0 8px 0 #e8435f,
+               0 10px 0 #c02444, 0 14px 18px rgba(0,0,0,.55), 0 22px 40px rgba(0,0,0,.35); }
+
+.pill { display: inline-block; padding: 14px 34px; border-radius: 999px; font-weight: 700;
+  box-shadow: inset 0 3px 0 rgba(255,255,255,.45), inset 0 -6px 0 rgba(0,0,0,.18), 0 12px 30px rgba(0,0,0,.4); }
+
+/* Glossy sphere (fat cells, buttons, bubbles) — set --c1/--c2 */
+.glossy { border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, rgba(255,255,255,.95) 0 6%, rgba(255,255,255,0) 22%),
+              radial-gradient(circle at 50% 55%, var(--c1) 0%, var(--c2) 78%);
+  box-shadow: inset -14px -18px 30px rgba(0,0,0,.25), 0 18px 40px rgba(0,0,0,.35); }
+
+.emoji { font-family: 'Noto Color Emoji'; line-height: 1; }

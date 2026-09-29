@@ -1,0 +1,76 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>S01-B07 7 Mistakes Preview</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  #seven { left:960px; top:330px; font-size:420px; color:#ff3b5c; }
+  #mm { left:50%; top:560px; font-size:110px; }
+  .tile { position:absolute; top:820px; width:196px; height:196px; margin:-98px 0 0 -98px; border-radius:48px;
+    box-shadow: inset 0 5px 0 rgba(255,255,255,.45), inset 0 -10px 0 rgba(0,0,0,.2), 0 18px 34px rgba(0,0,0,.45); }
+  .tile .emoji { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); font-size:110px; }
+  .tile .num { position:absolute; right:-14px; top:-14px; width:62px; height:62px; border-radius:50%; background:#fff; color:#2b1d63;
+    font-size:40px; font-weight:700; display:flex; align-items:center; justify-content:center; box-shadow: 0 6px 12px rgba(0,0,0,.35); }
+  .tile .bad { position:absolute; inset:-8px; border-radius:54px; border:8px solid #ff3b5c; box-shadow: 0 0 30px #ff3b5c; }
+  #stamp { left:960px; top:600px; font-size:92px; padding:12px 44px; border:12px solid #ff3b5c; border-radius:30px; color:#ff3b5c;
+    background: rgba(20,4,20,.82); font-weight:700; letter-spacing:6px; white-space:nowrap; box-shadow: 0 0 60px rgba(255,59,92,.6), 0 30px 60px rgba(0,0,0,.6); }
+  #redwash { position:absolute; inset:0; background: radial-gradient(circle at 50% 55%, rgba(255,59,92,.45), rgba(255,59,92,0) 65%); }
+</style></head>
+<body><div id="stage">
+  <div id="cells" class="layer"></div>
+  <div id="redwash"></div>
+  <div id="seven" class="abs h3d warn">7</div>
+  <div id="mm" class="abs h3d">MORNING MISTAKES</div>
+  <div id="tiles" class="layer"></div>
+  <div id="stamp" class="abs"><span class="emoji">⚠️</span> WRONG SIGNAL</div>
+</div>
+<script src="../lib.js"></script>
+<script>
+const cells = makeCells(24, [['#ff6b6b','#b3122e'], ['#9b5cff','#3d1c8f'], ['#ffb13b','#c2551f']], 31, $('#cells'));
+const T = [['📱','#7fa0ff','#3d5bd9'], ['☕','#c98b5a','#7a4a26'], ['☀️','#ffd166','#e89a1c'], ['🥣','#ff9ab3','#d9436b'],
+           ['⏱️','#2ee6a8','#12997a'], ['🪑','#c79bff','#7a45d9'], ['🚨','#ff6b6b','#c0213a']];
+const tiles = T.map(([e, c1, c2], i) => {
+  const d = el('div', 'tile', $('#tiles'));
+  d.style.background = `linear-gradient(160deg, ${c1}, ${c2})`;
+  d.style.left = (960 + (i - 3) * 245) + 'px';
+  d.innerHTML = `<div class="emoji">${e}</div><div class="num">${i + 1}</div><div class="bad"></div>`;
+  return { d, bad: d.querySelector('.bad'), at: 1.9 + i * .17 };
+});
+
+function render(t) {
+  entryPunch(t);
+  cells.update(t);
+  // "seven" slams in
+  const s = prog(t, 1.3, .25);
+  css($('#seven'), { transform: `translate(-50%,-50%) scale(${t < 1.3 ? 0 : lerp(3, 1, ease.back(s))}) rotate(${lerp(-20, -4, ease.out(s))}deg)`,
+    opacity: t > 1.3 ? 1 : 0 });
+  const mp = pop(t, 1.55, .45);
+  css($('#mm'), { transform: `translate(-50%, 0) scale(${mp})`, opacity: t > 1.55 ? 1 : 0 });
+
+  for (const [i, tl] of tiles.entries()) {
+    const p = pop(t, tl.at, .4);
+    const bob = Math.sin(t * 3 + i) * 6;
+    tl.d.style.transform = `translateY(${lerp(120, 0, p) + bob}px) scale(${p})`;
+    tl.d.style.opacity = t > tl.at ? 1 : 0;
+    const flick = t > 3.55 ? (Math.sin(t * 40 + i * 2) > -.3 ? 1 : .3) : 0;
+    tl.bad.style.opacity = flick;
+  }
+  // "wrong signal" stamp
+  const st = prog(t, 3.5, .22);
+  css($('#stamp'), { transform: `translate(-50%,-50%) scale(${t < 3.5 ? 0 : lerp(2.4, 1, ease.back(st))}) rotate(-7deg)`, opacity: t > 3.5 ? 1 : 0 });
+  $('#redwash').style.opacity = t > 3.5 ? .6 + Math.sin(t * 10) * .25 : 0;
+  // glitch jitter
+  const g = t > 3.5 && t < 4.4 ? (Math.sin(t * 97) > .7 ? 14 : 0) * (1 - prog(t, 3.5, .9)) : 0;
+  const sk = t > 1.3 && t < 1.6 ? Math.sin(t * 120) * 10 * (1 - prog(t, 1.3, .3)) : 0;
+  $('#stage').style.transform += ` translate(${g + sk}px, 0)`;
+}
+
+window.CLIP = {
+  duration: 5.5,
+  render,
+  sfx: [
+    [0.0, 'whoosh', {dur: .5}], [0.4, 'riser', {dur: .9, vol: .18}],
+    [1.3, 'impact', {vol: .85}], [1.55, 'pop', {freq: 500}],
+    ...Array.from({length: 7}, (_, i) => [1.9 + i * .17, 'pop', {freq: 520 + i * 90, vol: .35}]),
+    [3.5, 'impact', {vol: .6}], [3.5, 'buzz', {dur: .5, vol: .3}], [3.85, 'buzz', {dur: .25, vol: .18}],
+  ],
+};
+</script></body></html>
