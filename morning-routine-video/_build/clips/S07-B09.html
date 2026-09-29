@@ -1,0 +1,50 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>S07-B09 Routine Signals Survival</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  #src { left:420px; top:540px; width:360px; height:360px; margin:-180px; --c1:#ffd08a; --c2:#ff7a3d; }
+  #src .emoji { position:absolute; left:50%; top:50%; transform:translate(-50%,-52%); font-size:190px; }
+  #srcLbl { left:420px; top:800px; font-size:60px; white-space:nowrap; }
+  .wave { position:absolute; left:420px; top:540px; border:14px solid #ff3b5c; border-radius:50%; border-left-color:transparent; border-top-color:transparent; border-bottom-color:transparent; }
+  #dialWrap { left:1450px; top:540px; width:0; height:0; }
+  #dsvg { position:absolute; left:-260px; top:-260px; width:520px; height:520px; overflow:visible; }
+  #metLbl { left:1450px; top:830px; font-size:60px; }
+  #sig { left:930px; top:230px; white-space:nowrap; }
+</style></head>
+<body><div id="stage">
+  <div id="cells" class="layer"></div>
+  <div id="waves" class="layer"></div>
+  <div id="src" class="abs glossy"><div class="emoji">🌅</div></div>
+  <div id="srcLbl" class="abs h3d">MORNING ROUTINE</div>
+  <div id="sig" class="abs"><span class="pill" style="font-size:56px;background:linear-gradient(135deg,#ff3b5c,#9b1030)"><span class="emoji">📡</span> SURVIVAL STRESS</span></div>
+  <div id="dialWrap" class="abs"><svg id="dsvg" viewBox="-260 -260 520 520">
+      <path d="M-220 0 A220 220 0 0 1 0 -220" fill="none" stroke="#ff7a3d" stroke-width="44"/>
+      <path d="M0 -220 A220 220 0 0 1 220 0" fill="none" stroke="#6a7dff" stroke-width="44"/>
+      <text x="-180" y="60" text-anchor="middle" font-family="Fredoka" font-weight="700" font-size="40" fill="#ffb13b">BURN</text>
+      <text x="180" y="60" text-anchor="middle" font-family="Fredoka" font-weight="700" font-size="40" fill="#9fb3ff">STORE</text>
+      <g id="needle"><line x1="0" y1="0" x2="0" y2="-190" stroke="#fff" stroke-width="14" stroke-linecap="round"/><circle r="26" fill="#fff"/></g>
+    </svg></div>
+  <div id="metLbl" class="abs h3d">METABOLISM</div>
+</div>
+<script src="../lib.js"></script>
+<script>
+const cells = makeCells(14, [['#ff6b6b','#b3122e'], ['#3d6bff','#2a3fa8']], 371, $('#cells'));
+$('#src .emoji').textContent = '⏰';
+const waves = Array.from({length: 5}, () => el('div','wave',$('#waves')));
+function render(t) {
+  entryPunch(t); cells.update(t);
+  $('#src').style.transform = `scale(${pop(t, .05, .45) * (1 + Math.sin(t * 10) * .03)})`;
+  css($('#srcLbl'), { transform: `translate(-50%,-50%) scale(${pop(t, .9, .4)})`, opacity: t > .9 ? 1 : 0 });
+  waves.forEach((w, i) => { const k = ((t - 1.5) * .8 + i / waves.length) % 1; const on = t > 1.5; const r = 120 + k * 900;
+    css(w, { width: r * 2 + 'px', height: r * 2 + 'px', marginLeft: -r + 'px', marginTop: -r + 'px', opacity: on ? (1 - k) * .8 : 0 }); });
+  css($('#sig'), { transform: `translate(-50%,-50%) scale(${pop(t, 1.9, .45)})`, opacity: t > 1.9 ? 1 : 0 });
+  $('#dialWrap').style.transform = `scale(${pop(t, .3, .45)})`;
+  css($('#metLbl'), { transform: `translate(-50%,-50%) scale(${pop(t, 3.1, .4)})`, opacity: t > .3 ? 1 : 0 });
+  const push = ease.inOut(prog(t, 2.2, 1.0));
+  $('#needle').setAttribute('transform', `rotate(${lerp(-40, 72, push) + (push >= 1 ? Math.sin(t * 30) * 2 : 0)})`);
+}
+window.CLIP = { duration: 4.9, render, sfx: [
+  [0, 'whoosh', {dur: .4}], [.05, 'pop', {freq: 600}], [.3, 'pop', {freq: 500}], [.9, 'pop', {freq: 700}],
+  ...Array.from({length: 6}, (_, i) => [1.5 + i * .5, 'whoosh', {dur: .35, vol: .15}]), [1.9, 'buzz', {dur: .4, vol: .2}], [3.2, 'clunk', {vol: .6}],
+]};
+</script></body></html>

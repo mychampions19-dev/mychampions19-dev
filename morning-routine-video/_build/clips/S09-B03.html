@@ -1,0 +1,9 @@
+<!doctype html><html><head><meta charset="utf-8"><title>S09-B03 Fat Burning On</title><link rel="stylesheet" href="../theme.css"></head>
+<body><div id="stage"><div id="cells" class="layer"></div></div>
+<script src="../lib.js"></script>
+<script>window.FS = { flipAt: 1.2, title: 'FAT BURNING: ON', tag: 'NATURALLY', sunrise: true };</script>
+<script src="flip_switch.js"></script>
+<script>
+const cells = makeCells(16, [['#ffb13b','#c2551f'], ['#ff9ab3','#d9436b']], 431, $('#cells'));
+window.CLIP = { duration: 3.3, render(t) { entryPunch(t); cells.update(t); fsRender(t); }, sfx: fsSfx };
+</script></body></html>

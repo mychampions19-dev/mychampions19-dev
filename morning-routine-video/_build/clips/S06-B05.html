@@ -1,0 +1,51 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>S06-B05 Push First Meal Back</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  #title { left:50%; top:90px; font-size:92px; }
+  #track { left:200px; top:560px; width:1520px; height:24px; border-radius:12px; background:rgba(255,255,255,.2); }
+  #win { position:absolute; left:200px; top:380px; height:70px; border-radius:35px; background:linear-gradient(90deg,#ff5a36,#ffb13b); box-shadow:0 0 30px rgba(255,120,60,.8); display:flex; align-items:center; padding-left:30px; font:700 38px 'Fredoka'; white-space:nowrap; overflow:hidden; }
+  .stop { position:absolute; top:572px; transform:translate(-50%,-50%); text-align:center; }
+  .stop .dot { width:150px; height:150px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:84px; margin:0 auto;
+    box-shadow: inset 0 5px 0 rgba(255,255,255,.4), 0 16px 30px rgba(0,0,0,.45); }
+  .stop .l { font:700 42px 'Fredoka'; margin-top:16px; white-space:nowrap; }
+  #meal { position:absolute; top:572px; transform:translate(-50%,-50%); }
+  #meal .dot { width:180px; height:180px; border-radius:50%; background:linear-gradient(160deg,#ffd166,#ff9f43); display:flex; align-items:center; justify-content:center; font-size:100px; box-shadow:0 20px 40px rgba(0,0,0,.5); }
+  #meal .l { font:700 44px 'Fredoka'; text-align:center; margin-top:14px; white-space:nowrap; }
+  #longer { left:960px; top:930px; white-space:nowrap; }
+</style></head>
+<body><div id="stage">
+  <div id="cells" class="layer"></div>
+  <div id="title" class="abs h3d">PUSH YOUR FIRST MEAL BACK</div>
+  <div id="track" class="abs"></div>
+  <div id="win"><span class="emoji">🔥</span>&nbsp;FAT-BURNING WINDOW</div>
+  <div class="stop" id="s0" style="left:260px"><div class="dot" style="background:linear-gradient(160deg,#9b5cff,#3d1c8f)">⏰</div><div class="l">WAKE</div></div>
+  <div class="stop" id="s1" style="left:760px"><div class="dot emoji" style="background:linear-gradient(160deg,#7fd3ff,#2a7bff)">💧</div><div class="l">HYDRATE</div></div>
+  <div class="stop" id="s2" style="left:1180px"><div class="dot emoji" style="background:linear-gradient(160deg,#2ee6a8,#12997a)">🚶</div><div class="l">MOVE</div></div>
+  <div id="meal"><div class="dot emoji">🍳</div><div class="l">FIRST MEAL</div></div>
+  <div id="longer" class="abs"><span class="pill" style="font-size:58px;background:linear-gradient(135deg,#ff5a36,#ffb13b);color:#3a1400"><span class="emoji">🔥</span> FAT BURNING… LONGER</span></div>
+</div>
+<script src="../lib.js"></script>
+<script>
+const cells = makeCells(16, [['#ffb13b','#c2551f'], ['#2ee6a8','#12997a']], 291, $('#cells'));
+$$('.stop .dot')[0].classList.add('emoji');
+function render(t) {
+  entryPunch(t); cells.update(t);
+  css($('#title'), { transform: `translate(-50%,0) scale(${pop(t, .1, .45)})`, opacity: t > .1 ? 1 : 0 });
+  $('#track').style.transform = `scaleX(${ease.out(prog(t, .1, .5))})`; $('#track').style.transformOrigin = '0 50%';
+  css($('#s0'), { transform: `translate(-50%,-50%) scale(${pop(t, .2, .4)})` });
+  // meal starts right after wake, slides to the far right
+  const mv = ease.inOut(prog(t, .5, 2.4));
+  const mx = lerp(470, 1600, mv);
+  css($('#meal'), { left: mx + 'px', transform: `translate(-50%,-50%) scale(${pop(t, .3, .4)}) rotate(${Math.sin(t * 8) * (mv > 0 && mv < 1 ? 6 : 0)}deg)` });
+  css($('#s1'), { transform: `translate(-50%,-50%) scale(${pop(t, 1.75, .4)})`, opacity: t > 1.75 ? 1 : 0 });
+  css($('#s2'), { transform: `translate(-50%,-50%) scale(${pop(t, 2.1, .4)})`, opacity: t > 2.1 ? 1 : 0 });
+  $('#win').style.width = Math.max(0, mx - 200 - 100) + 'px';
+  $('#win').style.opacity = t > .5 ? 1 : 0;
+  css($('#longer'), { transform: `translate(-50%,-50%) scale(${pop(t, 3.0, .45)})`, opacity: t > 3.0 ? 1 : 0 });
+}
+window.CLIP = { duration: 6.4, render, sfx: [
+  [0, 'whoosh', {dur: .4}], [.1, 'pop', {freq: 520}], [.2, 'pop', {freq: 600}], [.5, 'whoosh', {dur: 2.4, vol: .25}],
+  [1.75, 'pop', {freq: 800}], [2.1, 'pop', {freq: 900}], [3.0, 'ding', {freq: 1319, dur: 1.0, vol: .28}], [3.0, 'sizzle', {dur: 2.0, vol: .1}],
+]};
+</script></body></html>

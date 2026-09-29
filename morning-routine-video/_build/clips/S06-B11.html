@@ -1,0 +1,50 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>S06-B11 Insulin-Free Side Door</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  #cell { left:1100px; top:560px; width:760px; height:620px; margin:-310px 0 0 -380px; border-radius:200px; background:radial-gradient(circle at 40% 35%, #ff9ab3, #c0213a 80%);
+    box-shadow: inset 0 0 0 16px rgba(255,255,255,.25), 0 40px 80px rgba(0,0,0,.5); }
+  #cellLbl { left:1020px; top:760px; font-size:64px; }
+  #front { position:absolute; left:-70px; top:250px; width:120px; height:170px; border-radius:20px 20px 0 0; background:#6a6190; box-shadow: inset 0 0 0 8px rgba(0,0,0,.25); }
+  #frontLk { position:absolute; left:-95px; top:280px; font-size:90px; }
+  #hole { position:absolute; left:600px; top:210px; width:150px; height:210px; border-radius:24px 24px 0 0; background:#2a0a18; box-shadow: 0 0 0 10px #2ee6a8, 0 0 40px #2ee6a8; }
+  #side { position:absolute; left:750px; top:210px; width:150px; height:210px; border-radius:24px 24px 0 0; background:linear-gradient(90deg,#2ee6a8,#12997a); transform-origin:0 50%; box-shadow: inset 0 0 0 8px rgba(0,0,0,.2); }
+  #sideLbl { left:1500px; top:170px; white-space:nowrap; }
+  #key { left:300px; top:540px; font-size:130px; }
+  #keyLbl { left:300px; top:690px; white-space:nowrap; }
+  .cube { position:absolute; width:50px; height:50px; border-radius:12px; background:linear-gradient(145deg,#fff,#dfe3f5); box-shadow: 0 8px 16px rgba(0,0,0,.35); }
+  #muscle { left:1450px; top:60px; font-size:120px; }
+  #title { left:960px; top:960px; white-space:nowrap; }
+</style></head>
+<body><div id="stage">
+  <div id="cells" class="layer"></div>
+  <div id="cell" class="abs"><div id="front"></div><div id="frontLk" class="emoji">🔒</div><div id="hole"></div><div id="side"></div></div>
+  <div id="cellLbl" class="abs h3d">MUSCLE CELL</div>
+  <div id="key" class="abs emoji">🔑</div>
+  <div id="keyLbl" class="abs"><span class="pill" style="font-size:36px;background:#6a6190">INSULIN NOT NEEDED</span></div>
+  <div id="cubes" class="layer"></div>
+  <div id="muscle" class="abs emoji">💪</div>
+  <div id="title" class="abs"><span class="pill" style="font-size:64px;background:linear-gradient(135deg,#2ee6a8,#12997a)"><span class="emoji">🚪</span> INSULIN-FREE SIDE DOOR</span></div>
+</div>
+<script src="../lib.js"></script>
+<script>
+const cells = makeCells(14, [['#2ee6a8','#12997a'], ['#ff6b8a','#a3173f']], 321, $('#cells'));
+const cubes = Array.from({length: 9}, (_, i) => ({ c: el('div','cube',$('#cubes')), at: .6 + i * .15, x0: 1900 + i * 30, y0: 80 + (i % 3) * 40 }));
+function render(t) {
+  entryPunch(t); cells.update(t);
+  $('#cell').style.transform = `scale(${pop(t, .05, .45)})`;
+  css($('#cellLbl'), { transform: `translate(-50%,-50%) scale(${pop(t, .1, .4)})` });
+  $('#side').style.transform = `perspective(700px) rotateY(${-ease.out(prog(t, .4, .4)) * 70}deg)`;
+  css($('#key'), { transform: `translate(-50%,-50%) scale(${pop(t, .2, .4)}) rotate(${Math.sin(t * 2) * 8}deg)`, filter: 'grayscale(.7)' });
+  css($('#keyLbl'), { transform: `translate(-50%,-50%) scale(${pop(t, .35, .4)})` });
+  css($('#muscle'), { transform: `translate(-50%,-50%) scale(${pop(t, .15, .4)}) rotate(${Math.sin(t * 6) * 10}deg)` });
+  for (const q of cubes) { const k = ease.inOut(prog(t, q.at, .6));
+    const x = lerp(q.x0, 1395, k), y = lerp(q.y0 + 150, 560, k);
+    css(q.c, { left: x + 'px', top: y + 'px', opacity: t > q.at && k < 1 ? 1 : 0, transform: `rotate(${k * 200}deg)` }); }
+  css($('#title'), { transform: `translate(-50%,-50%) scale(${pop(t, .7, .45)})`, opacity: t > .7 ? 1 : 0 });
+}
+window.CLIP = { duration: 2.8, render, sfx: [
+  [0, 'whoosh', {dur: .4}], [.4, 'click', {vol: .5}], [.6, 'whoosh', {dur: 1.5, vol: .3}], [.7, 'ding', {freq: 1319, dur: 1.0, vol: .28}],
+  ...Array.from({length: 9}, (_, i) => [1.1 + i * .15, 'tick', {vol: .18}]),
+]};
+</script></body></html>

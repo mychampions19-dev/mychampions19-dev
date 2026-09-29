@@ -1,0 +1,58 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>S06-B03 Overnight Fat Burning</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  #sky { position:absolute; inset:0; background: linear-gradient(#0b0630, #1b0f45 70%); }
+  #moon { left:260px; top:200px; font-size:150px; }
+  #zz { left:420px; top:120px; font:700 70px 'Fredoka'; color:#c7b8ff; }
+  #meter { left:520px; top:580px; width:170px; height:520px; margin:-260px 0 0 -85px; border-radius:85px; background:rgba(255,255,255,.1); overflow:hidden; box-shadow: inset 0 0 0 8px rgba(255,255,255,.35); }
+  #mFill { position:absolute; left:0; right:0; bottom:0; background:linear-gradient(#7f9bff,#3d6bff); }
+  #mLbl { left:520px; top:900px; font-size:52px; white-space:nowrap; }
+  #key { left:520px; top:245px; font-size:110px; }
+  #base { left:790px; top:780px; white-space:nowrap; }
+  .cellF { position:absolute; --c1:#fff3b0; --c2:#f2b400; }
+  .zap { position:absolute; font-size:70px; }
+  #energy { left:1320px; top:930px; white-space:nowrap; }
+  #fatLbl { left:1320px; top:170px; font-size:70px; }
+</style></head>
+<body><div id="stage">
+  <div id="sky"></div><div id="cells" class="layer"></div>
+  <div id="moon" class="abs emoji">🌙</div><div id="zz" class="abs">z z z</div>
+  <div id="key" class="abs emoji">🔑</div>
+  <div id="meter" class="abs"><div id="mFill"></div></div>
+  <div id="mLbl" class="abs h3d store">INSULIN</div>
+  <div id="base" class="abs"><span class="pill" style="font-size:44px;background:linear-gradient(135deg,#3d6bff,#9b5cff)">↓ BASELINE</span></div>
+  <div id="fatLbl" class="abs h3d burn">STORED FAT</div>
+  <div id="fat" class="layer"></div><div id="zaps" class="layer"></div>
+  <div id="energy" class="abs"><span class="pill" style="font-size:58px;background:linear-gradient(135deg,#ffd166,#ff5a36);color:#3a1400"><span class="emoji">⚡</span> BURNED FOR ENERGY</span></div>
+</div>
+<script src="../lib.js"></script>
+<script>
+const cells = makeCells(12, [['#9b5cff','#3d1c8f'], ['#ffd166','#c2551f']], 281, $('#cells'));
+const FC = [[1320,560,170],[1160,470,120],[1480,470,125],[1190,680,120],[1450,690,115],[1320,370,95],[1320,760,100]];
+const fat = FC.map(([x,y,s]) => { const c = el('div','cellF glossy',$('#fat')); return {c,x,y,s}; });
+const zr = rand(4), zaps = Array.from({length: 12}, (_, i) => { const z = el('div','zap emoji',$('#zaps')); z.textContent = '⚡'; return { z, x: 1150 + zr() * 340, y: 700 - zr() * 300, ph: zr() }; });
+function render(t) {
+  entryPunch(t); cells.update(t);
+  css($('#moon'), { transform: `translate(-50%,-50%) scale(${pop(t, .05, .5)})` });
+  css($('#zz'), { transform: `translateY(${Math.sin(t * 2) * 10}px)`, opacity: .4 + .4 * Math.sin(t * 3) });
+  $('#meter').style.transform = `scale(${pop(t, .3, .45)})`;
+  const lvl = lerp(.85, .15, ease.inOut(prog(t, 1.0, 1.0)));
+  $('#mFill').style.height = (lvl * 100) + '%';
+  css($('#key'), { transform: `translate(-50%,-50%) scale(${pop(t, .9, .4)}) rotate(${Math.sin(t * 3) * 10}deg)`, opacity: t > .9 ? 1 : 0 });
+  css($('#mLbl'), { transform: `translate(-50%,-50%) scale(${pop(t, .35, .4)})` });
+  css($('#base'), { transform: `translate(-50%,-50%) scale(${pop(t, 1.9, .4)})`, opacity: t > 1.9 ? 1 : 0 });
+  css($('#fatLbl'), { transform: `translate(-50%,-50%) scale(${pop(t, 2.8, .45)})`, opacity: t > 2.8 ? 1 : 0 });
+  const burn = ease.out(prog(t, 3.5, 2.0));
+  for (const f of fat) { const s = f.s * pop(t, 2.8, .5) * lerp(1, .5, burn) + Math.sin(t * 20 + f.x) * (burn > 0 && burn < 1 ? 3 : 0);
+    css(f.c, { width: s + 'px', height: s + 'px', left: (f.x - s / 2) + 'px', top: (f.y - s / 2) + 'px' }); }
+  for (const z of zaps) { const k = ((t - 3.5) * .7 + z.ph) % 1; const on = t > 3.5;
+    css(z.z, { left: z.x + 'px', top: (z.y - k * 300) + 'px', opacity: on ? 1 - k : 0, transform: `scale(${.6 + k * .5})` }); }
+  css($('#energy'), { transform: `translate(-50%,-50%) scale(${pop(t, 4.25, .45)})`, opacity: t > 4.25 ? 1 : 0 });
+}
+window.CLIP = { duration: 6.0, render, sfx: [
+  [0, 'whoosh', {dur: .4}], [.05, 'freeze', {dur: 1.5, vol: .12}], [.3, 'pop', {freq: 500}], [.9, 'pop', {freq: 700}],
+  [1.0, 'whoosh', {dur: 1.0, rise: false, vol: .35}], [1.9, 'ding', {freq: 784, dur: .8, vol: .2}], [2.8, 'pop', {freq: 600}],
+  [3.5, 'sizzle', {dur: 2.2, vol: .14}], [4.25, 'ding', {freq: 1319, dur: 1.0, vol: .28}],
+]};
+</script></body></html>

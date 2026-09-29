@@ -1,0 +1,44 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>S08-B02 Blueprint Overview</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  #t1 { left:50%; top:90px; font-size:70px; }
+  #t2 { left:50%; top:175px; font-size:120px; }
+  .tile { position:absolute; top:470px; width:200px; height:200px; margin:-100px; border-radius:50px; display:flex; align-items:center; justify-content:center; font-size:110px;
+    box-shadow: inset 0 6px 0 rgba(255,255,255,.5), inset 0 -12px 0 rgba(0,0,0,.18), 0 20px 40px rgba(40,0,60,.4); }
+  .tile .n { position:absolute; right:-12px; top:-12px; width:60px; height:60px; border-radius:50%; background:#2ee6a8; color:#0b5a45; font:700 36px 'Fredoka'; display:flex; align-items:center; justify-content:center; }
+  .ben { position:absolute; top:760px; transform:translate(-50%,-50%); white-space:nowrap; }
+  .ben .pill { font-size:38px; background:rgba(255,255,255,.95); color:#2b1d63; }
+  #hour { left:960px; top:920px; white-space:nowrap; }
+</style></head>
+<body><div id="stage" style="background:linear-gradient(160deg, #ff9a6b 0%, #ff6f91 38%, #8a5cff 100%)">
+  <div id="cells" class="layer"></div>
+  <div id="t1" class="abs h3d">THE 7-STEP</div>
+  <div id="t2" class="abs h3d">MORNING BLUEPRINT</div>
+  <div id="tiles" class="layer"></div>
+  <div class="ben" id="b1" style="left:400px"><span class="pill"><span class="emoji">⚙️</span> OPTIMISE METABOLISM</span></div>
+  <div class="ben" id="b2" style="left:960px"><span class="pill"><span class="emoji">⚖️</span> BALANCE HORMONES</span></div>
+  <div class="ben" id="b3" style="left:1520px"><span class="pill"><span class="emoji">🔥</span> FAT-BURNING MACHINE</span></div>
+  <div id="hour" class="abs"><span class="pill" style="font-size:58px;background:linear-gradient(135deg,#2ee6a8,#12997a)"><span class="emoji">⏰</span> ALL IN THE FIRST HOUR</span></div>
+</div>
+<script src="../lib.js"></script>
+<script>
+const cells = makeCells(16, [['#fff3c4','#ffb86b'], ['#ffd1e8','#ff6f91'], ['#d9c8ff','#8a5cff']], 391, $('#cells'));
+const T = [['📵','#7fa0ff','#3d5bd9'], ['💧','#7fd3ff','#2a7bff'], ['☀️','#ffd166','#e89a1c'], ['🚶','#2ee6a8','#12997a'], ['☕','#c98b5a','#7a4a26'], ['🍳','#ffd166','#ff9f43'], ['🧘','#c79bff','#7a45d9']];
+const tiles = T.map(([e, c1, c2], i) => { const d = el('div','tile',$('#tiles'), `<span class="emoji">${e}</span><div class="n">${i + 1}</div>`);
+  d.style.left = (960 + (i - 3) * 250) + 'px'; d.style.background = `linear-gradient(160deg,${c1},${c2})`; return { d, at: 1.2 + i * .22, i }; });
+function render(t) {
+  entryPunch(t); cells.update(t);
+  css($('#t1'), { transform: `translate(-50%,0) scale(${pop(t, .1, .4)})`, opacity: t > .1 ? 1 : 0 });
+  const t2 = prog(t, .85, .25);
+  css($('#t2'), { transform: `translate(-50%,0) scale(${t < .85 ? 0 : lerp(1.8, 1, ease.back(t2))})`, opacity: t > .85 ? 1 : 0 });
+  for (const o of tiles) css(o.d, { transform: `scale(${pop(t, o.at, .4)}) translateY(${Math.sin(t * 2.5 + o.i) * 8}px)`, opacity: t > o.at ? 1 : 0 });
+  [['#b1', 4.4], ['#b2', 5.4], ['#b3', 7.1]].forEach(([s, a]) => css($(s), { transform: `translate(-50%,-50%) scale(${pop(t, a, .4)})`, opacity: t > a ? 1 : 0 }));
+  css($('#hour'), { transform: `translate(-50%,-50%) scale(${pop(t, 8.1, .45)})`, opacity: t > 8.1 ? 1 : 0 });
+}
+window.CLIP = { duration: 9.5, render, sfx: [
+  [0, 'whoosh', {dur: .45}], [.1, 'pop', {freq: 500}], [.85, 'impact', {vol: .6}], [.9, 'ding', {freq: 1047, dur: 1.0, vol: .25}],
+  ...Array.from({length: 7}, (_, i) => [1.2 + i * .22, 'pop', {freq: 600 + i * 90, vol: .35}]),
+  [4.4, 'pop', {freq: 800}], [5.4, 'pop', {freq: 900}], [7.1, 'pop', {freq: 1000}], [8.1, 'ding', {freq: 1568, dur: 1.2, vol: .3}],
+]};
+</script></body></html>

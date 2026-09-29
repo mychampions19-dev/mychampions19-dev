@@ -1,0 +1,42 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>S07-B07 Protective Fat and Risks</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  #title { left:50%; top:80px; font-size:84px; }
+  .org { position:absolute; top:520px; width:0; height:0; }
+  .org .emoji { position:absolute; left:0; top:0; transform:translate(-50%,-50%); font-size:150px; }
+  .org .nm { position:absolute; left:0; top:140px; transform:translateX(-50%); font:700 44px 'Fredoka'; white-space:nowrap; }
+  .blob { position:absolute; width:90px; height:90px; margin:-45px; --c1:#fff3b0; --c2:#f2b400; }
+  .risk { position:absolute; top:900px; transform:translate(-50%,-50%); white-space:nowrap; }
+  .risk .pill { font-size:42px; }
+</style></head>
+<body><div id="stage">
+  <div id="cells" class="layer"></div>
+  <div id="title" class="abs h3d burn">A PROTECTIVE FAT STORE</div>
+  <div class="org" id="o1" style="left:480px"><div class="emoji">🫀</div><div class="nm">HEART</div></div>
+  <div class="org" id="o2" style="left:960px"><div class="emoji" style="font-size:0"><img alt="" style="display:none"></div><div id="liv" style="position:absolute;left:-110px;top:-80px;width:220px;height:160px;border-radius:60% 40% 50% 60%;background:radial-gradient(circle at 35% 30%,#b84a5a,#6b1d2a 80%);box-shadow:inset -10px -10px 20px rgba(0,0,0,.3)"></div><div class="nm">LIVER</div></div>
+  <div class="org" id="o3" style="left:1440px"><div class="emoji">🫘</div><div class="nm">KIDNEYS</div></div>
+  <div id="blobs" class="layer"></div>
+  <div class="risk" id="k1" style="left:420px"><span class="pill" style="background:linear-gradient(135deg,#ff8a3d,#c0213a)"><span class="emoji">🔥</span> INFLAMMATION</span></div>
+  <div class="risk" id="k2" style="left:960px"><span class="pill" style="background:linear-gradient(135deg,#ff3b5c,#9b1030)"><span class="emoji">❤️</span> CARDIO STRAIN</span></div>
+  <div class="risk" id="k3" style="left:1500px"><span class="pill" style="background:linear-gradient(135deg,#9b5cff,#3d1c8f)"><span class="emoji">⚠️</span> METABOLIC SYNDROME</span></div>
+</div>
+<script src="../lib.js"></script>
+<script>
+const cells = makeCells(14, [['#ffd166','#c2551f'], ['#ff6b6b','#b3122e']], 361, $('#cells'));
+const OX = [480, 960, 1440], blobs = [];
+OX.forEach((x, oi) => { for (let i = 0; i < 9; i++) { const a = i / 9 * 6.283; blobs.push({ b: el('div','blob glossy',$('#blobs')), x: x + Math.cos(a) * 125, y: 520 + Math.sin(a) * 110, oi, i, a }); } });
+const AT = [2.4, 2.75, 3.15];
+function render(t) {
+  entryPunch(t); cells.update(t);
+  css($('#title'), { transform: `translate(-50%,0) scale(${pop(t, .2, .45)})`, opacity: t > .2 ? 1 : 0 });
+  ['#o1', '#o2', '#o3'].forEach((s, i) => $(s).style.transform = `scale(${pop(t, .05 + i * .1, .45)})`);
+  for (const q of blobs) { const at = AT[q.oi] + q.i * .04, p = pop(t, at, .4), hug = Math.sin(t * 3 + q.i) * 6;
+    css(q.b, { left: (q.x + Math.cos(q.a) * hug) + 'px', top: (q.y + Math.sin(q.a) * hug) + 'px', transform: `scale(${p})`, opacity: t > at ? 1 : 0 }); }
+  ['#k1', '#k2', '#k3'].forEach((s, i) => css($(s), { transform: `translate(-50%,-50%) scale(${pop(t, 4.1 + i * .35, .4)})`, opacity: t > 4.1 + i * .35 ? 1 : 0 }));
+}
+window.CLIP = { duration: 5.8, render, sfx: [
+  [0, 'whoosh', {dur: .4}], [.05, 'pop', {freq: 500}], [.15, 'pop', {freq: 560}], [.25, 'pop', {freq: 620}], [.2, 'pop', {freq: 700}],
+  ...AT.map(a => [a, 'riser', {dur: .4, vol: .12}]), ...[4.1, 4.45, 4.8].map((a, i) => [a, 'buzz', {dur: .25, vol: .2}]),
+]};
+</script></body></html>

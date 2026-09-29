@@ -1,0 +1,41 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>S06-B08 Insulin Forces Storage</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  #meter { left:400px; top:560px; width:170px; height:560px; margin:-280px 0 0 -85px; border-radius:85px; background:rgba(255,255,255,.1); overflow:hidden; box-shadow: inset 0 0 0 8px rgba(255,255,255,.35); }
+  #mFill { position:absolute; left:0; right:0; bottom:0; background:linear-gradient(#ff6b8a,#3d6bff); }
+  #mLbl { left:400px; top:920px; white-space:nowrap; }
+  #box { left:1450px; top:620px; font-size:300px; }
+  #boxLbl { left:1450px; top:880px; font-size:72px; }
+  .cube { position:absolute; width:62px; height:62px; border-radius:14px; background:linear-gradient(145deg,#fff,#dfe3f5); box-shadow: inset -6px -6px 0 rgba(0,0,0,.08), 0 8px 16px rgba(0,0,0,.35); }
+  #push { left:960px; top:150px; font-size:90px; }
+</style></head>
+<body><div id="stage">
+  <div id="cells" class="layer"></div>
+  <div id="push" class="abs h3d store">INSULIN ↑</div>
+  <div id="meter" class="abs"><div id="mFill"></div></div>
+  <div id="mLbl" class="abs"><span class="pill" style="font-size:46px;background:linear-gradient(135deg,#3d6bff,#9b5cff)"><span class="emoji">🔑</span> INSULIN</span></div>
+  <div id="cubes" class="layer"></div>
+  <div id="box" class="abs emoji">📦</div>
+  <div id="boxLbl" class="abs h3d">STORAGE</div>
+</div>
+<script src="../lib.js"></script>
+<script>
+const cells = makeCells(14, [['#3d6bff','#2a3fa8'], ['#ff6b8a','#a3173f']], 301, $('#cells'));
+const r = rand(7), cubes = Array.from({length: 10}, (_, i) => { const c = el('div','cube',$('#cubes')); return { c, x: 700 + r() * 420, y: 380 + r() * 360, rot: r() * 360, at: 1.4 + i * .06 }; });
+function render(t) {
+  entryPunch(t); cells.update(t);
+  $('#meter').style.transform = `scale(${pop(t, .05, .4)})`;
+  css($('#mLbl'), { transform: `translate(-50%,-50%) scale(${pop(t, .1, .4)})` });
+  $('#mFill').style.height = (lerp(.2, .95, ease.out(prog(t, .2, .9))) * 100) + '%';
+  css($('#push'), { transform: `translate(-50%,-50%) scale(${pop(t, .3, .4)})`, opacity: t > .3 ? 1 : 0 });
+  css($('#box'), { transform: `translate(-50%,-50%) scale(${pop(t, .6, .45) * (1 + (t > 2.0 && t < 2.3 ? .08 : 0))})` });
+  css($('#boxLbl'), { transform: `translate(-50%,-50%) scale(${pop(t, 2.0, .4)})`, opacity: t > 2.0 ? 1 : 0 });
+  for (const q of cubes) { const k = ease.in(prog(t, q.at, .5)); const wig = Math.sin(t * 4 + q.rot) * 12;
+    css(q.c, { left: lerp(q.x, 1420, k) + wig * (1 - k) + 'px', top: lerp(q.y, 600, k) + 'px', transform: `rotate(${q.rot + k * 180}deg) scale(${(t > .2 ? 1 : 0) * (1 - k * .7)})`, opacity: k < 1 ? 1 : 0 }); }
+}
+window.CLIP = { duration: 3.2, render, sfx: [
+  [0, 'whoosh', {dur: .4}], [.2, 'riser', {dur: .9, vol: .18}], [.3, 'pop', {freq: 500}], [.6, 'pop', {freq: 400}],
+  ...Array.from({length: 10}, (_, i) => [1.8 + i * .06, 'tick', {vol: .2}]), [2.0, 'clunk', {vol: .6}],
+]};
+</script></body></html>

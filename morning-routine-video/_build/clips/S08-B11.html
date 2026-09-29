@@ -1,0 +1,46 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>S08-B11 Smooth Energy</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  #title { left:50%; top:70px; font-size:92px; }
+  .leg { position:absolute; left:1180px; white-space:nowrap; }
+  .leg .pill { font-size:40px; }
+  .tag { position:absolute; transform:translate(-50%,-50%); white-space:nowrap; }
+  .tag .pill { font-size:50px; }
+</style></head>
+<body><div id="stage" style="background:linear-gradient(160deg, #ff9a6b 0%, #ff6f91 38%, #8a5cff 100%)">
+  <div id="cells" class="layer"></div>
+  <svg class="layer" viewBox="0 0 1920 1080">
+    <line x1="240" y1="880" x2="1700" y2="880" stroke="rgba(255,255,255,.8)" stroke-width="6" stroke-linecap="round"/>
+    <text x="260" y="940" font-family="Fredoka" font-weight="700" font-size="40" fill="#fff">WAKE</text>
+    <text x="1500" y="940" font-family="Fredoka" font-weight="700" font-size="40" fill="#fff">MID-MORNING</text>
+    <path id="bad" fill="none" stroke="rgba(40,20,90,.55)" stroke-width="12" stroke-dasharray="20 14" stroke-linecap="round"/>
+    <path id="good" fill="none" stroke="#2ee6a8" stroke-width="18" stroke-linecap="round" style="filter:drop-shadow(0 0 16px #2ee6a8)"/>
+  </svg>
+  <div id="title" class="abs h3d">YOUR ENERGY</div>
+  <div class="leg" id="lB" style="top:190px"><span class="pill" style="background:rgba(40,20,90,.6)">- - COFFEE ON WAKING</span></div>
+  <div class="leg" id="lG" style="top:270px"><span class="pill" style="background:#12997a">━ COFFEE AFTER 60–90 MIN</span></div>
+  <div class="tag" id="tS" style="left:1150px;top:360px"><span class="pill" style="background:rgba(255,255,255,.95);color:#12664e"><span class="emoji">✨</span> SMOOTHER, CLEANER ENERGY</span></div>
+  <div class="tag" id="tN" style="left:1420px;top:760px"><span class="pill" style="background:rgba(255,255,255,.95);color:#12664e"><span class="emoji">✅</span> NO CRASH</span></div>
+</div>
+<script src="../lib.js"></script>
+<script>
+const cells = makeCells(14, [['#fff3c4','#ffb86b'], ['#d9c8ff','#8a5cff']], 401, $('#cells'));
+const bad = x => { const u = (x - 260) / 1420; return 640 - 330 * Math.exp(-Math.pow((u - .3) / .12, 2)) + 230 * Math.exp(-Math.pow((u - .72) / .12, 2)); };
+const good = x => { const u = (x - 260) / 1420; return 600 - 170 * (1 / (1 + Math.exp(-(u - .45) * 12))); };
+const P = (fn, x1) => { let d = ''; for (let x = 260; x <= x1; x += 6) d += (x === 260 ? 'M' : 'L') + x + ' ' + fn(x).toFixed(1) + ' '; return d; };
+function render(t) {
+  entryPunch(t); cells.update(t);
+  css($('#title'), { transform: `translate(-50%,0) scale(${pop(t, .05, .4)})`, opacity: t > .05 ? 1 : 0 });
+  $('#bad').setAttribute('d', P(bad, 260 + ease.inOut(prog(t, .3, 1.6)) * 1420));
+  $('#good').setAttribute('d', P(good, 260 + ease.inOut(prog(t, 1.8, 2.2)) * 1420));
+  css($('#lB'), { transform: `scale(${pop(t, .3, .35)})`, opacity: t > .3 ? 1 : 0, transformOrigin: '0 50%' });
+  css($('#lG'), { transform: `scale(${pop(t, 1.8, .35)})`, opacity: t > 1.8 ? 1 : 0, transformOrigin: '0 50%' });
+  css($('#tS'), { transform: `translate(-50%,-50%) scale(${pop(t, 4.3, .45)})`, opacity: t > 4.3 ? 1 : 0 });
+  css($('#tN'), { transform: `translate(-50%,-50%) scale(${pop(t, 5.4, .45)})`, opacity: t > 5.4 ? 1 : 0 });
+}
+window.CLIP = { duration: 7.4, render, sfx: [
+  [0, 'whoosh', {dur: .4}], [.05, 'pop', {freq: 520}], [.3, 'whoosh', {dur: 1.4, vol: .2}], [1.8, 'riser', {dur: 2.2, vol: .12}],
+  [4.3, 'ding', {freq: 1319, dur: 1.0, vol: .28}], [5.4, 'ding', {freq: 1568, dur: 1.0, vol: .28}],
+]};
+</script></body></html>

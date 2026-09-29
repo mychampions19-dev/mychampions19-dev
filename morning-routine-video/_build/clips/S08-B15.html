@@ -1,0 +1,39 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>S08-B15 Deep Nasal Breathing</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  #orb { left:960px; top:520px; width:520px; height:520px; margin:-260px; border-radius:50%;
+    background: radial-gradient(circle at 40% 35%, rgba(255,255,255,.95), rgba(190,240,255,.6) 35%, rgba(46,230,168,.35) 70%, rgba(46,230,168,0) 100%);
+    box-shadow: 0 0 120px rgba(46,230,168,.6); }
+  #ring { left:960px; top:520px; width:640px; height:640px; margin:-320px; border-radius:50%; border:6px dashed rgba(255,255,255,.5); }
+  #word { left:960px; top:520px; font-size:110px; }
+  #nose { left:960px; top:880px; white-space:nowrap; }
+  #tm { left:960px; top:120px; white-space:nowrap; }
+</style></head>
+<body><div id="stage" style="background:linear-gradient(160deg, #7fd3ff 0%, #8a9bff 45%, #b58aff 100%)">
+  <div id="cells" class="layer"></div>
+  <div id="tm" class="abs"><span class="pill" style="font-size:52px;background:rgba(20,10,60,.45)"><span class="emoji">⏱️</span> 2 MINUTES</span></div>
+  <div id="ring" class="abs"></div>
+  <div id="orb" class="abs"></div>
+  <div id="word" class="abs h3d">INHALE</div>
+  <div id="nose" class="abs"><span class="pill" style="font-size:56px;background:rgba(255,255,255,.95);color:#2b1d63"><span class="emoji">👃</span> DEEP NASAL BREATHING</span></div>
+</div>
+<script src="../lib.js"></script>
+<script>
+const cells = makeCells(14, [['#ffffff','#bfe9ff'], ['#d9c8ff','#8a5cff']], 411, $('#cells'));
+function render(t) {
+  entryPunch(t); cells.update(t);
+  const ph = (t % 4) / 4;                     // 2s in, 2s out
+  const s = ph < .5 ? ease.inOut(ph * 2) : ease.inOut(1 - (ph - .5) * 2);
+  $('#orb').style.transform = `scale(${(.55 + s * .5) * pop(t, .05, .5)})`;
+  $('#ring').style.transform = `rotate(${t * 20}deg) scale(${pop(t, .1, .5)})`;
+  $('#word').textContent = ph < .5 ? 'INHALE' : 'EXHALE';
+  css($('#word'), { transform: `translate(-50%,-50%) scale(${.9 + s * .15})`, opacity: t > .3 ? 1 : 0 });
+  css($('#tm'), { transform: `translate(-50%,-50%) scale(${pop(t, .2, .4)})`, opacity: t > .2 ? 1 : 0 });
+  css($('#nose'), { transform: `translate(-50%,-50%) scale(${pop(t, 2.8, .45)})`, opacity: t > 2.8 ? 1 : 0 });
+}
+window.CLIP = { duration: 4.8, render, sfx: [
+  [0, 'whoosh', {dur: 2.0, vol: .25}], [2.0, 'whoosh', {dur: 2.0, rise: false, vol: .25}], [4.0, 'whoosh', {dur: .8, vol: .2}],
+  [.2, 'ding', {freq: 784, dur: 2.0, vol: .15}], [2.8, 'pop', {freq: 600, vol: .3}],
+]};
+</script></body></html>

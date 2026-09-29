@@ -1,0 +1,48 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>S06-B09 Diabetes Care Walking Study</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  #j { left:960px; top:100px; white-space:nowrap; }
+  #who { left:960px; top:200px; white-space:nowrap; }
+  .card { position:absolute; top:570px; width:700px; height:470px; margin:-235px 0 0 -350px; border-radius:50px; background:rgba(255,255,255,.07);
+    box-shadow: inset 0 0 0 4px rgba(255,255,255,.15); text-align:center; padding-top:40px; }
+  .walks { display:flex; justify-content:center; gap:22px; font-size:100px; height:130px; align-items:center; }
+  .meal { display:inline-block; font-size:50px; margin-bottom:-60px; }
+  .big { font:700 76px 'Fredoka'; margin-top:30px; }
+  .sub { font:700 40px 'Nunito'; opacity:.85; margin-top:6px; }
+  #eq { left:960px; top:570px; font-size:130px; }
+  #res { left:960px; top:930px; white-space:nowrap; }
+</style></head>
+<body><div id="stage">
+  <div id="cells" class="layer"></div>
+  <div id="j" class="abs"><span class="pill" style="font-size:52px;background:linear-gradient(135deg,#ff6b8a,#c0213a)"><span class="emoji">📄</span> DIABETES CARE</span></div>
+  <div id="who" class="abs"><span class="pill" style="font-size:40px;background:linear-gradient(135deg,#9b5cff,#3d6bff)">OLDER ADULTS</span></div>
+  <div class="card" id="cA" style="left:520px"><div class="walks" id="wA"></div><div class="big h3d">3 × 15 MIN</div><div class="sub">after each meal</div></div>
+  <div class="card" id="cB" style="left:1400px"><div class="walks"><span class="emoji" id="w45">🚶</span></div><div class="big h3d">1 × 45 MIN</div><div class="sub">one continuous walk</div></div>
+  <div id="eq" class="abs h3d">=</div>
+  <div id="res" class="abs"><span class="pill" style="font-size:52px;background:linear-gradient(135deg,#2ee6a8,#12997a)"><span class="emoji">✅</span> SAME 24-HOUR BLOOD SUGAR CONTROL</span></div>
+</div>
+<script src="../lib.js"></script>
+<script>
+const cells = makeCells(16, [['#2ee6a8','#12997a'], ['#ff6b8a','#a3173f'], ['#9b5cff','#3d1c8f']], 311, $('#cells'));
+const MEALS = ['🍳','🥗','🍝'];
+$('#wA').innerHTML = MEALS.map((m, i) => `<span class="w" id="w${i}" style="display:inline-flex;flex-direction:column;align-items:center"><span class="emoji" style="font-size:54px">${m}</span><span class="emoji">🚶</span></span>`).join('');
+function render(t) {
+  entryPunch(t); cells.update(t);
+  css($('#j'), { transform: `translate(-50%,-50%) scale(${pop(t, 1.45, .45)})`, opacity: t > 1.45 ? 1 : 0 });
+  css($('#who'), { transform: `translate(-50%,-50%) scale(${pop(t, 2.7, .4)})`, opacity: t > 2.7 ? 1 : 0 });
+  const a = pop(t, .1, .5);
+  $('#cA').style.transform = `scale(${a})`;
+  [0, 1, 2].forEach(i => { const p = pop(t, 3.4 + i * .25, .35); $('#w' + i).style.transform = `scale(${p}) translateY(${Math.sin(t * 8 + i) * 4}px)`; });
+  const b = pop(t, 5.8, .5);
+  $('#cB').style.transform = `scale(${b})`; $('#cB').style.opacity = t > 5.8 ? 1 : 0;
+  $('#w45').style.transform = `scale(1.5) translateY(${Math.sin(t * 8) * 4}px)`;
+  css($('#eq'), { transform: `translate(-50%,-50%) scale(${pop(t, 5.6, .4)})`, opacity: t > 5.6 ? 1 : 0 });
+  css($('#res'), { transform: `translate(-50%,-50%) scale(${pop(t, 7.3, .45)})`, opacity: t > 7.3 ? 1 : 0 });
+}
+window.CLIP = { duration: 10.1, render, sfx: [
+  [0, 'whoosh', {dur: .4}], [.1, 'pop', {freq: 500}], [1.45, 'impact', {vol: .45}], [2.7, 'pop', {freq: 700}],
+  [3.4, 'pop', {freq: 700}], [3.65, 'pop', {freq: 800}], [3.9, 'pop', {freq: 900}], [5.6, 'ding', {freq: 1047, dur: .6, vol: .2}],
+  [5.8, 'pop', {freq: 600}], [7.3, 'ding', {freq: 1319, dur: 1.2, vol: .3}],
+]};
+</script></body></html>

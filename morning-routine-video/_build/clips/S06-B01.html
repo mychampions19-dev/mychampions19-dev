@@ -1,0 +1,47 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>S06-B01 Mistakes 5 and 6</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .tile { position:absolute; top:430px; width:340px; height:340px; margin:-170px; border-radius:80px; display:flex; align-items:center; justify-content:center;
+    box-shadow: inset 0 8px 0 rgba(255,255,255,.4), inset 0 -16px 0 rgba(0,0,0,.2), 0 30px 60px rgba(0,0,0,.5); }
+  .tile .n { font:700 220px 'Fredoka'; color:#fff; text-shadow: 0 6px 0 rgba(0,0,0,.2); }
+  #chain { left:960px; top:430px; font-size:170px; }
+  #gauge { left:960px; top:840px; width:1100px; height:90px; margin-left:-550px; border-radius:45px; background:rgba(255,255,255,.12); overflow:hidden; }
+  #gFill { position:absolute; left:0; top:0; bottom:0; width:100%; border-radius:45px; background:linear-gradient(90deg,#2ee6a8,#ffd166,#ff5a36); }
+  #gLbl { left:960px; top:720px; font-size:64px; }
+  #crack { position:absolute; left:50%; top:-20px; width:14px; height:130px; background:#140a33; transform-origin:50% 0; }
+  #sab { left:960px; top:120px; font-size:100px; }
+</style></head>
+<body><div id="stage">
+  <div id="cells" class="layer"></div>
+  <div id="sab" class="abs h3d warn">WORKING TOGETHER…</div>
+  <div class="tile" id="t5" style="left:560px;background:linear-gradient(160deg,#2ee6a8,#12997a)"><div class="n">5</div></div>
+  <div class="tile" id="t6" style="left:1360px;background:linear-gradient(160deg,#c79bff,#7a45d9)"><div class="n">6</div></div>
+  <div id="chain" class="abs emoji">⛓️</div>
+  <div id="gLbl" class="abs h3d">METABOLIC FLEXIBILITY</div>
+  <div id="gauge" class="abs"><div id="gFill"></div><div id="crack"></div></div>
+</div>
+<script src="../lib.js"></script>
+<script>
+const cells = makeCells(16, [['#2ee6a8','#12997a'], ['#c79bff','#7a45d9'], ['#ff6b6b','#b3122e']], 271, $('#cells'));
+function render(t) {
+  entryPunch(t); cells.update(t);
+  const a = prog(t, 1.1, .22), b = prog(t, 1.38, .22);
+  css($('#t5'), { transform: `scale(${t < 1.1 ? 0 : lerp(2, 1, ease.back(a))}) rotate(${-6 + Math.sin(t * 2) * 3}deg)`, opacity: t > 1.1 ? 1 : 0 });
+  css($('#t6'), { transform: `scale(${t < 1.38 ? 0 : lerp(2, 1, ease.back(b))}) rotate(${6 + Math.sin(t * 2 + 1) * 3}deg)`, opacity: t > 1.38 ? 1 : 0 });
+  css($('#chain'), { transform: `translate(-50%,-50%) scale(${pop(t, 1.6, .4)}) rotate(${Math.sin(t * 4) * 6}deg)`, opacity: t > 1.6 ? 1 : 0 });
+  css($('#sab'), { transform: `translate(-50%,-50%) scale(${pop(t, 1.7, .45)})`, opacity: t > 1.7 ? 1 : 0 });
+  css($('#gLbl'), { transform: `translate(-50%,-50%) scale(${pop(t, 2.3, .45)})`, opacity: t > 2.3 ? 1 : 0 });
+  const gp = pop(t, 2.2, .45);
+  $('#gauge').style.transform = `scaleX(${gp})`;
+  const drain = ease.inOut(prog(t, 2.7, 1.2));
+  $('#gFill').style.width = lerp(100, 22, drain) + '%';
+  $('#crack').style.transform = `scaleY(${ease.out(prog(t, 2.6, .2))}) rotate(${Math.sin(t * 50) * 4}deg)`;
+  const sk = t > 2.6 && t < 2.95 ? Math.sin(t * 110) * 9 * (1 - prog(t, 2.6, .35)) : 0;
+  $('#stage').style.transform += ` translate(${sk}px,0)`;
+}
+window.CLIP = { duration: 5.1, render, sfx: [
+  [0, 'whoosh', {dur: .4}], [1.1, 'impact', {vol: .6}], [1.38, 'impact', {vol: .6}], [1.6, 'clunk', {vol: .6}],
+  [1.7, 'pop', {freq: 500}], [2.3, 'pop', {freq: 700}], [2.6, 'impact', {vol: .5}], [2.65, 'buzz', {dur: .6, vol: .22}], [2.7, 'whoosh', {dur: 1.2, rise: false, vol: .3}],
+]};
+</script></body></html>
