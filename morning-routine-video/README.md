@@ -31,7 +31,7 @@ morning-routine-video/
 **Examples**
 - `S01-B03_3D_VisceralFatHug_v1.mp4`: your first Flow take of beat 3
 - `S01-B03_3D_VisceralFatHug_v2.mp4`: a re-roll you prefer
-- `S01-B06_MG_BurnVsStore_v1.mp4`: my motion graphic
+- `S01-B06_MG_BurnVsStore_v2.mp4`: my motion graphic
 - `CHAR-01_Cortisol_v1.png`: character sheet images (in `02_flow_prompts/characters/`)
 - `S01_VO_Beth_v1.mp3`: final voice for Section 1
 
@@ -54,13 +54,13 @@ Timecodes match Beth's test read (`04_audio/S01_Beth_TestRead.mp3`, 59.8 s). If 
 | B03 | 00:13.3 → 00:18.7 | `S01-B03_3D_VisceralFatHug_v1` ✅ | **use 2.4 s → 7.8 s** of the Flow clip (skip the slow start) | fat hugs organs on **"vital organs"** |
 | B04 | 00:18.7 → 00:25.4 | `S01-B04_MG_ZeroCalories_v2` (green counter) | use first 6.7 s | "0" slams on **"single calorie"** (clip 2.85 s) |
 | B05 | 00:25.4 → 00:33.3 | `S01-B05_3D_CortisolAlarm_v1` ✅ | use 0 → 7.9 s | alarm slam on **"stress hormones"** |
-| B06 | 00:33.3 → 00:43.6 | `S01-B06_MG_BurnVsStore_v1` | use first 10.3 s | lever → BURN on **"burn"** (6.55 s); lever → STORE on **"lock"** (8.35 s) |
+| B06 | 00:33.3 → 00:43.6 | `S01-B06_MG_BurnVsStore_v2` | use first 10.3 s | lever → BURN on **"burn"** (6.55 s); lever → STORE on **"lock"** (8.35 s) |
 | B07 | 00:43.6 → 00:48.8 | `S01-B07_MG_7MistakesPreview_v1` | use first 5.2 s | "7" slams on **"seven"** (clip 1.3 s) |
 | B08 | 00:48.8 → 00:59.8 | **HOST** | — | "We'll look at the actual science…" |
 
 **Host on screen in Section 1: 18.6 s of 59.8 s (31%). Graphics: 69%.**
 
-`S01_PREVIEW_Animatic_WithVoice_v2.mp4` is the whole section cut together with Beth's voice and your Flow shots. Only the host segments are still placeholders. Older versions are in `_rejects/`.
+`S01_PREVIEW_Animatic_WithVoice_v3.mp4` is the whole section cut together with Beth's voice and your Flow shots. Only the host segments are still placeholders. Older versions are in `_rejects/`.
 
 Flow clips are 24 fps and my graphics are 30 fps. CapCut mixes them without any problem.
 
