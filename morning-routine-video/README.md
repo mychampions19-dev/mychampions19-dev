@@ -155,13 +155,13 @@ Timecodes match `04_audio/S06_Beth_TestRead.mp3` (55.1 s). Word timings are in `
 | B01 | 00:00.0 → 00:04.9 | `S06-B01_MG_Mistakes5and6_v1` | first 4.9 s | tiles on **"five and six"**; gauge cracks on **"sabotage"** |
 | B02 | 00:04.9 → 00:08.4 | `S06-B02_MG_Mistake5Title_v1` | first 3.5 s | "#5" on **"five"** |
 | B03 | 00:08.4 → 00:14.1 | `S06-B03_MG_OvernightFatBurning_v1` | first 5.7 s | gauge drops on **"drops to baseline"**; ⚡ on **"energy"** |
-| B04 | 00:14.1 → 00:19.8 | `S06-B04_3D_WindowSlam_v1` *(Flow)* | 5.7 s | slam on **"slam that fat-burning window shut"** |
+| B04 | 00:14.1 → 00:19.8 | `S06-B04_3D_WindowSlam_v6` ✅ | **use 0.3 s → 6.0 s** (6 s clip) | slam on **"slam that fat-burning window shut"** |
 | B05 | 00:19.8 → 00:25.9 | `S06-B05_MG_PushMealBack_v1` | first 6.1 s | 💧 on **"hydrate"**; 🚶 on **"move"** |
 | B06 | 00:25.9 → 00:28.8 | `S06-B06_MG_Mistake6Title_v1` | first 2.9 s | "#6" on **"six"** |
 | B07 | 00:28.8 → 00:33.4 | **HOST** | — | "When you finish a meal and sit directly at a desk…" |
 | B08 | 00:33.4 → 00:36.4 | `S06-B08_MG_InsulinForcesStorage_v1` | first 3.0 s | cubes into 📦 on **"storage"** |
 | B09 | 00:36.4 → 00:46.2 | `S06-B09_MG_WalkingStudy_v1` | first 9.8 s | journal on **"Diabetes Care"**; ✅ on **"as effectively"** |
-| B10 | 00:46.2 → 00:52.5 | `S06-B10_3D_MuscleSideDoor_v1` *(Flow)* | 6.4 s | "Why? Because when your leg muscles contract…" |
+| B10 | 00:46.2 → 00:52.5 | `S06-B10_3D_MuscleSideDoor_v6` ✅ | **use 1.6 s → 8.0 s** | "Why? Because when your leg muscles contract…" |
 | B11 | 00:52.5 → 00:55.1 | `S06-B11_MG_InsulinFreeSideDoor_v1` | first 2.5 s | **"insulin-free side door"** |
 
 **Host on screen in Section 6: 4.7 s of 55.1 s (8%).**
@@ -240,13 +240,13 @@ Timecodes match `04_audio/S09_Beth_TestRead.mp3` (21.8 s).
 | **Total** | **≈ 8:35** | **≈ 14%** | **58** | **16 new** |
 
 ### FLOW CHECKLIST: every shot still to generate
-**New characters first (save to Ingredients):** CHAR-05_Brain ✅ · CHAR-06_Coffee ✅ · CHAR-07_Muscle · CHAR-08_Glucose
+**New characters first (save to Ingredients):** CHAR-05_Brain ✅ · CHAR-06_Coffee ✅ · CHAR-07_Muscle ✅ · CHAR-08_Glucose ✅
 
 - [x] S02-B02_3D_PhoneAlarmWake · [x] S02-B06_3D_BrainEngineStart · [x] S02-B15_3D_CortisolDirectsFat
 - [x] S03-B03_3D_DehydratedBlood · [x] S03-B06_3D_GasolineOnFire
 - [x] S04-B02_3D_BrainMasterClock · [x] S04-B06_3D_FluorescentGloom
 - [x] S05-B03_3D_DessertInDisguise · [x] S05-B08_3D_SugarRollercoaster
-- [ ] S06-B04_3D_WindowSlam · [ ] S06-B10_3D_MuscleSideDoor
+- [x] S06-B04_3D_WindowSlam · [x] S06-B10_3D_MuscleSideDoor
 - [ ] S07-B03_3D_BrainDanger · [ ] S07-B05_3D_CavemanThreat
 - [x] S08-B05_3D_HydratedBlood · [ ] S08-B09_3D_SunriseWalk · [ ] S08-B16_3D_BrainCalm
 
