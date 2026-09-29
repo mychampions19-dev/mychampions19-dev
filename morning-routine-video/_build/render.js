@@ -28,7 +28,7 @@ const fps = +(fpsArg || 30);
 
   fs.writeFileSync(outBase + '.sfx.json', JSON.stringify({ duration, sfx }));
   const ff = spawn(FFMPEG, ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(fps), '-i', '-',
-    '-c:v', 'libx264', '-preset', 'medium', '-crf', '17', '-pix_fmt', 'yuv420p', '-r', String(fps),
+    '-c:v', 'libx264', '-preset', 'slow', '-tune', 'animation', '-crf', '14', '-pix_fmt', 'yuv420p', '-r', String(fps),
     outBase + '.video.mp4'], { stdio: ['pipe', 'inherit', 'inherit'] });
   const n = Math.round(duration * fps);
   for (let i = 0; i < n; i++) {
