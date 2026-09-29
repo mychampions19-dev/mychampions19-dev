@@ -60,7 +60,7 @@ Timecodes match Beth's test read (`04_audio/S01_Beth_TestRead.mp3`, 59.8 s). If 
 
 **Host on screen in Section 1: 18.6 s of 59.8 s (31%). Graphics: 69%.**
 
-`S01_PREVIEW_Animatic_WithVoice_v3.mp4` is the whole section cut together with Beth's voice and your Flow shots. Only the host segments are still placeholders. Older versions are in `_rejects/`.
+`S01_PREVIEW_Animatic_WithVoice_LATEST.mp4` is the whole section cut together with Beth's voice and your Flow shots. Only the host segments are still placeholders. Older versions are in `_rejects/`. Each section folder has one `_LATEST` animatic.
 
 Flow clips are 24 fps and my graphics are 30 fps. CapCut mixes them without any problem.
 

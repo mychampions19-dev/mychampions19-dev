@@ -13,6 +13,16 @@ G = PROJ / "03_graphics"
 FF = "/usr/local/lib/python3.11/dist-packages/imageio_ffmpeg/binaries/ffmpeg-linux-x86_64-v7.0.2"
 
 SECTIONS = {
+    "S01": dict(folder="S01_MetabolicSwitch", voice="04_audio/S01_Beth_TestRead.mp3", segs=[
+        ("host", None, 0, 7.6, "S01-B01 · \"Most people assume…\""),
+        ("mg", "S01_MetabolicSwitch/S01-B02_MG_9AMSwitch_v1.mp4", 0, 5.7),
+        ("3d", "S01_MetabolicSwitch/S01-B03_3D_VisceralFatHug_v1.mp4", 2.4, 5.4),
+        ("mg", "S01_MetabolicSwitch/S01-B04_MG_ZeroCalories_v2.mp4", 0, 6.7),
+        ("3d", "S01_MetabolicSwitch/S01-B05_3D_CortisolAlarm_v1.mp4", 0, 7.9),
+        ("mg", "S01_MetabolicSwitch/S01-B06_MG_BurnVsStore_v2.mp4", 0, 10.3),
+        ("mg", "S01_MetabolicSwitch/S01-B07_MG_7MistakesPreview_v1.mp4", 0, 5.2),
+        ("host", None, 0, 11.0, "S01-B08 · \"We'll look at the actual science…\""),
+    ]),
     "S02": dict(folder="S02_Phone", voice="04_audio/S02_Beth_TestRead.mp3", segs=[
         ("mg", "S02_Phone/S02-B01_MG_Mistake1Title_v1.mp4", 0, 4.93),
         ("3d", "S02_Phone/S02-B02_3D_PhoneAlarmWake_v1.mp4", 3.2, 4.81, "S02-B02_3D_PhoneAlarmWake — brain grabs the buzzing phone"),
