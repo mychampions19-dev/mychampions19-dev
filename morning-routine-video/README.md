@@ -73,11 +73,11 @@ Timecodes match `04_audio/S02_Beth_TestRead.mp3` (78.0 s). Word timings are in `
 | Beat | Timeline in → out | Clip | Trim | Sync point |
 |---|---|---|---|---|
 | B01 | 00:00.0 → 00:04.9 | `S02-B01_MG_Mistake1Title_v1` | first 4.9 s | "#1" slams on **"one"** (1.0 s) |
-| B02 | 00:04.9 → 00:09.7 | `S02-B02_3D_PhoneAlarmWake_v1` *(Flow)* | 4.8 s, the grab | phone grabbed on **"grabbing that screen"** |
+| B02 | 00:04.9 → 00:09.7 | `S02-B02_3D_PhoneAlarmWake_v1` ✅ | **use 3.2 s → 8.0 s** | phone grabbed on **"grabbing that screen"** |
 | B03 | 00:09.7 → 00:15.7 | `S02-B03_MG_NotificationStorm_v1` | first 6.0 s | cards on **"emails"** / **"news"** / **"social"** |
 | B04 | 00:15.7 → 00:17.6 | **HOST** | — | "Here's why that's a biological problem." |
 | B05 | 00:17.6 → 00:25.7 | `S02-B05_MG_CortisolCurve_v1` | first 8.1 s | band on **"30 to 45"**; title on **"Cortisol Awakening Response"** |
-| B06 | 00:25.7 → 00:27.7 | `S02-B06_3D_BrainEngineStart_v1` *(Flow)* | 2.0 s, the key turn | **"engine start"** |
+| B06 | 00:25.7 → 00:27.7 | `S02-B06_3D_BrainEngineStart_v1` ✅ | **use 3.4 s → 5.4 s** (720p file, CapCut scales it) | **"engine start"** |
 | B07 | 00:27.7 → 00:36.3 | `S02-B07_MG_StressSurge_v1` | first 8.6 s | spikes on **"emails"** / **"news"**; flood on **"flood"** |
 | B08 | 00:36.3 → 00:46.8 | `S02-B08_MG_StudyPNASNexus_v1` | first 10.5 s | journal on **"PNAS Nexus"**; 🚫 on **"block"**; 2 WEEKS on **"two weeks"** |
 | B09 | 00:46.8 → 00:53.0 | **HOST** | — | "In just 14 days…" |
@@ -86,7 +86,7 @@ Timecodes match `04_audio/S02_Beth_TestRead.mp3` (78.0 s). Word timings are in `
 | B12 | 01:04.4 → 01:07.1 | `S02-B12_MG_SurvivalVsFatBurn_v1` | first 2.7 s | ❌ on **"cannot operate"** |
 | B13 | 01:07.1 → 01:10.5 | `S01-B03_3D_VisceralFatHug_v1` *(reused)* | **4.6 s → 7.9 s** | "wrapped around your internal organs" |
 | B14 | 01:10.5 → 01:14.2 | `S02-B14_MG_3xReceptors_v1` | first 3.7 s | 3× on **"three times"** |
-| B15 | 01:14.2 → 01:18.0 | `S02-B15_3D_CortisolDirectsFat_v1` *(Flow)* | 3.8 s | "store fat right in your midsection" |
+| B15 | 01:14.2 → 01:18.0 | `S02-B15_3D_CortisolDirectsFat_v1` ✅ | **use 4.0 s → 7.9 s** | "store fat right in your midsection" |
 
 **Host on screen in Section 2: 14.3 s of 78 s (18%).**
 
@@ -240,9 +240,9 @@ Timecodes match `04_audio/S09_Beth_TestRead.mp3` (21.8 s).
 | **Total** | **≈ 8:35** | **≈ 14%** | **58** | **16 new** |
 
 ### FLOW CHECKLIST: every shot still to generate
-**New characters first (save to Ingredients):** CHAR-05_Brain · CHAR-06_Coffee · CHAR-07_Muscle · CHAR-08_Glucose
+**New characters first (save to Ingredients):** CHAR-05_Brain ✅ · CHAR-06_Coffee · CHAR-07_Muscle · CHAR-08_Glucose
 
-- [ ] S02-B02_3D_PhoneAlarmWake · [ ] S02-B06_3D_BrainEngineStart · [ ] S02-B15_3D_CortisolDirectsFat
+- [x] S02-B02_3D_PhoneAlarmWake · [x] S02-B06_3D_BrainEngineStart · [x] S02-B15_3D_CortisolDirectsFat
 - [ ] S03-B03_3D_DehydratedBlood · [ ] S03-B06_3D_GasolineOnFire
 - [ ] S04-B02_3D_BrainMasterClock · [ ] S04-B06_3D_FluorescentGloom
 - [ ] S05-B03_3D_DessertInDisguise · [ ] S05-B08_3D_SugarRollercoaster

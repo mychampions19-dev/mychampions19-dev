@@ -15,11 +15,11 @@ FF = "/usr/local/lib/python3.11/dist-packages/imageio_ffmpeg/binaries/ffmpeg-lin
 SECTIONS = {
     "S02": dict(folder="S02_Phone", voice="04_audio/S02_Beth_TestRead.mp3", segs=[
         ("mg", "S02_Phone/S02-B01_MG_Mistake1Title_v1.mp4", 0, 4.93),
-        ("3d", "S02_Phone/S02-B02_3D_PhoneAlarmWake_v1.mp4", 1.0, 4.81, "S02-B02_3D_PhoneAlarmWake — brain grabs the buzzing phone"),
+        ("3d", "S02_Phone/S02-B02_3D_PhoneAlarmWake_v1.mp4", 3.2, 4.81, "S02-B02_3D_PhoneAlarmWake — brain grabs the buzzing phone"),
         ("mg", "S02_Phone/S02-B03_MG_NotificationStorm_v1.mp4", 0, 5.97),
         ("host", None, 0, 1.91, "S02-B04 · \"Here's why that's a biological problem.\""),
         ("mg", "S02_Phone/S02-B05_MG_CortisolCurve_v1.mp4", 0, 8.07),
-        ("3d", "S02_Phone/S02-B06_3D_BrainEngineStart_v1.mp4", 2.0, 2.03, "S02-B06_3D_BrainEngineStart — brain turns the ignition key"),
+        ("3d", "S02_Phone/S02-B06_3D_BrainEngineStart_v1.mp4", 3.4, 2.03, "S02-B06_3D_BrainEngineStart — brain turns the ignition key"),
         ("mg", "S02_Phone/S02-B07_MG_StressSurge_v1.mp4", 0, 8.61),
         ("mg", "S02_Phone/S02-B08_MG_StudyPNASNexus_v1.mp4", 0, 10.47),
         ("host", None, 0, 6.19, "S02-B09 · \"In just 14 days…\""),
@@ -28,7 +28,7 @@ SECTIONS = {
         ("mg", "S02_Phone/S02-B12_MG_SurvivalVsFatBurn_v1.mp4", 0, 2.74),
         ("3d", "S01_MetabolicSwitch/S01-B03_3D_VisceralFatHug_v1.mp4", 4.6, 3.34, "reused S01-B03"),
         ("mg", "S02_Phone/S02-B14_MG_3xReceptors_v1.mp4", 0, 3.73),
-        ("3d", "S02_Phone/S02-B15_3D_CortisolDirectsFat_v1.mp4", 1.0, 3.9, "S02-B15_3D_CortisolDirectsFat — gremlin marshals direct fat to the belly"),
+        ("3d", "S02_Phone/S02-B15_3D_CortisolDirectsFat_v1.mp4", 4.0, 3.9, "S02-B15_3D_CortisolDirectsFat — gremlin marshals direct fat to the belly"),
     ]),
     "S03": dict(folder="S03_Caffeine", voice="04_audio/S03_Beth_TestRead.mp3", segs=[
         ("mg", "S03_Caffeine/S03-B01_MG_Mistake2Title_v1.mp4", 0, 3.01),
