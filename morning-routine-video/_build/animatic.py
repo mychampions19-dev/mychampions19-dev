@@ -55,7 +55,7 @@ SECTIONS = {
     "S05": dict(folder="S05_HighCarbBreakfast", voice="04_audio/S05_Beth_TestRead.mp3", segs=[
         ("mg", "S05_HighCarbBreakfast/S05-B01_MG_Mistake4Title_v1.mp4", 0, 6.41),
         ("mg", "S05_HighCarbBreakfast/S05-B02_MG_HealthyBreakfastLineup_v1.mp4", 0, 4.33),
-        ("3d", "S05_HighCarbBreakfast/S05-B03_3D_DessertInDisguise_v1.mp4", 1.0, 6.32, "S05-B03_3D_DessertInDisguise — oatmeal bowl unmasks as a cake"),
+        ("3d", "S05_HighCarbBreakfast/S05-B03_3D_DessertInDisguise_v1.mp4", 1.2, 6.32, "S05-B03_3D_DessertInDisguise — oatmeal bowl unmasks as a cake"),
         ("mg", "S05_HighCarbBreakfast/S05-B04_MG_GlucoseSurge_v1.mp4", 0, 11.39),
         ("mg", "S05_HighCarbBreakfast/S05-B05_MG_FatBurnSuppressed_v1.mp4", 0, 3.62),
         ("mg", "S05_HighCarbBreakfast/S05-B06_MG_SugarCrash_v1.mp4", 0, 4.41),

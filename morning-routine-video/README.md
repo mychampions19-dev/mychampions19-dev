@@ -134,12 +134,12 @@ Timecodes match `04_audio/S05_Beth_TestRead.mp3` (70.7 s). Word timings are in `
 |---|---|---|---|---|
 | B01 | 00:00.0 → 00:06.4 | `S05-B01_MG_Mistake4Title_v1` | first 6.4 s | "#4" on **"four"** |
 | B02 | 00:06.4 → 00:10.7 | `S05-B02_MG_HealthyBreakfastLineup_v1` | first 4.3 s | each food pops on its word |
-| B03 | 00:10.7 → 00:17.1 | `S05-B03_3D_DessertInDisguise_v1` *(Flow)* | 6.3 s | unmasking on **"dessert in disguise"** |
+| B03 | 00:10.7 → 00:17.1 | `S05-B03_3D_DessertInDisguise_v1` ✅ | **use 1.2 s → 7.5 s** (reveal lands ~3.3 s in) | unmasking on **"dessert in disguise"** |
 | B04 | 00:17.1 → 00:28.5 | `S05-B04_MG_GlucoseSurge_v1` | first 11.4 s | STABLE on **"baseline stable"**; SURGE on **"surge"**; insulin on **"pancreas"** |
 | B05 | 00:28.5 → 00:32.1 | `S05-B05_MG_FatBurnSuppressed_v1` | first 3.6 s | lock on **"fat burning"**; stamp on **"suppressed"** |
 | B06 | 00:32.1 → 00:36.5 | `S05-B06_MG_SugarCrash_v1` | first 4.4 s | CRASH on **"crash below baseline"** |
 | B07 | 00:36.5 → 00:42.4 | `S05-B07_MG_CrashSymptoms_v1` | first 5.9 s | cards on **"shakiness"** / **"brain fog"** / **"signal"** |
-| B08 | 00:42.4 → 00:45.2 | `S05-B08_3D_SugarRollercoaster_v1` *(Flow)* | 2.8 s | "blood sugar rollercoaster" |
+| B08 | 00:42.4 → 00:45.2 | `S05-B08_3D_SugarRollercoaster_v1` ✅ | **use 1.0 s → 3.8 s** (4 s clip) | "blood sugar rollercoaster" |
 | B09 | 00:45.2 → 00:48.0 | **HOST** | — | "Contrast that with research from the University of Missouri." |
 | B10 | 00:48.0 → 01:01.4 | `S05-B10_MG_fMRICravingsStudy_v1` | first 13.4 s | scans on **"high-protein"** / **"high-carb"**; CRAVINGS on **"food cravings"** |
 | B11 | 01:01.4 → 01:10.7 | `S05-B11_MG_EggsVsBagel_v1` | first 9.3 s | EGGS on **"egg-based"**; BAGEL on **"bagel"** |
@@ -245,7 +245,7 @@ Timecodes match `04_audio/S09_Beth_TestRead.mp3` (21.8 s).
 - [x] S02-B02_3D_PhoneAlarmWake · [x] S02-B06_3D_BrainEngineStart · [x] S02-B15_3D_CortisolDirectsFat
 - [x] S03-B03_3D_DehydratedBlood · [x] S03-B06_3D_GasolineOnFire
 - [x] S04-B02_3D_BrainMasterClock · [x] S04-B06_3D_FluorescentGloom
-- [ ] S05-B03_3D_DessertInDisguise · [ ] S05-B08_3D_SugarRollercoaster
+- [x] S05-B03_3D_DessertInDisguise · [x] S05-B08_3D_SugarRollercoaster
 - [ ] S06-B04_3D_WindowSlam · [ ] S06-B10_3D_MuscleSideDoor
 - [ ] S07-B03_3D_BrainDanger · [ ] S07-B05_3D_CavemanThreat
 - [x] S08-B05_3D_HydratedBlood · [ ] S08-B09_3D_SunriseWalk · [ ] S08-B16_3D_BrainCalm
