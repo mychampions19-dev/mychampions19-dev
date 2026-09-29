@@ -11,7 +11,7 @@ FF = "/usr/local/lib/python3.11/dist-packages/imageio_ffmpeg/binaries/ffmpeg-lin
 # clip id -> (section folder, final file name)
 CLIPS = {
     "S01-B02": ("S01_MetabolicSwitch", "S01-B02_MG_9AMSwitch_v1"),
-    "S01-B04": ("S01_MetabolicSwitch", "S01-B04_MG_ZeroCalories_v1"),
+    "S01-B04": ("S01_MetabolicSwitch", "S01-B04_MG_ZeroCalories_v2"),
     "S01-B06": ("S01_MetabolicSwitch", "S01-B06_MG_BurnVsStore_v1"),
     "S01-B07": ("S01_MetabolicSwitch", "S01-B07_MG_7MistakesPreview_v1"),
 }

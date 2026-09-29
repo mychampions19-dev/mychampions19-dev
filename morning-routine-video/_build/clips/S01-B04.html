@@ -61,7 +61,7 @@ function render(t) {
   const slam = prog(t, 2.85, .2);
   const numScale = t < 2.85 ? .75 : lerp(1.9, 1, ease.back(slam));
   $('#num').style.transform = `translate(-50%,-50%) scale(${numScale})`;
-  $('#num').style.color = n === 0 ? '#2ee6a8' : '#ffffff';
+  $('#num').style.color = '#2ee6a8';
   // move plate up & shrink when foods arrive
   const up = ease.inOut(prog(t, 3.35, .45));
   const shake = t > 2.85 && t < 3.2 ? Math.sin(t * 110) * 12 * (1 - prog(t, 2.85, .35)) : 0;
