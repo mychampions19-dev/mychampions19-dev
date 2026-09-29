@@ -116,11 +116,11 @@ Timecodes match `04_audio/S04_Beth_TestRead.mp3` (43.3 s). Word timings are in `
 | Beat | Timeline in → out | Clip | Trim | Sync point |
 |---|---|---|---|---|
 | B01 | 00:00.0 → 00:05.3 | `S04-B01_MG_Mistake3Title_v1` | first 5.3 s | "#3" on **"three"** |
-| B02 | 00:05.3 → 00:08.9 | `S04-B02_3D_BrainMasterClock_v1` *(Flow)* | 3.6 s | "master clock… circadian rhythm" |
+| B02 | 00:05.3 → 00:08.9 | `S04-B02_3D_BrainMasterClock_v1` ✅ | **use 1.8 s → 5.4 s** (key turn → gears → pull-back) | "master clock… circadian rhythm" |
 | B03 | 00:08.9 → 00:19.0 | `S04-B03_MG_CircadianClock_v1` | first 10.1 s | ☀️ on **"cortisol"**; 🌙 on **"melatonin"**; arc on **"insulin"**; INSULIN card on **"Insulin is…"** |
 | B04 | 00:19.0 → 00:23.8 | `S04-B04_MG_OutOfSync_v1` | first 4.8 s | gears jam on **"out of alignment"**; gauge drops on **"drops significantly"** |
 | B05 | 00:23.8 → 00:28.4 | **HOST** | — | "Studies link bright light early in the day…" |
-| B06 | 00:28.4 → 00:31.9 | `S04-B06_3D_FluorescentGloom_v1` *(Flow)* | 3.5 s | "dim artificial lighting or fluorescent bulbs" |
+| B06 | 00:28.4 → 00:31.9 | `S04-B06_3D_FluorescentGloom_v1` ✅ | **use 0.3 s → 3.8 s** (4 s clip) | "dim artificial lighting or fluorescent bulbs" |
 | B07 | 00:31.9 → 00:35.5 | `S04-B07_MG_NoSignal_v1` | first 3.6 s | NO SIGNAL on **"never receives"** |
 | B08 | 00:35.5 → 00:43.3 | `S04-B08_MG_LightReset_v1` | first 7.8 s | reset on **"master reset"**; ✅ on **"blood sugar"** / **"metabolism"** |
 
@@ -244,7 +244,7 @@ Timecodes match `04_audio/S09_Beth_TestRead.mp3` (21.8 s).
 
 - [x] S02-B02_3D_PhoneAlarmWake · [x] S02-B06_3D_BrainEngineStart · [x] S02-B15_3D_CortisolDirectsFat
 - [x] S03-B03_3D_DehydratedBlood · [x] S03-B06_3D_GasolineOnFire
-- [ ] S04-B02_3D_BrainMasterClock · [ ] S04-B06_3D_FluorescentGloom
+- [x] S04-B02_3D_BrainMasterClock · [x] S04-B06_3D_FluorescentGloom
 - [ ] S05-B03_3D_DessertInDisguise · [ ] S05-B08_3D_SugarRollercoaster
 - [ ] S06-B04_3D_WindowSlam · [ ] S06-B10_3D_MuscleSideDoor
 - [ ] S07-B03_3D_BrainDanger · [ ] S07-B05_3D_CavemanThreat

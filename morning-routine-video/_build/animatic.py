@@ -44,11 +44,11 @@ SECTIONS = {
     ]),
     "S04": dict(folder="S04_MorningLight", voice="04_audio/S04_Beth_TestRead.mp3", segs=[
         ("mg", "S04_MorningLight/S04-B01_MG_Mistake3Title_v1.mp4", 0, 5.32),
-        ("3d", "S04_MorningLight/S04-B02_3D_BrainMasterClock_v1.mp4", 1.0, 3.62, "S04-B02_3D_BrainMasterClock — brain winds the giant sun & moon clock"),
+        ("3d", "S04_MorningLight/S04-B02_3D_BrainMasterClock_v1.mp4", 1.8, 3.62, "S04-B02_3D_BrainMasterClock — brain winds the giant sun & moon clock"),
         ("mg", "S04_MorningLight/S04-B03_MG_CircadianClock_v1.mp4", 0, 10.07),
         ("mg", "S04_MorningLight/S04-B04_MG_OutOfSync_v1.mp4", 0, 4.83),
         ("host", None, 0, 4.56, "S04-B05 · \"Studies link bright light early in the day…\""),
-        ("3d", "S04_MorningLight/S04-B06_3D_FluorescentGloom_v1.mp4", 1.0, 3.49, "S04-B06_3D_FluorescentGloom — brain stuck under a flickering office light"),
+        ("3d", "S04_MorningLight/S04-B06_3D_FluorescentGloom_v1.mp4", 0.3, 3.49, "S04-B06_3D_FluorescentGloom — brain stuck under a flickering office light"),
         ("mg", "S04_MorningLight/S04-B07_MG_NoSignal_v1.mp4", 0, 3.63),
         ("mg", "S04_MorningLight/S04-B08_MG_LightReset_v1.mp4", 0, 7.81),
     ]),
