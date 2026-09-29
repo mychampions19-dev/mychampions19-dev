@@ -10,7 +10,7 @@
     #mtWord { left:640px; top:250px; font-size:120px; }
     #mtBadge { left:640px; top:490px; width:330px; height:330px; margin:-165px 0 0 -165px; --c1:#ff7b8f; --c2:#c0213a; }
     #mtNum { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); font-size:210px; font-weight:700; color:#fff;
-      text-shadow: 5px 0px 0 #5a0a1e, -5px 0px 0 #5a0a1e, 0px 5px 0 #5a0a1e, 0px -5px 0 #5a0a1e, 3px 3px 0 #5a0a1e, -3px 3px 0 #5a0a1e, 3px -3px 0 #5a0a1e, -3px -3px 0 #5a0a1e, 0 5px 0 #e8435f, 0 10px 0 #c02444, 0 15px 0 #8c142e, 0 22px 30px rgba(0,0,0,.45); white-space:nowrap; }
+      text-shadow: 5px 0px 0 #5a0a1e, -5px 0px 0 #5a0a1e, 0px 5px 0 #5a0a1e, 0px -5px 0 #5a0a1e, 4px 4px 0 #5a0a1e, -4px 4px 0 #5a0a1e, 4px -4px 0 #5a0a1e, -4px -4px 0 #5a0a1e, 0 10px 0 #5a0a1e, 0 16px 26px rgba(0,0,0,.45); white-space:nowrap; }
     #mtTile { left:1300px; top:430px; width:420px; height:420px; margin:-210px 0 0 -210px; border-radius:90px;
       box-shadow: inset 0 8px 0 rgba(255,255,255,.45), inset 0 -16px 0 rgba(0,0,0,.2), 0 30px 60px rgba(0,0,0,.5); }
     #mtIcon { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); font-size:240px; }
