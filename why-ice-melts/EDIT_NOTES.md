@@ -36,11 +36,19 @@ Voice: ElevenLabs "Ben", a calm British male voice (eleven_multilingual_v2). Eac
 | 18.3 | "The particles start to wiggle, break free… and flow away as water." | Puddle spreading, drips |
 | 22.9 | "So ice melts because it's soaking up heat from the world around it." | Clip 5, ending |
 
-## Audio
-- Narration is the loudest layer.
-- The clips' own drips and birdsong are kept as the ambient sound, crossfaded at each dissolve.
-- A soft felt-piano music bed about 20 dB down. It is generated in code (`music.py`) because the ElevenLabs music request failed on credits.
-- Music and ambience dip (sidechain compression) under the voice, and sit about 13 dB below the narration during pauses.
+## Audio (v2: produced music and sound effects, built with `../series-kit/`)
+- **Music:** the series theme from `score.py`, played on sampled piano, celesta, pizzicato strings and a string pad (FluidSynth, FluidR3_GM).
+  A new layer enters at each cut (5.5 / 11 / 16.5 / 22 s), and it ends on a held chord that fades with the picture.
+- **Sound effects (58 cues in `cues.json`):**
+  - splash drop at 7.47 s, synced to the frame where the splash lands
+  - 11 sparse drips from clip 2 onward
+  - 16 tiny footsteps (clip 1 walk, clip 3 step back, clip 4 walk and sit, clip 5 crouch)
+  - two touches on the ice (11.3 s and 13.9 s)
+  - faint melting crackle throughout
+  - an always-on room tone
+- **Ambience:** the clips' own birdsong and drips, crossfaded at each join, with the clip 2 "ooh" turned down.
+- **Mix:** −15.6 LUFS, −1 dBFS peak. The background sits about 16 dB under the narration in pauses and dips 6 dB further under the voice.
+- To rebuild: `python3 ../series-kit/build_audio.py cues.json mix.wav`, then combine it with the picture.
 
 ## Transitions to watch
 The monkey never lands in the same place from one clip to the next, so each dissolve briefly shows two faint monkeys.

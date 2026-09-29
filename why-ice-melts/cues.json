@@ -1,0 +1,373 @@
+{
+ "episode": "why-ice-melts",
+ "duration": 26.92,
+ "sections": [
+  5.5,
+  11.0,
+  16.5,
+  22.0
+ ],
+ "voice": {
+  "file": "audio/voiceover_ben.mp3",
+  "voice": "ElevenLabs Ben (BhFRJzCXkJugxsZIDyx8), eleven_multilingual_v2",
+  "segments": [
+   [
+    0.0,
+    3.37,
+    0.7
+   ],
+   [
+    3.67,
+    4.59,
+    5.55
+   ],
+   [
+    4.94,
+    7.43,
+    6.9
+   ],
+   [
+    7.78,
+    12.52,
+    9.9
+   ],
+   [
+    12.87,
+    20.03,
+    15.25
+   ],
+   [
+    20.34,
+    23.684,
+    22.85
+   ]
+  ]
+ },
+ "native": "audio/native_clips.wav",
+ "fade_in": 0.4,
+ "fade_out": 1.0,
+ "sfx": [
+  {
+   "t": 7.47,
+   "kind": "drip_hero",
+   "file": "drip_hero.wav"
+  },
+  {
+   "t": 5.9,
+   "kind": "drip",
+   "file": "drip_c.wav",
+   "trim_db": -4
+  },
+  {
+   "t": 10.55,
+   "kind": "drip",
+   "file": "drip_a.wav"
+  },
+  {
+   "t": 14.35,
+   "kind": "drip",
+   "file": "drip_f.wav",
+   "trim_db": -2
+  },
+  {
+   "t": 15.95,
+   "kind": "drip",
+   "file": "drip_d.wav"
+  },
+  {
+   "t": 18.74,
+   "kind": "drip",
+   "file": "drip_e.wav"
+  },
+  {
+   "t": 19.8,
+   "kind": "drip",
+   "file": "drip_b.wav"
+  },
+  {
+   "t": 20.97,
+   "kind": "drip",
+   "file": "drip_a.wav",
+   "trim_db": -3
+  },
+  {
+   "t": 22.3,
+   "kind": "drip",
+   "file": "drip_f.wav"
+  },
+  {
+   "t": 23.45,
+   "kind": "drip",
+   "file": "drip_d.wav",
+   "trim_db": -2
+  },
+  {
+   "t": 24.6,
+   "kind": "drip",
+   "file": "drip_e.wav",
+   "trim_db": -3
+  },
+  {
+   "t": 26.0,
+   "kind": "drip",
+   "file": "drip_c.wav",
+   "trim_db": -4
+  },
+  {
+   "t": 1.2,
+   "kind": "step",
+   "file": "step_0.wav"
+  },
+  {
+   "t": 1.9,
+   "kind": "step",
+   "file": "step_1.wav",
+   "trim_db": -2
+  },
+  {
+   "t": 2.6,
+   "kind": "step",
+   "file": "step_2.wav"
+  },
+  {
+   "t": 3.3,
+   "kind": "step",
+   "file": "step_3.wav",
+   "trim_db": -2
+  },
+  {
+   "t": 4.0,
+   "kind": "step",
+   "file": "step_4.wav"
+  },
+  {
+   "t": 4.7,
+   "kind": "step",
+   "file": "step_5.wav",
+   "trim_db": -2
+  },
+  {
+   "t": 12.4,
+   "kind": "step",
+   "file": "step_0.wav"
+  },
+  {
+   "t": 13.1,
+   "kind": "step",
+   "file": "step_1.wav",
+   "trim_db": -2
+  },
+  {
+   "t": 17.0,
+   "kind": "step",
+   "file": "step_2.wav"
+  },
+  {
+   "t": 17.35,
+   "kind": "step",
+   "file": "step_3.wav",
+   "trim_db": -2
+  },
+  {
+   "t": 17.7,
+   "kind": "step",
+   "file": "step_4.wav"
+  },
+  {
+   "t": 18.25,
+   "kind": "step",
+   "file": "step_5.wav",
+   "trim_db": -2
+  },
+  {
+   "t": 20.7,
+   "kind": "step",
+   "file": "step_0.wav"
+  },
+  {
+   "t": 21.1,
+   "kind": "step",
+   "file": "step_1.wav",
+   "trim_db": -2
+  },
+  {
+   "t": 25.1,
+   "kind": "step",
+   "file": "step_2.wav"
+  },
+  {
+   "t": 25.7,
+   "kind": "step",
+   "file": "step_3.wav",
+   "trim_db": -2
+  },
+  {
+   "t": 11.3,
+   "kind": "touch",
+   "file": "touch_ice.wav"
+  },
+  {
+   "t": 13.9,
+   "kind": "touch",
+   "file": "touch_ice.wav",
+   "trim_db": -5
+  },
+  {
+   "t": 5.8,
+   "kind": "crackle",
+   "file": "crackle_5.wav"
+  },
+  {
+   "t": 6.446,
+   "kind": "crackle",
+   "file": "crackle_0.wav"
+  },
+  {
+   "t": 7.412,
+   "kind": "crackle",
+   "file": "crackle_1.wav",
+   "trim_db": -3
+  },
+  {
+   "t": 8.199,
+   "kind": "crackle",
+   "file": "crackle_3.wav"
+  },
+  {
+   "t": 8.614,
+   "kind": "crackle",
+   "file": "crackle_6.wav"
+  },
+  {
+   "t": 9.144,
+   "kind": "crackle",
+   "file": "crackle_6.wav"
+  },
+  {
+   "t": 10.114,
+   "kind": "crackle",
+   "file": "crackle_1.wav"
+  },
+  {
+   "t": 10.937,
+   "kind": "crackle",
+   "file": "crackle_0.wav",
+   "trim_db": -6
+  },
+  {
+   "t": 11.726,
+   "kind": "crackle",
+   "file": "crackle_0.wav"
+  },
+  {
+   "t": 12.111,
+   "kind": "crackle",
+   "file": "crackle_2.wav",
+   "trim_db": -3
+  },
+  {
+   "t": 12.776,
+   "kind": "crackle",
+   "file": "crackle_1.wav",
+   "trim_db": -6
+  },
+  {
+   "t": 13.357,
+   "kind": "crackle",
+   "file": "crackle_2.wav"
+  },
+  {
+   "t": 14.143,
+   "kind": "crackle",
+   "file": "crackle_3.wav",
+   "trim_db": -3
+  },
+  {
+   "t": 14.566,
+   "kind": "crackle",
+   "file": "crackle_1.wav",
+   "trim_db": -6
+  },
+  {
+   "t": 14.961,
+   "kind": "crackle",
+   "file": "crackle_3.wav",
+   "trim_db": -3
+  },
+  {
+   "t": 15.821,
+   "kind": "crackle",
+   "file": "crackle_6.wav",
+   "trim_db": -3
+  },
+  {
+   "t": 16.521,
+   "kind": "crackle",
+   "file": "crackle_7.wav",
+   "trim_db": -3
+  },
+  {
+   "t": 17.095,
+   "kind": "crackle",
+   "file": "crackle_2.wav",
+   "trim_db": -6
+  },
+  {
+   "t": 18.03,
+   "kind": "crackle",
+   "file": "crackle_1.wav",
+   "trim_db": -6
+  },
+  {
+   "t": 18.605,
+   "kind": "crackle",
+   "file": "crackle_7.wav",
+   "trim_db": -3
+  },
+  {
+   "t": 19.502,
+   "kind": "crackle",
+   "file": "crackle_4.wav",
+   "trim_db": -6
+  },
+  {
+   "t": 20.588,
+   "kind": "crackle",
+   "file": "crackle_1.wav",
+   "trim_db": -6
+  },
+  {
+   "t": 21.251,
+   "kind": "crackle",
+   "file": "crackle_5.wav"
+  },
+  {
+   "t": 22.301,
+   "kind": "crackle",
+   "file": "crackle_6.wav"
+  },
+  {
+   "t": 23.373,
+   "kind": "crackle",
+   "file": "crackle_1.wav",
+   "trim_db": -6
+  },
+  {
+   "t": 24.152,
+   "kind": "crackle",
+   "file": "crackle_5.wav",
+   "trim_db": -3
+  },
+  {
+   "t": 25.024,
+   "kind": "crackle",
+   "file": "crackle_7.wav",
+   "trim_db": -6
+  },
+  {
+   "t": 25.972,
+   "kind": "crackle",
+   "file": "crackle_1.wav"
+  }
+ ]
+}
