@@ -1,0 +1,52 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>S05-B04 Glucose Surge</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .tag { position:absolute; transform:translate(-50%,-50%); white-space:nowrap; }
+  .tag .pill { font-size:44px; }
+  .cube { position:absolute; width:56px; height:56px; border-radius:12px; background:linear-gradient(145deg,#fff,#dfe3f5); box-shadow: inset -6px -6px 0 rgba(0,0,0,.08), 0 8px 16px rgba(0,0,0,.35); }
+  #panc { left:1450px; top:170px; }
+</style></head>
+<body><div id="stage">
+  <div id="cells" class="layer"></div>
+  <div id="cubes" class="layer"></div>
+  <div class="tag" id="tStable"><span class="pill" style="background:linear-gradient(135deg,#2ee6a8,#12997a)">STABLE</span></div>
+  <div class="tag" id="tCarb"><span class="pill" style="background:linear-gradient(135deg,#ffd166,#ff9f43);color:#3a2300"><span class="emoji">🥣</span> FAST CARBS</span></div>
+  <div class="tag" id="tSurge"><span class="pill" style="font-size:60px;background:linear-gradient(135deg,#ff5a36,#c0213a)"><span class="emoji">📈</span> SUGAR SURGE</span></div>
+  <div class="tag" id="tIns"><span class="pill" style="font-size:36px;background:#3d6bff">INSULIN</span></div>
+  <div class="tag" id="panc"><span class="pill" style="font-size:52px;background:linear-gradient(135deg,#3d6bff,#9b5cff)">PANCREAS → <span class="emoji">🌊</span> INSULIN WAVE</span></div>
+</div>
+<script src="../lib.js"></script>
+<script src="glucose_chart.js"></script>
+<script>
+const cells = makeCells(16, [['#ffb13b','#c2551f'], ['#3d6bff','#2a3fa8'], ['#9b5cff','#3d1c8f']], 211, $('#cells'));
+buildGlucoseChart($('#stage'));
+const r = rand(9), cubes = Array.from({length: 14}, (_, i) => { const c = el('div','cube',$('#cubes')); return { c, x: GX(8) + (r() - .5) * 260, at: 2.6 + i * .08, rot: r() * 360 }; });
+css($('#tStable'), { left: GX(8) + 'px', top: (GY(GC.base) - 70) + 'px' });
+css($('#tCarb'), { left: GX(12) + 'px', top: '210px' });
+css($('#tSurge'), { left: GX(32) + 'px', top: (GY(glucose(32)) - 90) + 'px' });
+function render(t) {
+  entryPunch(t); cells.update(t);
+  $('#gchart').style.opacity = ease.out(prog(t, 0, .4));
+  // baseline stable 0.3→1.6 (draw to m=10), surge 4.6→5.9 (to m=45), keep going to m=60 by 8
+  const m = t < 1.6 ? lerp(0, 10, ease.out(prog(t, .3, 1.3))) : t < 4.6 ? 10 : t < 5.9 ? lerp(10, 45, ease.inOut(prog(t, 4.6, 1.3))) : lerp(45, 62, ease.out(prog(t, 5.9, 2.5)));
+  revealGlucose(m);
+  css($('#tStable'), { transform: `translate(-50%,-50%) scale(${pop(t, 1.1, .4)})`, opacity: t > 1.1 ? 1 - prog(t, 4.4, .3) : 0 });
+  css($('#tCarb'), { transform: `translate(-50%,-50%) scale(${pop(t, 2.55, .4)})`, opacity: t > 2.55 ? 1 - prog(t, 5.0, .3) : 0 });
+  for (const q of cubes) { const k = ease.in(prog(t, q.at, .7));
+    css(q.c, { left: q.x + 'px', top: lerp(-80, GY(GC.base) - 40, k) + 'px', transform: `rotate(${q.rot + k * 200}deg) scale(${1 - k * .5})`, opacity: t > q.at && k < 1 ? 1 : 0 }); }
+  const sp = prog(t, 5.35, .22);
+  css($('#tSurge'), { transform: `translate(-50%,-50%) scale(${t < 5.35 ? 0 : lerp(2, 1, ease.back(sp))})`, opacity: t > 5.35 ? 1 : 0 });
+  // insulin wave 7.2 →
+  revealInsulin(lerp(0, 120, ease.inOut(prog(t, 7.4, 3.0))));
+  css($('#tIns'), { left: GX(78) + 'px', top: GY(insulin(70)) + 'px', transform: `translate(-50%,-50%) scale(${pop(t, 8.6, .4)})`, opacity: t > 8.6 ? 1 : 0 });
+  css($('#panc'), { transform: `translate(-50%,-50%) scale(${pop(t, 7.2, .45)})`, opacity: t > 7.2 ? 1 : 0 });
+  const sk = t > 5.35 && t < 5.7 ? Math.sin(t * 110) * 8 * (1 - prog(t, 5.35, .35)) : 0;
+  $('#stage').style.transform += ` translateY(${sk}px)`;
+}
+window.CLIP = { duration: 11.7, render, sfx: [
+  [0, 'whoosh', {dur: .4}], [1.1, 'ding', {freq: 1047, dur: .8, vol: .2}], [2.55, 'pop', {freq: 600}],
+  ...Array.from({length: 14}, (_, i) => [3.2 + i * .08, 'tick', {vol: .18}]),
+  [4.6, 'riser', {dur: .8, vol: .2}], [5.35, 'impact', {vol: .75}], [7.2, 'pop', {freq: 520}], [7.4, 'whoosh', {dur: 2.5, vol: .3}],
+]};
+</script></body></html>

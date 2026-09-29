@@ -1,0 +1,57 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>S03-B05 Caffeine Into A Stressed System</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  #title { left:50%; top:80px; font-size:120px; }
+  #cup { left:960px; top:560px; font-size:330px; transform-origin:60% 60%; }
+  #stream { position:absolute; left:0; top:0; width:44px; border-radius:22px; background:linear-gradient(#8a4a1d, #5a2c0e); transform-origin:50% 0; }
+  #tankWrap { left:1400px; top:620px; width:420px; height:520px; margin:-260px 0 0 -210px; }
+  #tank { position:absolute; inset:0; border-radius:50px 50px 80px 80px; border:10px solid rgba(255,255,255,.75); overflow:hidden; background:rgba(255,255,255,.05); }
+  #liq { position:absolute; left:0; right:0; bottom:0; height:38%; background:linear-gradient(#ff8a6b, #c0213a); }
+  #coffee { position:absolute; left:0; right:0; bottom:38%; height:0; background:linear-gradient(#a0602d, #6b3510); }
+  .bubble { position:absolute; width:22px; height:22px; border-radius:50%; background:rgba(255,220,200,.8); }
+  .badge { position:absolute; white-space:nowrap; transform:translate(-50%,-50%); }
+  .badge .pill { font-size:48px; }
+</style></head>
+<body><div id="stage">
+  <div id="cells" class="layer"></div>
+  <div id="tankWrap" class="abs"><div id="tank"><div id="liq"></div><div id="coffee"></div><div id="bubs"></div></div></div>
+  <div id="stream"></div>
+  <div id="cup" class="abs emoji">☕</div>
+  <div id="title" class="abs h3d burn">CAFFEINE!</div>
+  <div class="badge" id="bD" style="left:1400px;top:250px"><span class="pill" style="background:linear-gradient(135deg,#7fa0ff,#3d5bd9)"><span class="emoji">💧</span> DEHYDRATED</span></div>
+  <div class="badge" id="bC" style="left:1400px;top:950px"><span class="pill" style="background:linear-gradient(135deg,#ff3b5c,#c0213a)"><span class="emoji">⚡</span> CORTISOL HIGH</span></div>
+</div>
+<script src="../lib.js"></script>
+<script>
+const cells = makeCells(20, [['#c98b5a','#7a4a26'], ['#ff6b6b','#b3122e'], ['#9b5cff','#3d1c8f']], 121, $('#cells'));
+const br = rand(4), bubs = Array.from({length: 14}, () => { const b = el('div','bubble',$('#bubs')); return { b, x: 30 + br() * 330, ph: br() * 3, sp: 60 + br() * 80 }; });
+function render(t) {
+  entryPunch(t); cells.update(t);
+  const ts = prog(t, .05, .22);
+  css($('#title'), { transform: `translate(-50%,0) scale(${t < .05 ? 0 : lerp(2.2, 1, ease.back(ts))})`, opacity: t > .05 ? 1 : 0 });
+  // cup slams in centre, then moves left and tilts to pour
+  const cp = pop(t, .05, .45), mv = ease.inOut(prog(t, 1.0, .6));
+  const shake = t > 3.5 ? Math.sin(t * 60) * 4 : 0;
+  css($('#cup'), { transform: `translate(-50%,-50%) translate(${lerp(0, -40, mv) + shake}px, ${lerp(0, -180, mv)}px) scale(${cp * lerp(1, .75, mv)}) rotate(${lerp(0, 55, mv)}deg)` });
+  const tw = pop(t, .9, .5);
+  $('#tankWrap').style.transform = `scale(${tw}) translateX(${shake}px)`;
+  // pour stream from cup lip to tank
+  const pour = t > 1.5 ? 1 : 0, len = ease.out(prog(t, 1.5, .4));
+  css($('#stream'), { left: '1035px', top: '345px', height: (len * 380) + 'px', opacity: pour, transform: `rotate(-42deg) scaleX(${.8 + Math.sin(t * 30) * .15})` });
+  const fill = ease.inOut(prog(t, 1.8, 3.5));
+  $('#coffee').style.height = (fill * 34) + '%';
+  $('#liq').style.filter = `saturate(${1 + fill}) brightness(${1 + fill * .2})`;
+  for (const q of bubs) {
+    const y = ((t * q.sp + q.ph * 100) % 400);
+    css(q.b, { left: q.x + 'px', bottom: y + 'px', opacity: fill > .1 ? (1 - y / 400) : 0 });
+  }
+  const d = pop(t, 2.45, .4), c = pop(t, 4.3, .4);
+  css($('#bD'), { transform: `translate(-50%,-50%) scale(${d})`, opacity: t > 2.45 ? 1 : 0 });
+  css($('#bC'), { transform: `translate(-50%,-50%) scale(${c}) rotate(${t > 4.3 ? Math.sin(t * 40) * 2 : 0}deg)`, opacity: t > 4.3 ? 1 : 0 });
+}
+window.CLIP = { duration: 6.0, render, sfx: [
+  [.05, 'impact', {vol: .7}], [.1, 'pop', {freq: 500}], [.9, 'pop', {freq: 400}], [1.0, 'whoosh', {dur: .5, vol: .3}],
+  [1.5, 'sizzle', {dur: 3.5, vol: .1}], [2.45, 'pop', {freq: 700}], [4.3, 'buzz', {dur: .4, vol: .25}], [4.3, 'pop', {freq: 520}],
+]};
+</script></body></html>

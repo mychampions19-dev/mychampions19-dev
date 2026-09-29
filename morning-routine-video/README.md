@@ -66,6 +66,66 @@ Flow clips are 24 fps and my graphics are 30 fps. CapCut mixes them without any 
 
 ---
 
+## SECTION 2 TIMING SHEET: Mistake #1, Phone (`03_graphics/S02_Phone/`)
+
+Timecodes match `04_audio/S02_Beth_TestRead.mp3` (78.0 s). Word timings are in `04_audio/S02_word_timings.tsv`.
+
+| Beat | Timeline in → out | Clip | Trim | Sync point |
+|---|---|---|---|---|
+| B01 | 00:00.0 → 00:04.9 | `S02-B01_MG_Mistake1Title_v1` | first 4.9 s | "#1" slams on **"one"** (1.0 s) |
+| B02 | 00:04.9 → 00:09.7 | `S02-B02_3D_PhoneAlarmWake_v1` *(Flow)* | 4.8 s, the grab | phone grabbed on **"grabbing that screen"** |
+| B03 | 00:09.7 → 00:15.7 | `S02-B03_MG_NotificationStorm_v1` | first 6.0 s | cards on **"emails"** / **"news"** / **"social"** |
+| B04 | 00:15.7 → 00:17.6 | **HOST** | — | "Here's why that's a biological problem." |
+| B05 | 00:17.6 → 00:25.7 | `S02-B05_MG_CortisolCurve_v1` | first 8.1 s | band on **"30 to 45"**; title on **"Cortisol Awakening Response"** |
+| B06 | 00:25.7 → 00:27.7 | `S02-B06_3D_BrainEngineStart_v1` *(Flow)* | 2.0 s, the key turn | **"engine start"** |
+| B07 | 00:27.7 → 00:36.3 | `S02-B07_MG_StressSurge_v1` | first 8.6 s | spikes on **"emails"** / **"news"**; flood on **"flood"** |
+| B08 | 00:36.3 → 00:46.8 | `S02-B08_MG_StudyPNASNexus_v1` | first 10.5 s | journal on **"PNAS Nexus"**; 🚫 on **"block"**; 2 WEEKS on **"two weeks"** |
+| B09 | 00:46.8 → 00:53.0 | **HOST** | — | "In just 14 days…" |
+| B10 | 00:53.0 → 00:58.2 | `S02-B10_MG_TenYearsYounger_v1` | first 5.2 s | −10 YEARS on **"ten years"** |
+| B11 | 00:58.2 → 01:04.4 | **HOST** | — | "When you flood your system…" |
+| B12 | 01:04.4 → 01:07.1 | `S02-B12_MG_SurvivalVsFatBurn_v1` | first 2.7 s | ❌ on **"cannot operate"** |
+| B13 | 01:07.1 → 01:10.5 | `S01-B03_3D_VisceralFatHug_v1` *(reused)* | **4.6 s → 7.9 s** | "wrapped around your internal organs" |
+| B14 | 01:10.5 → 01:14.2 | `S02-B14_MG_3xReceptors_v1` | first 3.7 s | 3× on **"three times"** |
+| B15 | 01:14.2 → 01:18.0 | `S02-B15_3D_CortisolDirectsFat_v1` *(Flow)* | 3.8 s | "store fat right in your midsection" |
+
+**Host on screen in Section 2: 14.3 s of 78 s (18%).**
+
+## SECTION 3 TIMING SHEET: Mistake #2, Caffeine Before Hydration (`03_graphics/S03_Caffeine/`)
+
+Timecodes match `04_audio/S03_Beth_TestRead.mp3` (45.7 s). Word timings are in `04_audio/S03_word_timings.tsv`.
+
+| Beat | Timeline in → out | Clip | Trim | Sync point |
+|---|---|---|---|---|
+| B01 | 00:00.0 → 00:03.0 | `S03-B01_MG_Mistake2Title_v1` | first 3.0 s | "#2" on **"two"** |
+| B02 | 00:03.0 → 00:10.0 | `S03-B02_MG_OvernightDehydration_v1` | first 7.0 s | 7 · 8 · 9 on **"seven, eight, or nine"** |
+| B03 | 00:10.0 → 00:15.4 | `S03-B03_3D_DehydratedBlood_v1` *(Flow)* | 5.4 s | "more concentrated" |
+| B04 | 00:15.4 → 00:17.4 | **HOST** | — | "So what do most people reach for first?" |
+| B05 | 00:17.4 → 00:23.1 | `S03-B05_MG_CaffeineStressedSystem_v1` | first 5.7 s | CAFFEINE! on **"Caffeine"**; badges on **"dehydrated"** / **"cortisol-elevated"** |
+| B06 | 00:23.1 → 00:27.3 | `S03-B06_3D_GasolineOnFire_v1` *(Flow)* | 4.2 s, pour + fireball | **"gasoline onto a flickering fire"** |
+| B07 | 00:27.3 → 00:30.6 | `S03-B07_MG_JitteryCrash_v1` | first 3.3 s | JITTERY on **"9:30 AM"**; CRASH on **"crashing"** |
+| B08 | 00:30.6 → 00:32.4 | **HOST** | — | "Here's a key metabolic insight:" |
+| B09 | 00:32.4 → 00:39.7 | `S03-B09_MG_HungerMask_v1` | first 7.3 s | mask flies off on **"wearing a mask"** |
+| B10 | 00:39.7 → 00:45.7 | `S03-B10_MG_HydrateFirst_v1` | first 6.0 s | ✅ on **"energy"** / **"appetite"** |
+
+**Host on screen in Section 3: 3.8 s of 45.7 s (8%).**
+
+## SECTION 4 TIMING SHEET: Mistake #3, Skipping Morning Light (`03_graphics/S04_MorningLight/`)
+
+Timecodes match `04_audio/S04_Beth_TestRead.mp3` (43.3 s). Word timings are in `04_audio/S04_word_timings.tsv`.
+
+| Beat | Timeline in → out | Clip | Trim | Sync point |
+|---|---|---|---|---|
+| B01 | 00:00.0 → 00:05.3 | `S04-B01_MG_Mistake3Title_v1` | first 5.3 s | "#3" on **"three"** |
+| B02 | 00:05.3 → 00:08.9 | `S04-B02_3D_BrainMasterClock_v1` *(Flow)* | 3.6 s | "master clock… circadian rhythm" |
+| B03 | 00:08.9 → 00:19.0 | `S04-B03_MG_CircadianClock_v1` | first 10.1 s | ☀️ on **"cortisol"**; 🌙 on **"melatonin"**; arc on **"insulin"**; INSULIN card on **"Insulin is…"** |
+| B04 | 00:19.0 → 00:23.8 | `S04-B04_MG_OutOfSync_v1` | first 4.8 s | gears jam on **"out of alignment"**; gauge drops on **"drops significantly"** |
+| B05 | 00:23.8 → 00:28.4 | **HOST** | — | "Studies link bright light early in the day…" |
+| B06 | 00:28.4 → 00:31.9 | `S04-B06_3D_FluorescentGloom_v1` *(Flow)* | 3.5 s | "dim artificial lighting or fluorescent bulbs" |
+| B07 | 00:31.9 → 00:35.5 | `S04-B07_MG_NoSignal_v1` | first 3.6 s | NO SIGNAL on **"never receives"** |
+| B08 | 00:35.5 → 00:43.3 | `S04-B08_MG_LightReset_v1` | first 7.8 s | reset on **"master reset"**; ✅ on **"blood sugar"** / **"metabolism"** |
+
+**Host on screen in Section 4: 4.6 s of 43.3 s (10%).**
+
 ## CAPCUT SETUP
 1. **Main track:** host footage. **Audio track 1:** Beth's voice.
 2. **Overlay track, above the host:** drop each MG/3D clip at its timeline point. Right-click → *Fit to canvas*. They are already 1920×1080, so they cover the host completely.

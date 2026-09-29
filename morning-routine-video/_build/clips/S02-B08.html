@@ -1,0 +1,82 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>S02-B08 Study Card</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  #paper { left:520px; top:560px; width:640px; height:800px; margin:-400px 0 0 -320px; border-radius:36px; background:#fbf9ff;
+    box-shadow: 0 40px 80px rgba(0,0,0,.55), inset 0 -10px 0 #e3dcf7; color:#1b1440; padding:50px 54px; transform-origin:50% 100%; }
+  #paper .kick { font:700 34px 'Nunito'; color:#9b5cff; letter-spacing:4px; }
+  #paper .yr { font:700 120px 'Fredoka'; line-height:1; margin:6px 0 10px; color:#1b1440; }
+  #journal { display:inline-block; font:700 52px 'Fredoka'; color:#fff; background:linear-gradient(135deg,#3d6bff,#9b5cff); padding:10px 30px; border-radius:18px; }
+  .bar { height:26px; border-radius:13px; background:#e3dcf7; margin:22px 0; position:relative; overflow:hidden; }
+  .bar .hl { position:absolute; left:0; top:0; bottom:0; width:0; background:#ffd166; }
+  #hlTxt { position:absolute; left:54px; top:590px; font:700 44px 'Fredoka'; color:#1b1440; opacity:0; }
+  #phone { left:1370px; top:540px; width:330px; height:640px; margin:-320px 0 0 -165px; border-radius:56px; padding:16px;
+    background:linear-gradient(160deg,#3a3558,#16122e); box-shadow:0 40px 80px rgba(0,0,0,.6); }
+  #scr { position:absolute; inset:16px; border-radius:42px; background:radial-gradient(circle at 50% 30%, #4d6bff, #1d2a8a 70%); overflow:hidden; }
+  #sig { position:absolute; left:50%; top:200px; transform:translateX(-50%); font:700 90px 'Fredoka'; color:#fff; text-align:center; line-height:1; }
+  #sig small { display:block; font:700 30px 'Nunito'; margin-top:14px; letter-spacing:2px; }
+  #ban { position:absolute; left:50%; top:250px; width:260px; height:260px; margin:-130px; border-radius:50%; border:28px solid #ff3b5c; }
+  #ban::after { content:''; position:absolute; left:50%; top:-14px; bottom:-14px; width:28px; margin-left:-14px; background:#ff3b5c; transform:rotate(45deg); }
+  #blocked { left:1370px; top:905px; }
+  #weeks { left:1370px; top:140px; }
+  #days { left:1370px; top:1005px; transform:translateX(-50%); display:flex; gap:10px; }
+  .d { width:44px; height:44px; border-radius:12px; background:rgba(255,255,255,.15); }
+  .d.on { background:#2ee6a8; box-shadow:0 0 14px #2ee6a8; }
+</style></head>
+<body><div id="stage">
+  <div id="cells" class="layer"></div>
+  <div id="paper" class="abs">
+    <div class="kick">NEW RESEARCH</div>
+    <div class="yr" id="yr">2025</div>
+    <div id="journal">PNAS NEXUS</div>
+    <div class="bar" style="width:92%"></div><div class="bar" style="width:78%"></div>
+    <div class="bar" id="hlBar" style="width:96%;height:64px;border-radius:18px"><div class="hl" id="hl"></div></div>
+    <div class="bar" style="width:70%"></div><div class="bar" style="width:86%"></div>
+    <div id="hlTxt">SCREENS vs YOUR BRAIN</div>
+  </div>
+  <div id="phone" class="abs"><div id="scr"><div id="sig">📶<small>MOBILE INTERNET</small></div><div id="ban"></div></div></div>
+  <div id="blocked" class="abs"><span class="pill" style="font-size:46px;background:linear-gradient(135deg,#ff3b5c,#c0213a)">BLOCKED</span></div>
+  <div id="weeks" class="abs"><span class="pill" style="font-size:64px;background:linear-gradient(135deg,#2ee6a8,#12997a)"><span class="emoji">📅</span> 2 WEEKS</span></div>
+  <div id="days" class="abs"></div>
+</div>
+<script src="../lib.js"></script>
+<script>
+const cells = makeCells(20, [['#7fa0ff','#2a3fa8'], ['#9b5cff','#3d1c8f'], ['#2ee6a8','#12997a']], 71, $('#cells'));
+$('#sig').innerHTML = '<div style="display:flex;align-items:flex-end;justify-content:center;gap:14px;height:150px">' +
+  [50, 80, 110, 150].map(h => `<div style="width:32px;height:${h}px;border-radius:10px;background:#fff"></div>`).join('') +
+  '</div><small style="margin-top:150px">MOBILE INTERNET</small>';
+for (let i = 0; i < 14; i++) el('div','d',$('#days'));
+$('#hlTxt').style.top = ($('#hlBar').offsetTop + 8) + 'px';
+function render(t) {
+  entryPunch(t); cells.update(t);
+  // paper flips up
+  const fp = ease.back(prog(t, .1, .6));
+  const leave = 0;
+  css($('#paper'), { transform: `perspective(1400px) rotateX(${lerp(80, 0, fp)}deg) rotate(-3deg)`, opacity: t > .1 ? 1 : 0 });
+  // year counts up to 2025
+  $('#yr').textContent = Math.round(lerp(1990, 2025, ease.out(prog(t, .2, .6))));
+  const jp = pop(t, 1.95, .45);
+  $('#journal').style.transform = `scale(${jp}) rotate(${lerp(-12, 0, jp)}deg)`; $('#journal').style.opacity = t > 1.95 ? 1 : 0;
+  const hl = ease.inOut(prog(t, 3.2, .6));
+  $('#hl').style.width = (hl * 100) + '%';
+  $('#hlTxt').style.opacity = hl > .1 ? 1 : 0;
+  // phone comes in on "Researchers"
+  const pp = ease.back(prog(t, 6.1, .6));
+  css($('#phone'), { transform: `translateY(${lerp(900, 0, pp)}px) rotate(4deg)`, opacity: t > 6.1 ? 1 : 0 });
+  const bn = prog(t, 7.4, .22);
+  css($('#ban'), { transform: `scale(${t < 7.4 ? 0 : lerp(2.2, 1, ease.back(bn))})`, opacity: t > 7.4 ? 1 : 0 });
+  $('#sig').style.opacity = t > 7.4 ? .55 : 1;
+  const bp = pop(t, 7.6, .4);
+  css($('#blocked'), { transform: `translate(-50%,-50%) scale(${bp})`, opacity: t > 7.6 ? 1 : 0 });
+  const wp = pop(t, 8.6, .45);
+  css($('#weeks'), { transform: `translate(-50%,-50%) scale(${wp})`, opacity: t > 8.6 ? 1 : 0 });
+  $$('.d').forEach((d, i) => { const on = t > 8.75 + i * .07; d.className = 'd' + (on ? ' on' : ''); d.style.transform = `scale(${on ? pop(t, 8.75 + i * .07, .3) : .8})`; });
+  $('#days').style.opacity = t > 8.6 ? 1 : 0;
+}
+window.CLIP = { duration: 10.8, render, sfx: [
+  [0, 'whoosh', {dur: .5}], [.2, 'whoosh', {dur: .4, vol: .3}], ...Array.from({length: 8}, (_, i) => [.2 + i * .07, 'tick', {vol: .2}]),
+  [1.95, 'impact', {vol: .45}], [3.2, 'whoosh', {dur: .6, vol: .25}],
+  [6.1, 'whoosh', {dur: .5, vol: .4}], [7.4, 'impact', {vol: .7}], [7.45, 'buzz', {dur: .35, vol: .25}], [7.6, 'pop', {freq: 440}],
+  [8.6, 'pop', {freq: 660}], ...Array.from({length: 14}, (_, i) => [8.75 + i * .07, 'tick', {vol: .22}]), [9.75, 'ding', {freq: 1319, dur: .9, vol: .25}],
+]};
+</script></body></html>

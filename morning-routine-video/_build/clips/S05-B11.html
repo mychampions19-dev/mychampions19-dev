@@ -1,0 +1,57 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>S05-B11 Eggs vs Bagel</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  #trial { left:960px; top:90px; font-size:80px; }
+  #who { left:960px; top:195px; white-space:nowrap; }
+  .side { position:absolute; top:430px; width:0; height:0; }
+  .side .ball { position:absolute; left:-150px; top:-150px; width:300px; height:300px; }
+  .side .ball .emoji { position:absolute; left:50%; top:50%; transform:translate(-50%,-52%); font-size:180px; }
+  .side .name { position:absolute; left:0; top:180px; transform:translateX(-50%); font-size:64px; white-space:nowrap; }
+  #eq { left:960px; top:430px; white-space:nowrap; }
+  .bars { position:absolute; left:0; top:300px; width:700px; margin-left:-350px; }
+  .row { margin-bottom:26px; }
+  .row .l { font:700 40px 'Fredoka'; margin-bottom:8px; }
+  .row .b { height:48px; border-radius:24px; background:rgba(255,255,255,.12); overflow:hidden; }
+  .row .f { height:100%; width:0; border-radius:24px; }
+  #crown { position:absolute; left:120px; top:-140px; transform:translate(-50%,-50%); font-size:130px; }
+</style></head>
+<body><div id="stage">
+  <div id="cells" class="layer"></div>
+  <div id="trial" class="abs h3d">A SEPARATE TRIAL</div>
+  <div id="who" class="abs"><span class="pill" style="font-size:46px;background:linear-gradient(135deg,#9b5cff,#3d6bff)">OVERWEIGHT ADULTS · REDUCED-CALORIE DIET</span></div>
+  <div class="side" id="sE" style="left:480px"><div id="crown" class="emoji">👑</div>
+    <div class="ball glossy" style="--c1:#fffbe6;--c2:#ffd166"><div class="emoji">🍳</div></div><div class="name h3d">EGGS</div>
+    <div class="bars"><div class="row"><div class="l">⬇ WEIGHT LOST</div><div class="b"><div class="f" id="eW" style="background:linear-gradient(90deg,#2ee6a8,#12c48f)"></div></div></div>
+      <div class="row"><div class="l">📏 WAIST TRIMMED</div><div class="b"><div class="f" id="eT" style="background:linear-gradient(90deg,#2ee6a8,#12c48f)"></div></div></div></div></div>
+  <div class="side" id="sB" style="left:1440px">
+    <div class="ball glossy" style="--c1:#fff1dc;--c2:#d9a06b"><div class="emoji">🥯</div></div><div class="name h3d">BAGEL</div>
+    <div class="bars"><div class="row"><div class="l">⬇ WEIGHT LOST</div><div class="b"><div class="f" id="bW" style="background:linear-gradient(90deg,#b8b3d9,#6a6190)"></div></div></div>
+      <div class="row"><div class="l">📏 WAIST TRIMMED</div><div class="b"><div class="f" id="bT" style="background:linear-gradient(90deg,#b8b3d9,#6a6190)"></div></div></div></div></div>
+  <div id="eq" class="abs"><span class="pill" style="font-size:44px;background:linear-gradient(135deg,#ffd166,#ff9f43);color:#3a2300">= SAME CALORIES</span></div>
+</div>
+<script src="../lib.js"></script>
+<script>
+const cells = makeCells(16, [['#ffd166','#c2551f'], ['#2ee6a8','#12997a'], ['#9b5cff','#3d1c8f']], 261, $('#cells'));
+$$('.bars').forEach(b => b.style.top = '300px');
+function render(t) {
+  entryPunch(t); cells.update(t);
+  css($('#trial'), { transform: `translate(-50%,-50%) scale(${pop(t, .3, .45)})`, opacity: t > .3 ? 1 : 0 });
+  css($('#who'), { transform: `translate(-50%,-50%) scale(${pop(t, .9, .45)})`, opacity: t > .9 ? 1 : 0 });
+  const e = pop(t, 3.0, .5), b = pop(t, 5.4, .5);
+  $('#sE').style.transform = `scale(${e})`; $('#sB').style.transform = `scale(${b})`;
+  $('#sE').style.opacity = t > 3.0 ? 1 : 0; $('#sB').style.opacity = t > 5.4 ? 1 : 0;
+  css($('#eq'), { transform: `translate(-50%,-50%) scale(${pop(t, 5.6, .45)})`, opacity: t > 5.6 ? 1 : 0 });
+  $('#eW').style.width = (ease.out(prog(t, 3.55, .9)) * 92) + '%';
+  $('#eT').style.width = (ease.out(prog(t, 4.4, .9)) * 88) + '%';
+  $('#bW').style.width = (ease.out(prog(t, 5.9, .9)) * 50) + '%';
+  $('#bT').style.width = (ease.out(prog(t, 6.2, .9)) * 58) + '%';
+  const cp = prog(t, 7.0, .3);
+  css($('#crown'), { transform: `translate(-50%,-50%) scale(${t < 7.0 ? 0 : lerp(2, 1, ease.back(cp))}) rotate(${Math.sin(t * 3) * 8}deg)`, opacity: t > 7.0 ? 1 : 0 });
+}
+window.CLIP = { duration: 9.6, render, sfx: [
+  [0, 'whoosh', {dur: .4}], [.3, 'pop', {freq: 520}], [.9, 'pop', {freq: 700}],
+  [3.0, 'pop', {freq: 800}], [3.55, 'riser', {dur: .9, vol: .15}], [4.4, 'riser', {dur: .9, vol: .15}],
+  [5.4, 'pop', {freq: 500}], [5.6, 'ding', {freq: 1047, dur: .6, vol: .2}], [7.0, 'ding', {freq: 1568, dur: 1.4, vol: .3}], [7.05, 'impact', {vol: .4}],
+]};
+</script></body></html>

@@ -1,0 +1,49 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>S02-B12 Survival vs Fat Burning</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .mode { position:absolute; top:470px; width:440px; height:440px; margin:-220px; }
+  .mode .orb { position:absolute; inset:0; }
+  .mode .ic { position:absolute; left:50%; top:46%; transform:translate(-50%,-50%); font-size:170px; }
+  .mode .lbl { position:absolute; left:50%; top:500px; transform:translateX(-50%); font-size:72px; white-space:nowrap; }
+  .mode .state { position:absolute; left:50%; top:-80px; transform:translateX(-50%); font:700 44px 'Fredoka'; padding:8px 26px; border-radius:30px; }
+  #neq { left:960px; top:470px; font-size:220px; color:#fff; }
+  #pill { left:960px; top:930px; white-space:nowrap; }
+  #xx { position:absolute; left:50%; top:46%; transform:translate(-50%,-50%); font-size:260px; }
+</style></head>
+<body><div id="stage">
+  <div id="cells" class="layer"></div>
+  <div class="mode" id="mS" style="left:520px"><div class="orb glossy" style="--c1:#ff7b8f;--c2:#c0213a"></div><div class="ic emoji">🚨</div>
+    <div class="state" style="background:#ff3b5c">ON</div><div class="lbl h3d warn">SURVIVAL</div></div>
+  <div class="mode" id="mF" style="left:1400px"><div class="orb glossy" id="fOrb" style="--c1:#ffd08a;--c2:#ff5a36"></div><div class="ic emoji" id="fIc">🔥</div>
+    <div class="state" id="fState" style="background:#555">OFF</div><div class="lbl h3d burn">FAT BURNING</div><div id="xx" class="emoji">❌</div></div>
+  <div id="neq" class="abs h3d">≠</div>
+  <div id="pill" class="abs"><span class="pill" style="font-size:56px;background:linear-gradient(135deg,#ff3b5c,#9b5cff)">CAN'T RUN AT THE SAME TIME</span></div>
+</div>
+<script src="../lib.js"></script>
+<script>
+const cells = makeCells(20, [['#ff6b6b','#b3122e'], ['#ffb13b','#c2551f'], ['#9b5cff','#3d1c8f']], 91, $('#cells'));
+function render(t) {
+  entryPunch(t); cells.update(t);
+  const s = pop(t, .05, .4), f = pop(t, .45, .4);
+  $('#mS').style.transform = `scale(${s * (1 + Math.sin(t * 14) * .03)})`;
+  $('#mS').style.filter = `drop-shadow(0 0 ${40 + Math.sin(t * 14) * 20}px rgba(255,59,92,.9))`;
+  // fat burning tries to switch on, flickers, dies
+  const tryOn = t > .55 && t < .9 && Math.sin(t * 90) > 0;
+  const dead = t >= .9;
+  $('#mF').style.transform = `scale(${f}) translateX(${dead && t < 1.2 ? Math.sin(t * 100) * 10 : 0}px)`;
+  $('#fOrb').style.filter = dead ? 'grayscale(1) brightness(.5)' : tryOn ? 'none' : 'grayscale(.8) brightness(.6)';
+  $('#fIc').style.filter = dead ? 'grayscale(1) brightness(.6)' : tryOn ? 'none' : 'grayscale(.8)';
+  $('#fState').textContent = dead ? 'BLOCKED' : 'OFF';
+  const xp = prog(t, .9, .2);
+  css($('#xx'), { transform: `translate(-50%,-50%) scale(${t < .9 ? 0 : lerp(2, 1, ease.back(xp))})`, opacity: t > .9 ? 1 : 0 });
+  const np = pop(t, .3, .4);
+  css($('#neq'), { transform: `translate(-50%,-50%) scale(${np})`, opacity: t > .3 ? 1 : 0 });
+  const pp = pop(t, 1.05, .4);
+  css($('#pill'), { transform: `translate(-50%,-50%) scale(${pp})`, opacity: t > 1.05 ? 1 : 0 });
+}
+window.CLIP = { duration: 3.0, render, sfx: [
+  [0, 'whoosh', {dur: .4}], [.05, 'buzz', {dur: .4, vol: .2}], [.45, 'pop', {freq: 700}],
+  ...[.56, .63, .7, .77, .84].map(a => [a, 'click', {vol: .35}]), [.9, 'buzz', {dur: .35, vol: .35}], [.9, 'impact', {vol: .5}], [1.05, 'pop', {freq: 520}],
+]};
+</script></body></html>

@@ -1,0 +1,56 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>S03-B07 Jittery Then Crash</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  #title { left:50%; top:70px; font-size:96px; }
+  .tag { position:absolute; transform:translate(-50%,-50%); white-space:nowrap; }
+  .tag .pill { font-size:52px; }
+</style></head>
+<body><div id="stage">
+  <div id="cells" class="layer"></div>
+  <svg class="layer" viewBox="0 0 1920 1080">
+    <line x1="240" y1="880" x2="1700" y2="880" stroke="rgba(255,255,255,.7)" stroke-width="6" stroke-linecap="round"/>
+    <text x="300" y="950" font-family="Fredoka" font-weight="700" font-size="42" fill="rgba(255,255,255,.8)">7 AM</text>
+    <text x="800" y="950" font-family="Fredoka" font-weight="700" font-size="42" fill="#ffd166">9:30 AM</text>
+    <text x="1400" y="950" font-family="Fredoka" font-weight="700" font-size="42" fill="rgba(255,255,255,.8)">MID-MORNING</text>
+    <line x1="240" y1="600" x2="1700" y2="600" stroke="rgba(255,255,255,.18)" stroke-width="4" stroke-dasharray="14 12"/>
+    <text x="1710" y="610" font-family="Fredoka" font-weight="600" font-size="32" fill="rgba(255,255,255,.5)">baseline</text>
+    <path id="line" fill="none" stroke="url(#eg)" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 14px rgba(255,209,102,.8))"/>
+    <circle id="dot" r="20" fill="#fff" style="filter:drop-shadow(0 0 16px #fff)"/>
+    <defs><linearGradient id="eg" x1="0" x2="1"><stop offset="0" stop-color="#ffd166"/><stop offset=".45" stop-color="#ff5a36"/><stop offset=".7" stop-color="#9b5cff"/><stop offset="1" stop-color="#3d6bff"/></linearGradient></defs>
+  </svg>
+  <div id="title" class="abs h3d">YOUR ENERGY</div>
+  <div class="tag" id="tJ"><span class="pill" style="background:linear-gradient(135deg,#ffd166,#ff5a36);color:#3a1400"><span class="emoji">⚡</span> JITTERY</span></div>
+  <div class="tag" id="tC"><span class="pill" style="background:linear-gradient(135deg,#9b5cff,#3d6bff)"><span class="emoji">📉</span> CRASH</span></div>
+</div>
+<script src="../lib.js"></script>
+<script>
+const cells = makeCells(18, [['#ffd166','#c2551f'], ['#9b5cff','#3d1c8f']], 131, $('#cells'));
+// energy curve: x 260..1680; jitter spike near 9:30 (x≈870), crash below baseline mid-morning
+const E = x => {
+  const u = (x - 260) / 1420;
+  const spike = 330 * Math.exp(-Math.pow((u - .42) / .12, 2));
+  const crash = -230 * Math.exp(-Math.pow((u - .82) / .12, 2));
+  const jit = (u > .3 && u < .55) ? Math.sin(x / 9) * 18 : 0;
+  return 640 - spike - crash - jit;
+};
+function render(t) {
+  entryPunch(t); cells.update(t);
+  const tp = pop(t, .05, .4);
+  css($('#title'), { transform: `translate(-50%,0) scale(${tp})`, opacity: t > .05 ? 1 : 0 });
+  const d = ease.inOut(prog(t, .15, 2.1)), xEnd = 260 + d * 1420;
+  let p = '';
+  for (let x = 260; x <= xEnd; x += 6) p += (x === 260 ? 'M' : 'L') + x + ' ' + E(x).toFixed(1) + ' ';
+  $('#line').setAttribute('d', p);
+  $('#dot').setAttribute('cx', xEnd); $('#dot').setAttribute('cy', E(xEnd)); $('#dot').style.opacity = d > 0 && d < 1 ? 1 : 0;
+  const j = pop(t, .95, .35), c = pop(t, 1.75, .35);
+  css($('#tJ'), { left: '1230px', top: '330px', transform: `translate(-50%,-50%) scale(${j}) rotate(${Math.sin(t * 50) * 3}deg)`, opacity: t > .95 ? 1 : 0 });
+  css($('#tC'), { left: '1420px', top: '680px', transform: `translate(-50%,-50%) scale(${c})`, opacity: t > 1.75 ? 1 : 0 });
+  const sk = t > 1.75 && t < 2.1 ? Math.sin(t * 100) * 8 * (1 - prog(t, 1.75, .35)) : 0;
+  $('#stage').style.transform += ` translateY(${sk}px)`;
+}
+window.CLIP = { duration: 3.6, render, sfx: [
+  [0, 'whoosh', {dur: .4}], [.05, 'pop', {freq: 520}], [.3, 'riser', {dur: .65, vol: .15}],
+  [.95, 'buzz', {dur: .5, vol: .2}], [.95, 'pop', {freq: 900}], [1.4, 'whoosh', {dur: .5, rise: false, vol: .4}], [1.75, 'impact', {vol: .6}],
+]};
+</script></body></html>

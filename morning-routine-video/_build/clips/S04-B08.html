@@ -1,0 +1,57 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>S04-B08 Light Reset</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  #sky { position:absolute; inset:0; background:linear-gradient(#ffb36b 0%, #ff7aa2 40%, #6a5cff 100%); opacity:0; }
+  #sun { left:520px; top:560px; font-size:260px; }
+  #rays { position:absolute; left:520px; top:560px; width:0; height:0; }
+  .ray { position:absolute; left:0; top:-10px; height:20px; border-radius:10px; background:linear-gradient(90deg, rgba(255,230,120,.9), rgba(255,230,120,0)); transform-origin:0 50%; }
+  #eye { left:1380px; top:560px; font-size:200px; }
+  #mins { left:520px; top:170px; white-space:nowrap; }
+  #hour { left:1380px; top:300px; white-space:nowrap; }
+  #reset { left:960px; top:470px; width:420px; height:420px; margin:-210px; --c1:#b8ffe6; --c2:#12997a; }
+  #reset .emoji { position:absolute; left:50%; top:46%; transform:translate(-50%,-50%); font-size:200px; }
+  #reset .lbl { position:absolute; left:50%; top:100%; margin-top:30px; transform:translateX(-50%); font-size:72px; white-space:nowrap; }
+  #ok { left:960px; top:900px; display:flex; gap:26px; transform:translateX(-50%); white-space:nowrap; }
+  #ok .pill { font-size:46px; background:linear-gradient(135deg,#2ee6a8,#12997a); }
+</style></head>
+<body><div id="stage">
+  <div id="sky"></div>
+  <div id="cells" class="layer"></div>
+  <div id="rays"></div>
+  <div id="sun" class="abs emoji">☀️</div>
+  <div id="eye" class="abs emoji">👁️</div>
+  <div id="mins" class="abs"><span class="pill" style="font-size:66px;background:linear-gradient(135deg,#ffd166,#ff9f43);color:#3a2300"><span class="emoji">⏱️</span> 10–30 MIN OUTSIDE</span></div>
+  <div id="hour" class="abs"><span class="pill" style="font-size:54px;background:linear-gradient(135deg,#3d6bff,#9b5cff)">WITHIN THE FIRST HOUR</span></div>
+  <div id="reset" class="abs glossy"><svg class="emoji" viewBox="-100 -100 200 200" width="230" height="230" style="overflow:visible"><path d="M-60 -20 A65 65 0 0 1 55 -35" fill="none" stroke="#fff" stroke-width="22" stroke-linecap="round"/><polygon points="40,-75 90,-30 30,-10" fill="#fff"/><path d="M60 20 A65 65 0 0 1 -55 35" fill="none" stroke="#fff" stroke-width="22" stroke-linecap="round"/><polygon points="-40,75 -90,30 -30,10" fill="#fff"/></svg><div class="lbl h3d">MASTER RESET</div></div>
+  <div id="ok" class="abs"><span class="pill" id="o1"><span class="emoji">✅</span> BLOOD SUGAR</span><span class="pill" id="o2"><span class="emoji">✅</span> METABOLISM</span></div>
+</div>
+<script src="../lib.js"></script>
+<script>
+const cells = makeCells(18, [['#ffd166','#c2551f'], ['#ff9ab3','#d9436b']], 191, $('#cells'));
+const rays = Array.from({length: 7}, (_, i) => { const r = el('div','ray',$('#rays')); return { r, a: -12 + i * 4 }; });
+function render(t) {
+  entryPunch(t); cells.update(t);
+  $('#sky').style.opacity = .55 * ease.out(prog(t, 0, 1.2));
+  const sp = ease.back(prog(t, .05, .8));
+  css($('#sun'), { transform: `translate(-50%,-50%) translateY(${lerp(500, 0, sp)}px) rotate(${t * 15}deg)` });
+  css($('#mins'), { transform: `translate(-50%,-50%) scale(${pop(t, .3, .45)})`, opacity: t > .3 ? 1 : 0 });
+  const rl = ease.out(prog(t, 1.35, .6));
+  rays.forEach((o, i) => css(o.r, { width: (rl * 760) + 'px', transform: `rotate(${o.a + Math.sin(t * 3 + i) * .8}deg)`, opacity: .5 + .5 * Math.sin(t * 6 + i) }));
+  css($('#eye'), { transform: `translate(-50%,-50%) scale(${pop(t, 1.2, .45) * (1 + (rl > .9 ? Math.sin(t * 8) * .04 : 0))})`, filter: `brightness(${1 + rl * .3})` });
+  css($('#hour'), { transform: `translate(-50%,-50%) scale(${pop(t, 2.6, .4)})`, opacity: t > 2.6 ? 1 : 0 });
+  // everything clears for the reset button
+  const clr = ease.inOut(prog(t, 3.45, .3));
+  ['#sun', '#eye', '#mins', '#hour', '#rays'].forEach(s => $(s).style.opacity = 1 - clr);
+  const rp = prog(t, 3.7, .25);
+  css($('#reset'), { transform: `scale(${t < 3.7 ? 0 : lerp(1.8, 1, ease.back(rp))}) rotate(${-(t - 3.7) * 90 * (t > 3.7 ? 1 : 0) * (1 - prog(t, 3.7, 1.2))}deg)`, opacity: t > 3.7 ? 1 : 0 });
+  $('#reset .emoji').style.transform = `translate(-50%,-50%) rotate(${Math.max(0, t - 3.7) * 200}deg)`;
+  css($('#o1'), { transform: `scale(${pop(t, 4.2, .4)})`, opacity: t > 4.2 ? 1 : 0 });
+  css($('#o2'), { transform: `scale(${pop(t, 4.8, .4)})`, opacity: t > 4.8 ? 1 : 0 });
+}
+window.CLIP = { duration: 8.1, render, sfx: [
+  [0, 'riser', {dur: .9, vol: .15}], [.3, 'pop', {freq: 600}], [1.2, 'pop', {freq: 800}], [1.35, 'whoosh', {dur: .6, vol: .35}],
+  [2.6, 'pop', {freq: 700}], [3.45, 'whoosh', {dur: .3, vol: .3}], [3.7, 'impact', {vol: .7}], [3.75, 'ding', {freq: 1047, dur: 1.4, vol: .3}],
+  [4.2, 'ding', {freq: 1319, dur: .8, vol: .25}], [4.8, 'ding', {freq: 1568, dur: 1.0, vol: .25}],
+]};
+</script></body></html>

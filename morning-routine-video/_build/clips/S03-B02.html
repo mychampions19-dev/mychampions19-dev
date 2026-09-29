@@ -1,0 +1,79 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>S03-B02 Overnight Dehydration</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  #sky { position:absolute; inset:0; background: linear-gradient(#0b0630, #1b0f45 60%, #2a1250); }
+  .star { position:absolute; width:6px; height:6px; border-radius:50%; background:#fff; }
+  #moon { left:330px; top:260px; font-size:220px; }
+  #title { left:50%; top:80px; font-size:96px; }
+  #hours { left:330px; top:640px; font-size:200px; color:#ffd166; }
+  #hrsLbl { left:330px; top:790px; font-size:64px; }
+  #tankWrap { left:1260px; top:560px; width:380px; height:640px; margin:-320px 0 0 -190px; }
+  #tank { position:absolute; inset:0; border-radius:60px 60px 80px 80px; border:10px solid rgba(255,255,255,.75); overflow:hidden;
+    background: rgba(255,255,255,.06); box-shadow: 0 0 60px rgba(77,160,255,.35); }
+  #water { position:absolute; left:0; right:0; bottom:0; background: linear-gradient(#7fd3ff, #2a7bff); }
+  #wave { position:absolute; left:-20%; width:140%; height:60px; top:-30px; border-radius:45%; background:#9be0ff; opacity:.8; }
+  #pct { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); font:700 110px 'Fredoka'; color:#fff; text-shadow:0 6px 20px rgba(0,0,0,.4); }
+  #drop { position:absolute; left:50%; top:-120px; transform:translateX(-50%); font-size:110px; }
+  .puff { position:absolute; font-size:80px; }
+  #tags { left:1260px; top:960px; display:flex; gap:24px; transform:translateX(-50%); white-space:nowrap; }
+  #tags .pill { font-size:44px; }
+</style></head>
+<body><div id="stage">
+  <div id="sky"></div><div id="stars" class="layer"></div>
+  <div id="cells" class="layer"></div>
+  <div id="title" class="abs h3d">OVERNIGHT…</div>
+  <div id="moon" class="abs emoji">🌙</div>
+  <div id="hours" class="abs h3d">7</div>
+  <div id="hrsLbl" class="abs h3d">HOURS · NO WATER</div>
+  <div id="tankWrap" class="abs"><div id="tank"><div id="water"><div id="wave"></div></div><div id="pct">100%</div></div><div id="drop" class="emoji">💧</div></div>
+  <div id="puffs" class="layer"></div>
+  <div id="tags" class="abs"><span class="pill" id="tB" style="background:linear-gradient(135deg,#7fa0ff,#3d5bd9)"><span class="emoji">💨</span> BREATH</span>
+    <span class="pill" id="tP" style="background:linear-gradient(135deg,#2ee6a8,#12997a)"><span class="emoji">💦</span> SWEAT</span></div>
+</div>
+<script src="../lib.js"></script>
+<script>
+const cells = makeCells(14, [['#7fa0ff','#2a3fa8'], ['#9b5cff','#3d1c8f']], 111, $('#cells'));
+const sr = rand(3); for (let i = 0; i < 80; i++) { const s = el('div','star',$('#stars')); css(s, {left: sr()*1920+'px', top: sr()*1080+'px', opacity: .2 + sr()*.6}); }
+const pr = rand(12), puffs = Array.from({length: 16}, (_, i) => { const p = el('div','puff emoji',$('#puffs')); p.textContent = i % 2 ? '💦' : '💨';
+  return { p, x: 1260 + (pr() - .5) * 300, at: 3.6 + i * .2, dx: (pr() - .5) * 500 }; });
+function render(t) {
+  entryPunch(t); cells.update(t);
+  const tp = pop(t, .1, .45);
+  css($('#title'), { transform: `translate(-50%,0) scale(${tp})`, opacity: t > .1 ? 1 : 0 });
+  const mp = pop(t, .2, .6);
+  css($('#moon'), { transform: `translate(-50%,-50%) scale(${mp}) rotate(${Math.sin(t) * 8}deg)` });
+  $$('.star').forEach((s, i) => s.style.transform = `scale(${.6 + .6 * Math.abs(Math.sin(t * 2 + i))})`);
+  // 7 → 8 → 9 on the words (seven 1.8, eight 2.1, nine 2.45)
+  const n = t < 2.1 ? 7 : t < 2.45 ? 8 : 9;
+  $('#hours').textContent = n;
+  const beat = Math.max(pop(t, 1.8, .3), 0);
+  const hk = [1.8, 2.1, 2.45].reduce((a, k) => t > k ? k : a, 1.8);
+  const hp = pop(t, hk, .3);
+  css($('#hours'), { transform: `translate(-50%,-50%) scale(${t > 1.8 ? hp : 0})`, opacity: t > 1.8 ? 1 : 0 });
+  css($('#hrsLbl'), { transform: `translate(-50%,-50%) scale(${pop(t, 2.0, .4)})`, opacity: t > 2.0 ? 1 : 0 });
+  // tank drains from 100% to 60% on "without a single drop of water" onward
+  const tk = pop(t, .4, .5);
+  $('#tankWrap').style.transform = `scale(${tk})`;
+  const dr = ease.inOut(prog(t, 2.8, 4.0));
+  const lvl = lerp(.92, .52, dr);
+  $('#water').style.height = (lvl * 100) + '%';
+  $('#wave').style.transform = `translateX(${Math.sin(t * 2.2) * 30}px) rotate(${Math.sin(t * 1.7) * 3}deg)`;
+  $('#pct').textContent = t > 6.2 ? 'LOW' : Math.round(lerp(100, 60, dr)) + '%';
+  $('#pct').style.color = t > 6.2 ? '#ffd166' : '#fff';
+  $('#drop').style.transform = `translate(-50%, ${Math.sin(t * 3) * 10}px) scale(${1 - dr * .4})`;
+  for (const q of puffs) {
+    const k = prog(t, q.at, 1.4);
+    css(q.p, { left: (q.x + q.dx * k) + 'px', top: (560 - k * 520) + 'px', opacity: t > q.at && k < 1 ? 1 - k : 0, transform: `scale(${.6 + k * .6})` });
+  }
+  const bp = pop(t, 4.4, .4), pp = pop(t, 4.9, .4);
+  css($('#tB'), { transform: `scale(${bp})`, opacity: t > 4.4 ? 1 : 0 });
+  css($('#tP'), { transform: `scale(${pp})`, opacity: t > 4.9 ? 1 : 0 });
+}
+window.CLIP = { duration: 7.3, render, sfx: [
+  [0, 'whoosh', {dur: .5}], [.1, 'pop', {freq: 480}], [.2, 'freeze', {dur: 1.5, vol: .12}],
+  [1.8, 'pop', {freq: 600}], [2.1, 'pop', {freq: 700}], [2.45, 'pop', {freq: 800}],
+  [2.8, 'whoosh', {dur: 2.0, rise: false, vol: .25}], ...Array.from({length: 8}, (_, i) => [3.6 + i * .4, 'whoosh', {dur: .3, vol: .12}]),
+  [4.4, 'pop', {freq: 660}], [4.9, 'pop', {freq: 760}], [6.2, 'buzz', {dur: .3, vol: .2}],
+]};
+</script></body></html>

@@ -1,0 +1,72 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>S02-B07 Stress Surge</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  #title { left:50%; top:70px; font-size:86px; }
+  .tag { position:absolute; transform:translate(-50%,-50%); white-space:nowrap; }
+  .tag .pill { font-size:44px; }
+  #surge { left:960px; top:560px; font-size:120px; padding:14px 54px; border:12px solid #ff3b5c; border-radius:30px; color:#fff;
+    background: rgba(160,10,40,.85); font-weight:700; letter-spacing:5px; white-space:nowrap; box-shadow:0 0 70px rgba(255,59,92,.8); }
+  #excess { left:960px; top:780px; }
+  #redwash { position:absolute; inset:0; background: radial-gradient(circle at 50% 50%, rgba(255,59,92,.4), rgba(255,59,92,0) 70%); opacity:0; }
+</style></head>
+<body><div id="stage">
+  <div id="cells" class="layer"></div>
+  <div id="redwash"></div>
+  <div id="title" class="abs h3d warn">+ ARTIFICIAL STRESS</div>
+  <div id="tMail" class="tag"><span class="pill" style="background:linear-gradient(135deg,#ff6b8a,#c0213a)"><span class="emoji">📧</span> WORK EMAILS</span></div>
+  <div id="tNews" class="tag"><span class="pill" style="background:linear-gradient(135deg,#ff8a3d,#c0213a)"><span class="emoji">📰</span> ALARMING NEWS</span></div>
+  <div id="surge" class="abs"><span class="emoji">🚨</span> STRESS SURGE</div>
+  <div id="excess" class="abs"><span class="pill" style="font-size:60px;background:linear-gradient(135deg,#ff3b5c,#9b5cff)">EXCESS CORTISOL</span></div>
+</div>
+<script src="../lib.js"></script>
+<script src="cortisol_chart.js"></script>
+<script>
+const cells = makeCells(20, [['#ff6b6b','#b3122e'], ['#9b5cff','#3d1c8f'], ['#ffd166','#c2551f']], 62, $('#cells'));
+buildChart($('#stage'));
+$('#band').style.display = 'none';
+$('#revealRect').setAttribute('width', 1920); $('#head').style.display = 'none';
+const bump = (m, c, w) => Math.exp(-Math.pow((m - c) / w, 2));
+let A = 0, B = 0;
+const stressFn = m => natural(m) + A * .38 * bump(m, 9, 7) + B * .42 * bump(m, 18, 8);
+css($('#tMail'), { left: X(8) + 'px', top: '0px' }); css($('#tNews'), { left: X(36) + 'px', top: '0px' });
+
+function render(t) {
+  entryPunch(t); cells.update(t);
+  const tp = pop(t, .35, .45);
+  css($('#title'), { transform: `translate(-50%,0) scale(${tp})`, opacity: t > .35 ? 1 : 0 });
+  A = ease.back(prog(t, 1.85, .5)); B = ease.back(prog(t, 2.55, .5));
+  const vis = t > 1.85;
+  $('#strArea').setAttribute('d', vis ? areaOf(stressFn, 90) : '');
+  $('#strLine').setAttribute('d', vis ? pathOf(stressFn, 90) : '');
+  $('#strArea').style.opacity = .55;
+  // tags ride the peaks
+  const mp = pop(t, 1.85, .4), np = pop(t, 2.55, .4);
+  css($('#tMail'), { top: (Y(stressFn(9)) - 75) + 'px', transform: `translate(-50%,-50%) scale(${mp})`, opacity: t > 1.85 ? 1 : 0 });
+  css($('#tNews'), { top: (Y(stressFn(19)) - 150) + 'px', transform: `translate(-50%,-50%) scale(${np})`, opacity: t > 2.55 ? 1 : 0 });
+  // natural curve dims once stress stacks on top
+  const dim = ease.out(prog(t, 3.0, .6));
+  $('#natLine').style.opacity = lerp(1, .35, dim); $('#natArea').style.opacity = lerp(1, .3, dim);
+  // flood: red liquid rises over the chart
+  const fl = ease.inOut(prog(t, 5.2, .9));
+  const lvl = lerp(CH.y0, CH.y1 - 120, fl);
+  let d = `M${CH.x0} ${CH.y0} `;
+  for (let x = CH.x0; x <= CH.x1; x += 20) d += `L${x} ${(lvl + Math.sin(x / 70 + t * 6) * 16 * (fl > 0 ? 1 : 0)).toFixed(1)} `;
+  d += `L${CH.x1} ${CH.y0} Z`;
+  $('#flood').setAttribute('d', fl > 0 ? d : '');
+  $('#redwash').style.opacity = fl * (.7 + Math.sin(t * 8) * .2);
+  const sp = prog(t, 5.25, .22);
+  css($('#surge'), { transform: `translate(-50%,-50%) scale(${t < 5.25 ? 0 : lerp(2.4, 1, ease.back(sp))}) rotate(-5deg)`, opacity: t > 5.25 ? 1 : 0 });
+  const ep = pop(t, 6.05, .45);
+  css($('#excess'), { transform: `translate(-50%,-50%) scale(${ep})`, opacity: t > 6.05 ? 1 : 0 });
+  const sk = t > 5.25 && t < 5.7 ? Math.sin(t * 110) * 12 * (1 - prog(t, 5.25, .45)) : 0;
+  $('#stage').style.transform += ` translate(${sk}px,0)`;
+}
+window.CLIP = { duration: 8.9, render, sfx: [
+  [0, 'whoosh', {dur: .45}], [.35, 'pop', {freq: 440}],
+  [1.85, 'ding', {freq: 1760, dur: .5, vol: .3}], [1.9, 'buzz', {dur: .25, vol: .2}],
+  [2.55, 'ding', {freq: 1568, dur: .5, vol: .3}], [2.6, 'buzz', {dur: .25, vol: .2}],
+  [4.2, 'riser', {dur: 1.05, vol: .2}], [5.25, 'impact', {vol: .9}], [5.3, 'buzz', {dur: .6, vol: .3}],
+  [5.3, 'whoosh', {dur: 1.0, vol: .4}], [6.05, 'pop', {freq: 520}],
+]};
+</script></body></html>

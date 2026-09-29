@@ -1,0 +1,52 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>S02-B05 Cortisol Awakening Response</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  #title { left:50%; top:70px; font-size:86px; }
+  #bandLbl { left:0; top:0; }
+  .tag { position:absolute; transform:translate(-50%,-50%); white-space:nowrap; }
+  .tag .pill { font-size:44px; }
+</style></head>
+<body><div id="stage">
+  <div id="cells" class="layer"></div>
+  <div id="title" class="abs h3d">YOUR CORTISOL AFTER WAKING</div>
+  <div id="tBand" class="tag"><span class="pill" style="background:linear-gradient(135deg,#ffd166,#ff9f43);color:#3a2300">30–45 MIN</span></div>
+  <div id="tPeak" class="tag"><span class="pill" style="background:linear-gradient(135deg,#2ee6a8,#12997a)"><span class="emoji">☀️</span> NATURAL, HEALTHY SPIKE</span></div>
+  <div id="tCAR" class="tag"><span class="pill" style="font-size:54px;background:linear-gradient(135deg,#9b5cff,#3d6bff)">CORTISOL AWAKENING RESPONSE</span></div>
+</div>
+<script src="../lib.js"></script>
+<script src="cortisol_chart.js"></script>
+<script>
+const cells = makeCells(20, [['#2ee6a8','#12997a'], ['#9b5cff','#3d1c8f'], ['#ffd166','#c2551f']], 61, $('#cells'));
+buildChart($('#stage'));
+const peakM = 37;
+css($('#tBand'), { left: X(37.5) + 'px', top: (CH.y1 - 80) + 'px' });
+css($('#tPeak'), { left: X(62) + 'px', top: (Y(natural(peakM)) - 10) + 'px' });
+css($('#tCAR'), { left: '960px', top: '215px' });
+
+function render(t) {
+  entryPunch(t); cells.update(t);
+  const tp = pop(t, .1, .45);
+  css($('#title'), { transform: `translate(-50%,0) scale(${tp})`, opacity: t > .1 ? 1 : 0 });
+  const ax = ease.out(prog(t, 0, .5));
+  $('#axes').style.opacity = ax;
+  const bp = pop(t, .3, .45);
+  $('#band').style.opacity = t > .3 ? bp : 0;
+  css($('#tBand'), { transform: `translate(-50%,-50%) scale(${bp})`, opacity: t > .3 ? 1 - ease.out(prog(t, 5.1, .2)) : 0 });
+  // curve draws 1.0 → 3.8s
+  const d = ease.inOut(prog(t, 1.0, 2.8)), mNow = d * 90;
+  $('#revealRect').setAttribute('width', X(mNow) + 6);
+  $('#head').setAttribute('cx', X(mNow)); $('#head').setAttribute('cy', Y(natural(mNow)));
+  $('#head').style.opacity = d > 0 && d < 1 ? 1 : 0;
+  const pp = pop(t, 3.85, .45);
+  css($('#tPeak'), { transform: `translate(-50%,-50%) scale(${pp})`, opacity: t > 3.85 ? 1 : 0 });
+  const cp = prog(t, 5.25, .25);
+  css($('#tCAR'), { transform: `translate(-50%,-50%) scale(${t < 5.25 ? 0 : lerp(2, 1, ease.back(cp))})`, opacity: t > 5.25 ? 1 : 0 });
+  $('#title').style.opacity = t > 5.2 ? 1 - ease.out(prog(t, 5.2, .2)) : $('#title').style.opacity;
+}
+window.CLIP = { duration: 8.3, render, sfx: [
+  [0, 'whoosh', {dur: .5}], [.1, 'pop', {freq: 520}], [.3, 'pop', {freq: 700}],
+  [1.0, 'riser', {dur: 2.8, vol: .12}], [3.85, 'ding', {freq: 1319, dur: 1.0, vol: .3}], [3.9, 'pop', {freq: 880}],
+  [5.25, 'impact', {vol: .6}], [5.3, 'ding', {freq: 988, dur: 1.2, vol: .22}],
+]};
+</script></body></html>

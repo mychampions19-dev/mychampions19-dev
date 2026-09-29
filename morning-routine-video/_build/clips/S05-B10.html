@@ -1,0 +1,65 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>S05-B10 fMRI Cravings Study</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  #uni { left:960px; top:95px; white-space:nowrap; }
+  #fmri { left:960px; top:200px; font-size:84px; }
+  #who { left:960px; top:560px; white-space:nowrap; }
+  .scan { position:absolute; top:560px; width:520px; height:520px; margin:-260px; border-radius:50%;
+    background: radial-gradient(circle, #1d1650 0 60%, #0d0930 100%); box-shadow: 0 0 0 10px rgba(255,255,255,.12), 0 30px 60px rgba(0,0,0,.5); overflow:hidden; }
+  .scan .emoji { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); font-size:330px; filter: grayscale(1) brightness(1.2) contrast(1.1); opacity:.9; }
+  .hot { position:absolute; left:50%; top:52%; width:240px; height:240px; margin:-120px; border-radius:50%; mix-blend-mode:screen; }
+  .sweep { position:absolute; left:0; right:0; height:18px; background:linear-gradient(90deg, rgba(46,230,168,0), rgba(46,230,168,.9), rgba(46,230,168,0)); }
+  .food { position:absolute; top:900px; transform:translate(-50%,-50%); white-space:nowrap; }
+  .food .pill { font-size:48px; }
+  .res { position:absolute; top:220px; transform:translate(-50%,-50%); white-space:nowrap; }
+  .res .pill { font-size:46px; }
+  #hours { left:960px; top:560px; white-space:nowrap; }
+</style></head>
+<body><div id="stage">
+  <div id="cells" class="layer"></div>
+  <div id="uni" class="abs"><span class="pill" style="font-size:44px;background:linear-gradient(135deg,#ffd166,#ff9f43);color:#3a2300"><span class="emoji">🎓</span> UNIVERSITY OF MISSOURI</span></div>
+  <div id="fmri" class="abs h3d">fMRI BRAIN SCANS</div>
+  <div id="who" class="abs"><span class="pill" style="font-size:50px;background:linear-gradient(135deg,#9b5cff,#3d6bff)">YOUNG WOMEN · USUALLY SKIPPED BREAKFAST</span></div>
+  <div class="scan" id="sP" style="left:520px"><div class="emoji">🧠</div><div class="hot" id="hP"></div><div class="sweep" id="wP"></div></div>
+  <div class="scan" id="sC" style="left:1400px"><div class="emoji">🧠</div><div class="hot" id="hC"></div><div class="sweep" id="wC"></div></div>
+  <div class="food" id="fP" style="left:520px"><span class="pill" style="background:linear-gradient(135deg,#2ee6a8,#12997a)"><span class="emoji">🍳</span> HIGH-PROTEIN</span></div>
+  <div class="food" id="fC" style="left:1400px"><span class="pill" style="background:linear-gradient(135deg,#ff8aa8,#c0213a)"><span class="emoji">🥣</span> HIGH-CARB</span></div>
+  <div class="res" id="rP" style="left:520px"><span class="pill" style="background:#12997a">CRAVINGS ↓</span></div>
+  <div class="res" id="rC" style="left:1400px"><span class="pill" style="background:#c0213a">CRAVINGS ↑</span></div>
+  <div id="hours" class="abs"><span class="pill" style="font-size:52px;background:linear-gradient(135deg,#3d6bff,#9b5cff)"><span class="emoji">⏱️</span> FOR HOURS</span></div>
+</div>
+<script src="../lib.js"></script>
+<script>
+const cells = makeCells(16, [['#2ee6a8','#12997a'], ['#ff6b8a','#a3173f'], ['#9b5cff','#3d1c8f']], 251, $('#cells'));
+function render(t) {
+  entryPunch(t); cells.update(t);
+  const ph2 = ease.inOut(prog(t, 4.3, .5));
+  css($('#uni'), { transform: `translate(-50%,-50%) scale(${pop(t, .1, .4)})`, opacity: t > .1 ? 1 : 0 });
+  css($('#fmri'), { transform: `translate(-50%,-50%) scale(${pop(t, .85, .45) * lerp(1, .0, ph2)})`, opacity: t > .85 ? 1 - ph2 : 0 });
+  css($('#who'), { transform: `translate(-50%,-50%) scale(${pop(t, 1.6, .45)}) translateY(${ph2 * 420}px)`, opacity: t > 1.6 ? 1 - ph2 : 0 });
+  const sP = pop(t, 4.95, .5), sC = pop(t, 5.65, .5);
+  $('#sP').style.transform = `scale(${sP})`; $('#sC').style.transform = `scale(${sC})`;
+  css($('#fP'), { transform: `translate(-50%,-50%) scale(${pop(t, 5.0, .4)})`, opacity: t > 5.0 ? 1 : 0 });
+  css($('#fC'), { transform: `translate(-50%,-50%) scale(${pop(t, 5.7, .4)})`, opacity: t > 5.7 ? 1 : 0 });
+  // scanner sweep then hotspots: both hot at first, protein cools from 7.2
+  [['#wP', 5.2], ['#wC', 5.9]].forEach(([s, a]) => { const k = prog(t, a, 1.2); $(s).style.top = (k * 540 - 20) + 'px'; $(s).style.opacity = k > 0 && k < 1 ? 1 : 0; });
+  const heat = ease.out(prog(t, 6.2, .8)), cool = ease.inOut(prog(t, 7.2, 1.3));
+  const pulse = 1 + Math.sin(t * 7) * .08;
+  $('#hC').style.background = `radial-gradient(circle, rgba(255,230,90,${.95 * heat}), rgba(255,70,50,${.8 * heat}) 45%, rgba(255,40,40,0) 70%)`;
+  $('#hC').style.transform = `scale(${pulse * (1 + prog(t, 7.2, 2) * .3)})`;
+  const pr = lerp(1, 0, cool);
+  $('#hP').style.background = `radial-gradient(circle, rgba(${Math.round(lerp(80, 255, pr))},${Math.round(lerp(220, 230, pr))},${Math.round(lerp(255, 90, pr))},${.9 * heat}), rgba(${Math.round(lerp(40, 255, pr))},${Math.round(lerp(120, 70, pr))},${Math.round(lerp(255, 50, pr))},${.7 * heat}) 45%, rgba(0,0,0,0) 70%)`;
+  $('#hP').style.transform = `scale(${lerp(1, .55, cool)})`;
+  css($('#rP'), { transform: `translate(-50%,-50%) scale(${pop(t, 9.8, .4)})`, opacity: t > 9.8 ? 1 : 0 });
+  css($('#rC'), { transform: `translate(-50%,-50%) scale(${pop(t, 10.0, .4)})`, opacity: t > 10.0 ? 1 : 0 });
+  css($('#hours'), { transform: `translate(-50%,-50%) scale(${pop(t, 10.7, .45)})`, opacity: t > 10.7 ? 1 : 0 });
+  $('#uni').style.opacity = t > 9.6 ? 1 - prog(t, 9.6, .2) : $('#uni').style.opacity;
+}
+window.CLIP = { duration: 13.7, render, sfx: [
+  [0, 'whoosh', {dur: .4}], [.1, 'pop', {freq: 600}], [.85, 'pop', {freq: 480}], [1.6, 'pop', {freq: 700}], [4.3, 'whoosh', {dur: .5, vol: .35}],
+  [4.95, 'pop', {freq: 600}], [5.65, 'pop', {freq: 650}], [5.2, 'riser', {dur: 1.2, vol: .12}], [5.9, 'riser', {dur: 1.2, vol: .12}],
+  [6.2, 'buzz', {dur: .6, vol: .15}], [7.2, 'freeze', {dur: 1.5, vol: .15}], [9.8, 'ding', {freq: 1319, dur: .8, vol: .25}], [10.0, 'buzz', {dur: .3, vol: .2}],
+  [10.7, 'pop', {freq: 520}],
+]};
+</script></body></html>

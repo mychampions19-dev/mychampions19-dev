@@ -1,0 +1,39 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>S05-B07 Crash Symptoms</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .card { position:absolute; top:520px; width:440px; height:440px; margin:-220px; border-radius:60px; text-align:center;
+    box-shadow: inset 0 6px 0 rgba(255,255,255,.35), inset 0 -14px 0 rgba(0,0,0,.2), 0 30px 60px rgba(0,0,0,.5); }
+  .card .emoji { font-size:190px; margin-top:50px; display:block; }
+  .card .lbl { font-size:60px; margin-top:10px; }
+  #fog { position:absolute; left:0; right:0; top:0; bottom:0; border-radius:60px; background: radial-gradient(circle at 40% 40%, rgba(255,255,255,.7), rgba(255,255,255,0) 60%); }
+  #urgent { left:960px; top:930px; white-space:nowrap; }
+  #siren { position:absolute; inset:0; background:radial-gradient(circle at 50% 100%, rgba(255,59,92,.5), rgba(255,59,92,0) 60%); opacity:0; }
+</style></head>
+<body><div id="stage">
+  <div id="cells" class="layer"></div><div id="siren"></div>
+  <div class="card" id="c1" style="left:420px;background:linear-gradient(160deg,#ffd166,#ff9f43)"><span class="emoji">🥶</span><div class="lbl h3d">SHAKY</div></div>
+  <div class="card" id="c2" style="left:960px;background:linear-gradient(160deg,#b8b3d9,#6a6190)"><span class="emoji">😵‍💫</span><div class="lbl h3d">BRAIN FOG</div><div id="fog"></div></div>
+  <div class="card" id="c3" style="left:1500px;background:linear-gradient(160deg,#ff8aa8,#c0213a)"><span class="emoji">🍩</span><div class="lbl h3d">CRAVINGS</div></div>
+  <div id="urgent" class="abs"><span class="pill" style="font-size:66px;background:linear-gradient(135deg,#ff3b5c,#9b1030)"><span class="emoji">🚨</span> MORE CARBS… NOW!</span></div>
+</div>
+<script src="../lib.js"></script>
+<script>
+const cells = makeCells(16, [['#ff6b6b','#b3122e'], ['#9b5cff','#3d1c8f']], 241, $('#cells'));
+function render(t) {
+  entryPunch(t); cells.update(t);
+  const c1 = pop(t, 1.0, .45), c2 = pop(t, 1.42, .45), c3 = pop(t, 2.0, .45);
+  $('#c1').style.transform = `scale(${c1}) translateX(${t > 1.0 ? Math.sin(t * 70) * 5 : 0}px)`;
+  $('#c2').style.transform = `scale(${c2}) rotate(${Math.sin(t * 2) * 3}deg)`;
+  $('#fog').style.transform = `translateX(${Math.sin(t * 1.5) * 60}px)`;
+  $('#c3').style.transform = `scale(${c3 * (1 + (t > 3.0 ? Math.sin(t * 16) * .05 : 0))})`;
+  [c1, c2, c3].forEach((p, i) => $('#c' + (i + 1)).style.opacity = p > 0 ? 1 : 0);
+  const up = prog(t, 3.05, .22);
+  css($('#urgent'), { transform: `translate(-50%,-50%) scale(${t < 3.05 ? 0 : lerp(2, 1, ease.back(up))})`, opacity: t > 3.05 ? 1 : 0 });
+  $('#siren').style.opacity = t > 2.0 ? (.5 + Math.sin(t * 12) * .4) : 0;
+}
+window.CLIP = { duration: 6.2, render, sfx: [
+  [0, 'whoosh', {dur: .4}], [1.0, 'pop', {freq: 600}], [1.05, 'buzz', {dur: .6, vol: .12}], [1.42, 'pop', {freq: 500}],
+  [2.0, 'pop', {freq: 800}], ...[2.0, 2.5, 3.0, 3.5, 4.0].map(a => [a, 'buzz', {dur: .25, vol: .15}]), [3.05, 'impact', {vol: .7}],
+]};
+</script></body></html>

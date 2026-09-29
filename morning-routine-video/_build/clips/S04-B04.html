@@ -1,0 +1,70 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>S04-B04 Out Of Sync</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .gear { position:absolute; }
+  .glbl { position:absolute; transform:translate(-50%,-50%); white-space:nowrap; }
+  .glbl .pill { font-size:40px; }
+  #sync { left:560px; top:110px; white-space:nowrap; }
+  #gauge { left:1420px; top:560px; width:0; height:0; }
+  #gsvg { position:absolute; left:-300px; top:-300px; width:600px; height:600px; overflow:visible; }
+  #gLbl { left:1420px; top:820px; white-space:nowrap; }
+  #gPct { position:absolute; left:0; top:40px; transform:translateX(-50%); font:700 90px 'Fredoka'; }
+  #flash { position:absolute; inset:0; background:radial-gradient(circle at 30% 50%, rgba(255,59,92,.5), rgba(255,59,92,0) 60%); opacity:0; }
+</style></head>
+<body><div id="stage">
+  <div id="cells" class="layer"></div><div id="flash"></div>
+  <svg class="layer" viewBox="0 0 1920 1080" style="overflow:visible">
+    <defs><g id="gearShape">
+      <circle r="120" fill="currentColor"/>
+      ${''}
+    </g></defs>
+    <g id="g1" transform="translate(430 540)" color="#ffd166"></g>
+    <g id="g2" transform="translate(690 700)" color="#9b5cff"></g>
+  </svg>
+  <div class="glbl" id="l1" style="left:430px;top:540px"><span class="emoji" style="font-size:90px">☀️</span></div>
+  <div class="glbl" id="l2" style="left:690px;top:700px"><span class="emoji" style="font-size:80px">🧠</span></div>
+  <div id="sync" class="abs"><span class="pill" style="font-size:60px;background:linear-gradient(135deg,#ff3b5c,#c0213a)"><span class="emoji">⚠️</span> OUT OF SYNC</span></div>
+  <div id="gauge" class="abs"><svg id="gsvg" viewBox="-300 -300 600 600">
+      <path d="M-230 0 A230 230 0 0 1 230 0" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="50" stroke-linecap="round"/>
+      <path id="gArc" d="" fill="none" stroke="#2ee6a8" stroke-width="50" stroke-linecap="round"/>
+      <g id="needle"><line x1="0" y1="0" x2="0" y2="-200" stroke="#fff" stroke-width="14" stroke-linecap="round"/><circle r="28" fill="#fff"/></g>
+    </svg><div id="gPct">100%</div></div>
+  <div id="gLbl" class="abs h3d" style="font-size:60px">BLOOD SUGAR CONTROL</div>
+</div>
+<script src="../lib.js"></script>
+<script>
+const cells = makeCells(18, [['#ff6b6b','#b3122e'], ['#ffd166','#c2551f'], ['#9b5cff','#3d1c8f']], 171, $('#cells'));
+function gearPath(teeth, r0, r1) { let d = ''; const n = teeth * 2;
+  for (let i = 0; i <= n; i++) { const a0 = i / n * 2 * Math.PI, r = i % 2 ? r0 : r1; const a1 = (i + .5) / n * 2 * Math.PI;
+    d += (i ? 'L' : 'M') + (Math.cos(a0) * r).toFixed(1) + ' ' + (Math.sin(a0) * r).toFixed(1) + ' L' + (Math.cos(a1) * r).toFixed(1) + ' ' + (Math.sin(a1) * r).toFixed(1) + ' '; }
+  return d + 'Z'; }
+$('#g1').innerHTML = `<g class="rot"><path d="${gearPath(12, 150, 180)}" fill="currentColor"/><circle r="110" fill="#1b0f45" opacity=".55"/></g>`;
+$('#g2').innerHTML = `<g class="rot"><path d="${gearPath(10, 120, 148)}" fill="currentColor"/><circle r="88" fill="#1b0f45" opacity=".55"/></g>`;
+function arcTo(p) { const a = Math.PI * (1 - p); return `M-230 0 A230 230 0 0 1 ${(Math.cos(a) * 230).toFixed(1)} ${(-Math.sin(a) * 230).toFixed(1)}`; }
+function render(t) {
+  entryPunch(t); cells.update(t);
+  const jam = t > 1.2;
+  const a1 = jam ? 1.2 * 60 + Math.sin(t * 60) * 4 : t * 60, a2 = jam ? -1.2 * 72 + Math.sin(t * 57) * 5 : -t * 72;
+  const gp = pop(t, .05, .5);
+  $('#g1 .rot').setAttribute('transform', `rotate(${a1}) scale(${gp})`);
+  $('#g2 .rot').setAttribute('transform', `rotate(${a2}) scale(${gp})`);
+  $('#g2').setAttribute('transform', `translate(${690 + (jam ? 30 : 0)} ${700 + (jam ? -20 : 0)})`);
+  $$('.glbl').forEach(l => l.style.transform = `translate(-50%,-50%) scale(${gp})`);
+  $('#flash').style.opacity = jam ? .5 + Math.sin(t * 12) * .3 : 0;
+  const sp = prog(t, 1.2, .22);
+  css($('#sync'), { transform: `translate(-50%,-50%) scale(${t < 1.2 ? 0 : lerp(2, 1, ease.back(sp))}) rotate(-4deg)`, opacity: t > 1.2 ? 1 : 0 });
+  const gg = pop(t, .3, .5);
+  $('#gauge').style.transform = `scale(${gg})`; $('#gLbl').style.transform = `translate(-50%,-50%) scale(${gg})`;
+  const drop = ease.out(prog(t, 2.6, .9)), v = lerp(1, .3, drop) + (t > 2.6 && t < 3.6 ? Math.sin(t * 40) * .02 : 0);
+  $('#gArc').setAttribute('d', arcTo(v));
+  $('#gArc').setAttribute('stroke', v > .6 ? '#2ee6a8' : v > .45 ? '#ffd166' : '#ff3b5c');
+  $('#needle').setAttribute('transform', `rotate(${-90 + v * 180})`);
+  $('#gPct').textContent = Math.round(v * 100) + '%'; $('#gPct').style.color = v > .45 ? '#fff' : '#ff3b5c';
+}
+window.CLIP = { duration: 5.1, render, sfx: [
+  [0, 'whoosh', {dur: .45}], ...Array.from({length: 6}, (_, i) => [.1 + i * .18, 'click', {vol: .25}]),
+  [1.2, 'clunk', {vol: .8}], [1.2, 'buzz', {dur: .5, vol: .25}], [1.25, 'impact', {vol: .5}],
+  [2.6, 'whoosh', {dur: .8, rise: false, vol: .4}], [3.3, 'buzz', {dur: .3, vol: .22}],
+]};
+</script></body></html>

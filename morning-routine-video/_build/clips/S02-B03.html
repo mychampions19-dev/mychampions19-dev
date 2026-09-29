@@ -1,0 +1,85 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>S02-B03 Notification Storm</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  #head { left:50%; top:80px; font-size:96px; }
+  #phone { left:960px; top:600px; width:400px; height:800px; margin:-400px 0 0 -200px; border-radius:64px;
+    background: linear-gradient(160deg, #3a3558, #16122e); padding:18px;
+    box-shadow: inset 0 3px 0 rgba(255,255,255,.3), 0 40px 80px rgba(0,0,0,.6), 0 0 120px var(--glow, rgba(100,140,255,.45)); }
+  #screen { position:absolute; inset:18px; border-radius:48px; overflow:hidden;
+    background: radial-gradient(circle at 50% 30%, #4d6bff, #1d2a8a 70%); }
+  #screenRed { position:absolute; inset:0; background: radial-gradient(circle at 50% 40%, #ff5a6e, #8a1d3a 75%); opacity:0; }
+  #clock { position:absolute; left:0; right:0; top:90px; text-align:center; font:700 110px 'Nunito'; color:#fff; }
+  #date { position:absolute; left:0; right:0; top:215px; text-align:center; font:700 32px 'Nunito'; color:rgba(255,255,255,.8); }
+  .card { position:absolute; width:560px; padding:22px 28px; border-radius:30px; background: rgba(255,255,255,.96); color:#1b1440;
+    box-shadow: 0 20px 40px rgba(0,0,0,.45); display:flex; align-items:center; gap:22px; }
+  .card .ic { font-size:72px; }
+  .card .t1 { font:700 40px 'Fredoka'; }
+  .card .t2 { font:700 26px 'Nunito'; color:#6a6190; }
+  .card .badge { position:absolute; right:-18px; top:-18px; min-width:70px; height:70px; padding:0 16px; border-radius:35px; background:#ff3b5c; color:#fff;
+    font:700 38px 'Fredoka'; display:flex; align-items:center; justify-content:center; box-shadow: 0 6px 14px rgba(0,0,0,.35); }
+  .mini { position:absolute; width:120px; height:120px; margin:-60px; border-radius:30px; display:flex; align-items:center; justify-content:center;
+    font-size:64px; box-shadow: 0 12px 24px rgba(0,0,0,.4); }
+  #stress { left:960px; top:1000px; }
+</style></head>
+<body><div id="stage">
+  <div id="cells" class="layer"></div>
+  <div id="minis" class="layer"></div>
+  <div id="phone" class="abs"><div id="screen"><div id="screenRed"></div><div id="clock">6:30</div><div id="date">MONDAY</div></div></div>
+  <div id="cards" class="layer"></div>
+  <div id="head" class="abs h3d">WITHIN SECONDS…</div>
+  <div id="stress" class="abs"><span class="pill" style="font-size:52px;background:linear-gradient(135deg,#ff3b5c,#ff8a3d)"><span class="emoji">😰</span> STRESS RISING</span></div>
+</div>
+<script src="../lib.js"></script>
+<script>
+const cells = makeCells(22, [['#7fa0ff','#2a3fa8'], ['#9b5cff','#3d1c8f'], ['#ff6b8a','#a3173f']], 51, $('#cells'));
+const CARDS = [
+  { ic:'📧', t1:'Inbox', t2:'47 unread · "URGENT: re: deadline"', b:'47', x: 90,   y: 250, at: 1.4 },
+  { ic:'🚨', t1:'BREAKING NEWS', t2:'Markets plunge overnight…', b:'!', x: 1270, y: 420, at: 2.6 },
+  { ic:'❤️', t1:'Social', t2:'128 new notifications', b:'99+', x: 90,   y: 640, at: 3.75 },
+];
+const cards = CARDS.map(c => { const d = el('div','card',$('#cards'), `<div class="ic emoji">${c.ic}</div><div><div class="t1">${c.t1}</div><div class="t2">${c.t2}</div></div><div class="badge">${c.b}</div>`);
+  d.style.left = c.x + 'px'; d.style.top = c.y + 'px'; return { ...c, d }; });
+const r = rand(8), ICONS = ['📧','💬','🔔','❤️','🚨','📰','📅','💸'], COLS = ['#7fa0ff','#ff6b8a','#ffd166','#2ee6a8','#c79bff','#ff8a3d'];
+const minis = Array.from({length: 26}, (_, i) => { const m = el('div','mini',$('#minis'));
+  m.innerHTML = `<span class="emoji">${ICONS[i % ICONS.length]}</span>`; m.style.background = COLS[i % COLS.length];
+  const a = r() * 6.283, rad = 420 + r() * 420; return { m, x: 960 + Math.cos(a) * rad * 1.3, y: 560 + Math.sin(a) * rad * .75, at: 4.2 + i * .05, rot: (r() - .5) * 40 }; });
+
+function render(t) {
+  entryPunch(t); cells.update(t);
+  const hp = pop(t, .15, .45);
+  css($('#head'), { transform: `translate(-50%,0) scale(${hp})`, opacity: t > .15 ? 1 : 0 });
+  // phone rises, then buzzes harder with each notification
+  const pp = ease.back(prog(t, .05, .6));
+  const n = cards.filter(c => t > c.at).length + (t > 4.2 ? 2 : 0);
+  const buzz = n ? Math.sin(t * 80) * n * 2.2 : 0;
+  $('#phone').style.transform = `translateY(${lerp(700, 0, pp)}px) rotate(${buzz * .4}deg) translateX(${buzz}px)`;
+  const red = ease.inOut(prog(t, 3.9, 1.2));
+  $('#screenRed').style.opacity = red;
+  $('#phone').style.setProperty('--glow', `rgba(${Math.round(lerp(100,255,red))},${Math.round(lerp(140,60,red))},${Math.round(lerp(255,90,red))},.55)`);
+  $('#clock').textContent = t < 3 ? '6:30' : '6:31';
+  for (const c of cards) {
+    const p = pop(t, c.at, .45);
+    const fromX = c.x < 900 ? -700 : 700;
+    css(c.d, { transform: `translateX(${lerp(fromX, 0, ease.out(prog(t, c.at, .4)))}px) scale(${.6 + .4 * p}) rotate(${Math.sin(t*3 + c.at) * 1.5}deg)`,
+      opacity: t > c.at ? 1 : 0 });
+  }
+  for (const k of minis) {
+    const p = pop(t, k.at, .4);
+    css(k.m, { left: lerp(960, k.x, ease.out(prog(t, k.at, .5))) + 'px', top: lerp(560, k.y, ease.out(prog(t, k.at, .5))) + Math.sin(t*4 + k.rot) * 10 + 'px',
+      transform: `scale(${p * .9}) rotate(${k.rot}deg)`, opacity: t > k.at ? 1 : 0 });
+  }
+  const sp = pop(t, 4.5, .45);
+  css($('#stress'), { transform: `translate(-50%,-50%) scale(${sp})`, opacity: t > 4.5 ? 1 : 0 });
+}
+
+window.CLIP = {
+  duration: 6.3, render,
+  sfx: [
+    [0, 'whoosh', {dur: .5}], [.15, 'pop', {freq: 520}],
+    ...[1.4, 2.6, 3.75].flatMap(a => [[a, 'ding', {freq: 1760, dur: .5, vol: .3}], [a + .05, 'buzz', {dur: .2, vol: .12}]]),
+    ...Array.from({length: 13}, (_, i) => [4.2 + i * .1, 'pop', {freq: 700 + (i % 5) * 150, vol: .2}]),
+    [4.5, 'riser', {dur: 1.5, vol: .15}],
+  ],
+};
+</script></body></html>

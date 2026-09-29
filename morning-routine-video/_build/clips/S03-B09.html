@@ -1,0 +1,62 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>S03-B09 Hunger Wearing A Mask</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  #title { left:50%; top:80px; font-size:110px; }
+  #clock { left:960px; top:265px; white-space:nowrap; }
+  #faceWrap { left:960px; top:590px; width:0; height:0; }
+  #under { position:absolute; left:-230px; top:-230px; width:460px; height:460px; --c1:#bfe9ff; --c2:#2a7bff; }
+  #under .emoji { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); font-size:240px; }
+  #mask { position:absolute; left:-240px; top:-240px; width:480px; height:480px; --c1:#ffd08a; --c2:#ff7a3d; transform-origin:50% 0; }
+  #mask .emoji { position:absolute; left:50%; top:52%; transform:translate(-50%,-50%); font-size:260px; }
+  #mask .strap { position:absolute; top:44%; width:140px; height:26px; background:#2b1d63; border-radius:13px; }
+  #cal { left:1540px; top:590px; white-space:nowrap; }
+  #calX { position:absolute; left:4%; right:4%; top:50%; height:14px; margin-top:-7px; border-radius:7px; background:#fff; box-shadow:0 0 12px rgba(0,0,0,.4); transform-origin:0 50%; }
+  #reveal { left:960px; top:940px; white-space:nowrap; }
+  .fork { position:absolute; font-size:110px; }
+</style></head>
+<body><div id="stage">
+  <div id="cells" class="layer"></div>
+  <div id="title" class="abs h3d burn">HUNGRY?</div>
+  <div id="clock" class="abs"><span class="pill" style="font-size:52px;background:linear-gradient(135deg,#ffd166,#ff9f43);color:#3a2300"><span class="emoji">⏰</span> 10–11 AM</span></div>
+  <div id="faceWrap" class="abs">
+    <div id="under" class="glossy"><div class="emoji">💧</div></div>
+    <div id="mask" class="glossy"><div class="strap" style="left:-120px"></div><div class="strap" style="right:-120px"></div><div class="emoji">🤤</div></div>
+  </div>
+  <div class="fork emoji" id="f1" style="left:470px;top:470px">🍴</div>
+  <div id="cal" class="abs"><span class="pill" style="font-size:52px;background:linear-gradient(135deg,#ff6b8a,#c0213a)">NEED CALORIES?</span><div id="calX"></div></div>
+  <div id="reveal" class="abs"><span class="pill" style="font-size:72px;background:linear-gradient(135deg,#4d9bff,#2a3fa8)"><span class="emoji">💧</span> IT'S DEHYDRATION</span></div>
+</div>
+<script src="../lib.js"></script>
+<script>
+const cells = makeCells(20, [['#ffb13b','#c2551f'], ['#7fa0ff','#2a3fa8'], ['#9b5cff','#3d1c8f']], 141, $('#cells'));
+function render(t) {
+  entryPunch(t); cells.update(t);
+  const tp = pop(t, .9, .45);
+  css($('#title'), { transform: `translate(-50%,0) scale(${tp}) rotate(${Math.sin(t * 6) * 2}deg)`, opacity: t > .9 ? 1 : 0 });
+  const cp = pop(t, 1.4, .4);
+  css($('#clock'), { transform: `translate(-50%,-50%) scale(${cp})`, opacity: t > 1.4 ? 1 : 0 });
+  const fp = pop(t, .1, .5);
+  // tummy-rumble wobble on the masked face until the reveal
+  const rumble = t > .9 && t < 5.5 ? Math.sin(t * 30) * 4 : 0;
+  $('#faceWrap').style.transform = `scale(${fp}) rotate(${rumble}deg)`;
+  // mask peels up and flies off at 5.6s
+  const rv = ease.in(prog(t, 5.55, .5));
+  css($('#mask'), { transform: `translateY(${-rv * 900}px) rotate(${-rv * 70}deg) rotateX(${rv * 40}deg)`, opacity: 1 - prog(t, 5.9, .2) });
+  $('#under').style.opacity = t > 5.4 ? 1 : 0;
+  const up = t > 5.6 ? 1 + Math.sin((t - 5.6) * 12) * .05 * (1 - prog(t, 5.6, .8)) : 1;
+  $('#under').style.transform = `scale(${up})`;
+  css($('#f1'), { transform: `scale(${pop(t, 1.0, .4)}) rotate(${Math.sin(t * 5) * 12}deg)`, opacity: t > 1.0 && t < 5.6 ? 1 : 0 });
+  const cl = pop(t, 2.4, .4), xx = prog(t, 2.95, .2);
+  css($('#cal'), { transform: `translate(-50%,-50%) scale(${cl})`, opacity: t > 2.4 ? 1 : 0 });
+  css($('#calX'), { transform: `rotate(-1.5deg) scaleX(${ease.out(xx)})`, opacity: t > 2.95 ? 1 : 0 });
+  const rp = pop(t, 5.9, .45);
+  css($('#reveal'), { transform: `translate(-50%,-50%) scale(${rp})`, opacity: t > 5.9 ? 1 : 0 });
+  $('#title').style.opacity = t > 5.55 ? 1 - prog(t, 5.55, .3) : $('#title').style.opacity;
+}
+window.CLIP = { duration: 7.6, render, sfx: [
+  [0, 'whoosh', {dur: .45}], [.1, 'pop', {freq: 500}], [.9, 'buzz', {dur: .6, vol: .15}], [.9, 'pop', {freq: 700}],
+  [1.4, 'pop', {freq: 900}], [2.4, 'pop', {freq: 600}], [2.95, 'buzz', {dur: .3, vol: .25}],
+  [5.2, 'riser', {dur: .4, vol: .15}], [5.55, 'whoosh', {dur: .5, vol: .5}], [5.9, 'ding', {freq: 1319, dur: 1.2, vol: .3}], [5.9, 'pop', {freq: 520}],
+]};
+</script></body></html>

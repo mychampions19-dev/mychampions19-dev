@@ -1,0 +1,52 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>S02-B10 Ten Years Younger</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  #title { left:50%; top:80px; font-size:96px; }
+  #brainWrap { left:960px; top:560px; width:0; height:0; }
+  #ring { position:absolute; left:-280px; top:-280px; width:560px; height:560px; }
+  #brain { position:absolute; left:0; top:0; transform:translate(-50%,-50%); font-size:280px; }
+  #glow { position:absolute; left:-330px; top:-330px; width:660px; height:660px; border-radius:50%;
+    background: radial-gradient(circle, rgba(46,230,168,.55), rgba(46,230,168,0) 65%); }
+  #years { left:960px; top:560px; font-size:190px; color:#2ee6a8; }
+  #sub { left:960px; top:930px; white-space:nowrap; }
+</style></head>
+<body><div id="stage">
+  <div id="cells" class="layer"></div>
+  <div id="title" class="abs h3d">ATTENTION BOOST</div>
+  <div id="brainWrap" class="abs"><div id="glow"></div>
+    <svg id="ring" viewBox="-280 -280 560 560">
+      <circle r="250" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="30"/>
+      <circle id="arc" r="250" fill="none" stroke="#2ee6a8" stroke-width="30" stroke-linecap="round" stroke-dasharray="1571" stroke-dashoffset="1571" transform="rotate(-90) scale(-1 1)"/>
+      <g id="hand"><line x1="0" y1="0" x2="0" y2="-205" stroke="#fff" stroke-width="14" stroke-linecap="round"/></g>
+    </svg>
+    <div id="brain" class="emoji">🧠</div></div>
+  <div id="years" class="abs h3d">−10 YEARS</div>
+  <div id="sub" class="abs"><span class="pill" style="font-size:52px;background:linear-gradient(135deg,#2ee6a8,#3d6bff)">OF AGE-RELATED DECLINE REVERSED</span></div>
+</div>
+<script src="../lib.js"></script>
+<script>
+const cells = makeCells(22, [['#2ee6a8','#12997a'], ['#9b5cff','#3d1c8f'], ['#7fa0ff','#2a3fa8']], 81, $('#cells'));
+function render(t) {
+  entryPunch(t); cells.update(t);
+  const tp = pop(t, .15, .45);
+  css($('#title'), { transform: `translate(-50%,0) scale(${tp})`, opacity: t > .15 ? 1 : 0 });
+  const bp = pop(t, .1, .55);
+  const rw = ease.inOut(prog(t, 1.2, .9));             // rewind on "reversing … ten years"
+  const slide = ease.inOut(prog(t, 2.05, .45));
+  $('#brainWrap').style.transform = `translateX(${lerp(0, -470, slide)}px) scale(${bp * lerp(1, .8, slide)})`;
+  $('#brain').style.transform = `translate(-50%,-50%) scale(${1 + Math.sin(t * 5) * .03 + rw * .1})`;
+  $('#arc').setAttribute('stroke-dashoffset', (1571 * (1 - rw)).toFixed(0));
+  $('#hand').setAttribute('transform', `rotate(${-rw * 720})`);
+  $('#glow').style.opacity = .3 + rw * .7;
+  const yp = prog(t, 2.2, .25);
+  css($('#years'), { transform: `translate(-50%,-50%) translateX(${lerp(0, 250, 1)}px) scale(${t < 2.2 ? 0 : lerp(2.2, 1, ease.back(yp))})`, opacity: t > 2.2 ? 1 : 0 });
+  const sp = pop(t, 2.8, .45);
+  css($('#sub'), { transform: `translate(-50%,-50%) scale(${sp})`, opacity: t > 2.8 ? 1 : 0 });
+}
+window.CLIP = { duration: 5.5, render, sfx: [
+  [0, 'whoosh', {dur: .5}], [.15, 'pop', {freq: 600}], [1.2, 'whoosh', {dur: .9, rise: false, vol: .45}],
+  ...Array.from({length: 12}, (_, i) => [1.2 + i * .075, 'tick', {vol: .22}]),
+  [2.2, 'impact', {vol: .7}], [2.25, 'ding', {freq: 1568, dur: 1.2, vol: .3}], [2.8, 'pop', {freq: 700}],
+]};
+</script></body></html>

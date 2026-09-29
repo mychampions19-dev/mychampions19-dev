@@ -1,0 +1,36 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>S05-B06 Sugar Crash</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .tag { position:absolute; transform:translate(-50%,-50%); white-space:nowrap; }
+  #t90 { left:960px; top:170px; }
+  #tCrash .pill { font-size:62px; }
+</style></head>
+<body><div id="stage">
+  <div id="cells" class="layer"></div>
+  <div class="tag" id="t90"><span class="pill" style="font-size:60px;background:linear-gradient(135deg,#ffd166,#ff9f43);color:#3a2300"><span class="emoji">⏱️</span> 90 MINUTES LATER…</span></div>
+  <div class="tag" id="tCrash"><span class="pill" style="background:linear-gradient(135deg,#ff3b5c,#c0213a)"><span class="emoji">📉</span> CRASH BELOW BASELINE</span></div>
+</div>
+<script src="../lib.js"></script>
+<script src="glucose_chart.js"></script>
+<script>
+const cells = makeCells(16, [['#ff6b6b','#b3122e'], ['#3d6bff','#2a3fa8']], 231, $('#cells'));
+buildGlucoseChart($('#stage'));
+revealInsulin(120);
+css($('#tCrash'), { left: '1320px', top: '360px' });
+function render(t) {
+  entryPunch(t); cells.update(t);
+  css($('#t90'), { transform: `translate(-50%,-50%) scale(${pop(t, .1, .45)})`, opacity: t > .1 ? 1 : 0 });
+  const m = lerp(62, 150, ease.inOut(prog(t, .5, 2.3)));
+  revealGlucose(m);
+  $('#lowZone').setAttribute('opacity', ease.out(prog(t, 2.2, .4)));
+  const cp = prog(t, 2.3, .22);
+  css($('#tCrash'), { transform: `translate(-50%,-50%) scale(${t < 2.3 ? 0 : lerp(2, 1, ease.back(cp))})`, opacity: t > 2.3 ? 1 : 0 });
+  const sk = t > 2.3 && t < 2.7 ? Math.sin(t * 110) * 10 * (1 - prog(t, 2.3, .4)) : 0;
+  $('#stage').style.transform += ` translateY(${sk}px)`;
+}
+window.CLIP = { duration: 4.7, render, sfx: [
+  [0, 'whoosh', {dur: .4}], [.1, 'pop', {freq: 560}], ...Array.from({length: 6}, (_, i) => [.2 + i * .12, 'tick', {vol: .2}]),
+  [1.4, 'whoosh', {dur: 1.0, rise: false, vol: .45}], [2.3, 'impact', {vol: .8}], [2.35, 'buzz', {dur: .5, vol: .25}],
+]};
+</script></body></html>

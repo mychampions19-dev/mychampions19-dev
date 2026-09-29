@@ -1,0 +1,55 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>S02-B14 3x Cortisol Receptors</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .fat { position:absolute; top:520px; margin:-160px; width:320px; height:320px; --c1:#fff3b0; --c2:#f2b400; }
+  .port { position:absolute; width:46px; height:46px; margin:-23px; border-radius:50%; background:#1b0f45; border:8px solid #ffd166; }
+  .port.full { background:#ff3b5c; border-color:#ff97a8; box-shadow:0 0 18px #ff3b5c; }
+  .lbl { position:absolute; top:780px; transform:translateX(-50%); font-size:60px; white-space:nowrap; }
+  .fly { position:absolute; width:34px; height:34px; margin:-17px; border-radius:50%; background:radial-gradient(circle at 35% 30%, #ffb3c0, #ff3b5c 60%); box-shadow:0 0 16px #ff3b5c; }
+  #x3 { left:960px; top:480px; font-size:230px; color:#ff3b5c; }
+  #rec { left:960px; top:940px; white-space:nowrap; }
+</style></head>
+<body><div id="stage">
+  <div id="cells" class="layer"></div>
+  <div class="fat glossy" id="fA" style="left:430px; transform:scale(.8)"></div>
+  <div class="fat glossy" id="fB" style="left:1490px"></div>
+  <div id="ports" class="layer"></div><div id="flies" class="layer"></div>
+  <div class="lbl h3d" style="left:430px">OTHER FAT</div>
+  <div class="lbl h3d warn" style="left:1490px">VISCERAL FAT</div>
+  <div id="x3" class="abs h3d warn">3×</div>
+  <div id="rec" class="abs"><span class="pill" style="font-size:54px;background:linear-gradient(135deg,#ff3b5c,#c0213a)">MORE CORTISOL RECEPTORS</span></div>
+</div>
+<script src="../lib.js"></script>
+<script>
+const cells = makeCells(20, [['#ffd166','#c2551f'], ['#ff6b6b','#b3122e'], ['#9b5cff','#3d1c8f']], 101, $('#cells'));
+function ring(cx, cy, r, n) { return Array.from({length: n}, (_, i) => { const a = i / n * 6.283 - 1.57; return [cx + Math.cos(a) * r, cy + Math.sin(a) * r]; }); }
+const PA = ring(430, 520, 150, 4), PB = ring(1490, 520, 185, 12);
+const ports = [...PA.map(p => ({p, side: 0})), ...PB.map(p => ({p, side: 1}))].map((o, i) => {
+  const d = el('div', 'port', $('#ports')); d.style.left = o.p[0] + 'px'; d.style.top = o.p[1] + 'px';
+  const f = el('div', 'fly', $('#flies'));
+  const r = rand(i + 5);
+  return { ...o, d, f, sx: 960 + (r() - .5) * 900, sy: -80 - r() * 200, at: 1.15 + (o.side ? (i - 4) * .05 : i * .12) };
+});
+function render(t) {
+  entryPunch(t); cells.update(t);
+  const a = pop(t, .05, .4), b = pop(t, .15, .4);
+  $('#fA').style.transform = `scale(${.8 * a})`; $('#fB').style.transform = `scale(${b * (1 + Math.sin(t * 6) * .02)})`;
+  $$('.lbl').forEach(l => l.style.opacity = t > .2 ? 1 : 0);
+  for (const o of ports) {
+    const pp = pop(t, o.side ? .25 : .15, .35);
+    o.d.style.transform = `scale(${pp})`;
+    const k = ease.inOut(prog(t, o.at, .45));
+    css(o.f, { left: lerp(o.sx, o.p[0], k) + 'px', top: lerp(o.sy, o.p[1], k) + 'px', opacity: t > o.at && k < 1 ? 1 : 0 });
+    o.d.className = 'port' + (k >= 1 ? ' full' : '');
+  }
+  const xp = prog(t, .4, .22);
+  css($('#x3'), { transform: `translate(-50%,-50%) scale(${t < .4 ? 0 : lerp(2.6, 1, ease.back(xp))}) rotate(-6deg)`, opacity: t > .4 ? 1 : 0 });
+  const rp = pop(t, 1.2, .4);
+  css($('#rec'), { transform: `translate(-50%,-50%) scale(${rp})`, opacity: t > 1.2 ? 1 : 0 });
+}
+window.CLIP = { duration: 4.0, render, sfx: [
+  [0, 'whoosh', {dur: .4}], [.05, 'pop', {freq: 500}], [.15, 'pop', {freq: 600}], [.4, 'impact', {vol: .8}], [1.2, 'pop', {freq: 700}],
+  ...Array.from({length: 16}, (_, i) => [1.6 + i * .05, 'tick', {vol: .18}]),
+]};
+</script></body></html>

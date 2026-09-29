@@ -1,0 +1,45 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>S05-B05 Fat Burning Suppressed</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  #furnace { left:960px; top:560px; width:520px; height:520px; margin:-260px; border-radius:60px; background:linear-gradient(160deg,#4a3d8a,#1b1245);
+    box-shadow: inset 0 6px 0 rgba(255,255,255,.2), 0 40px 80px rgba(0,0,0,.6); }
+  #window { position:absolute; left:80px; top:110px; width:360px; height:300px; border-radius:40px; background:#0c0726; overflow:hidden; box-shadow: inset 0 0 0 10px #2b2168; }
+  #fire { position:absolute; left:50%; bottom:-10px; transform:translateX(-50%); font-size:260px; transform-origin:50% 100%; }
+  #lbl { left:960px; top:200px; font-size:84px; }
+  #key { left:1500px; top:560px; font-size:220px; }
+  #lock { position:absolute; left:88%; top:84%; font-size:150px; transform:translate(-50%,-50%); }
+  #stamp { left:960px; top:930px; font-size:100px; padding:10px 50px; border:12px solid #7f9bff; border-radius:26px; color:#fff; background:rgba(30,20,90,.85); white-space:nowrap; }
+  #ins { left:1500px; top:790px; white-space:nowrap; }
+</style></head>
+<body><div id="stage">
+  <div id="cells" class="layer"></div>
+  <div id="lbl" class="abs h3d burn">FAT BURNING</div>
+  <div id="furnace" class="abs"><div id="window"><div id="fire" class="emoji">🔥</div></div><div id="lock" class="emoji">🔒</div></div>
+  <div id="key" class="abs emoji">🔑</div>
+  <div id="ins" class="abs"><span class="pill" style="font-size:48px;background:linear-gradient(135deg,#3d6bff,#9b5cff)">INSULIN HIGH</span></div>
+  <div id="stamp" class="abs h3d store">SUPPRESSED</div>
+</div>
+<script src="../lib.js"></script>
+<script>
+const cells = makeCells(16, [['#ffb13b','#c2551f'], ['#3d6bff','#2a3fa8']], 221, $('#cells'));
+function render(t) {
+  entryPunch(t); cells.update(t);
+  $('#furnace').style.transform = `scale(${pop(t, .05, .45)})`;
+  css($('#lbl'), { transform: `translate(-50%,-50%) scale(${pop(t, .1, .45)})` });
+  const kp = pop(t, .25, .4), fly = ease.inOut(prog(t, 1.0, .45));
+  css($('#key'), { transform: `translate(-50%,-50%) translateX(${lerp(0, -540, fly)}px) rotate(${lerp(0, -90, fly)}deg) scale(${kp * lerp(1, .6, fly)})`, opacity: t > .25 && t < 1.5 ? 1 : 0 });
+  css($('#ins'), { transform: `translate(-50%,-50%) scale(${pop(t, .3, .4)})`, opacity: t > .3 ? 1 - prog(t, 1.4, .2) : 0 });
+  const lk = prog(t, 1.45, .2);
+  css($('#lock'), { transform: `translate(-50%,-50%) scale(${t < 1.45 ? 0 : lerp(2, 1, ease.back(lk))})`, opacity: t > 1.45 ? 1 : 0 });
+  const die = ease.out(prog(t, 1.5, .9));
+  css($('#fire'), { transform: `translateX(-50%) scale(${lerp(1, .18, die) * (1 + Math.sin(t * 20) * .04)})`, filter: `saturate(${1 - die * .8}) brightness(${1 - die * .5})` });
+  $('#lbl').style.filter = `grayscale(${die})`;
+  const sp = prog(t, 1.75, .22);
+  css($('#stamp'), { transform: `translate(-50%,-50%) scale(${t < 1.75 ? 0 : lerp(2.2, 1, ease.back(sp))}) rotate(-4deg)`, opacity: t > 1.75 ? 1 : 0 });
+}
+window.CLIP = { duration: 3.9, render, sfx: [
+  [0, 'whoosh', {dur: .4}], [.05, 'sizzle', {dur: 1.4, vol: .14}], [.3, 'pop', {freq: 700}], [1.0, 'whoosh', {dur: .4, vol: .3}],
+  [1.45, 'clunk', {vol: .8}], [1.5, 'freeze', {dur: 1.2, vol: .18}], [1.75, 'impact', {vol: .6}],
+]};
+</script></body></html>

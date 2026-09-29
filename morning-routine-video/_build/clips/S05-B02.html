@@ -1,0 +1,36 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>S05-B02 Healthy Breakfast Lineup</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  #title { left:50%; top:90px; font-size:100px; }
+  .item { position:absolute; top:560px; width:290px; height:290px; margin:-145px; --c1:#fff7e6; }
+  .item .emoji { position:absolute; left:50%; top:50%; transform:translate(-50%,-52%); font-size:160px; }
+  .item .lbl { position:absolute; left:50%; top:320px; transform:translateX(-50%); font-size:38px; white-space:nowrap; }
+  .halo { position:absolute; left:50%; top:-40px; width:170px; height:40px; margin-left:-85px; border-radius:50%; border:10px solid #ffd166; box-shadow:0 0 20px #ffd166; }
+</style></head>
+<body><div id="stage">
+  <div id="cells" class="layer"></div>
+  <div id="title" class="abs h3d">"HEALTHY" BREAKFASTS?</div>
+  <div id="items" class="layer"></div>
+</div>
+<script src="../lib.js"></script>
+<script>
+const cells = makeCells(18, [['#ff9ab3','#d9436b'], ['#ffd166','#c2551f'], ['#9b5cff','#3d1c8f']], 201, $('#cells'));
+const IT = [['🥣','OATMEAL','#ffd6a0',.0], ['🍞','GRAIN TOAST','#ffc98a',1.0], ['🍨','FRUIT YOGURT','#ffc2dc',1.7], ['🥤','SMOOTHIES','#c7b8ff',2.3], ['🌾','GRANOLA','#ffe08a',2.6]];
+const items = IT.map(([e, l, c, at], i) => { const d = el('div','item glossy',$('#items'), `<div class="halo"></div><div class="emoji">${e}</div><div class="lbl h3d">${l}</div>`);
+  d.style.left = (240 + i * 360) + 'px'; d.style.setProperty('--c2', c); return { d, at, i }; });
+function render(t) {
+  entryPunch(t); cells.update(t);
+  css($('#title'), { transform: `translate(-50%,0) scale(${pop(t, .1, .45)})`, opacity: t > .1 ? 1 : 0 });
+  for (const o of items) {
+    const p = pop(t, o.at + .05, .45);
+    css(o.d, { transform: `translateY(${Math.sin(t * 2.5 + o.i) * 12}px) scale(${p})`, opacity: t > o.at + .05 ? 1 : 0 });
+    o.d.querySelector('.halo').style.opacity = t > 3.0 ? .9 : 0;
+    o.d.querySelector('.halo').style.transform = `rotateX(60deg) scale(${pop(t, 3.0 + o.i * .06, .35)})`;
+  }
+}
+window.CLIP = { duration: 4.6, render, sfx: [
+  [0, 'whoosh', {dur: .45}], [.1, 'pop', {freq: 480}], ...[.05, 1.05, 1.75, 2.35, 2.65].map((a, i) => [a, 'pop', {freq: 600 + i * 100}]),
+  [3.0, 'ding', {freq: 1760, dur: 1.2, vol: .2}], [3.1, 'ding', {freq: 2093, dur: 1.2, vol: .15}],
+]};
+</script></body></html>
