@@ -8,6 +8,8 @@ const fs = require('fs');
 const FFMPEG = '/usr/local/lib/python3.11/dist-packages/imageio_ffmpeg/binaries/ffmpeg-linux-x86_64-v7.0.2';
 const [clip, outBase, fpsArg, flag, stills] = process.argv.slice(2);
 const fps = +(fpsArg || 30);
+// SPEED < 1 slows every animation + SFX cue to match a slower voice read (e.g. Beth at 0.9).
+const SPEED = +(process.env.SPEED || 1);
 
 (async () => {
   const browser = await chromium.launch({ args: ['--font-render-hinting=none', '--disable-gpu-vsync'] });
@@ -15,7 +17,9 @@ const fps = +(fpsArg || 30);
   page.on('pageerror', e => { console.error('PAGE ERROR', e.message); process.exit(1); });
   await page.goto('file://' + path.resolve(clip));
   await page.evaluate(() => document.fonts.ready);
-  const { duration, sfx } = await page.evaluate(() => ({ duration: CLIP.duration, sfx: CLIP.sfx || [] }));
+  const raw = await page.evaluate(() => ({ duration: CLIP.duration, sfx: CLIP.sfx || [] }));
+  const duration = raw.duration / SPEED;
+  const sfx = raw.sfx.map(([t, ...r]) => [t / SPEED, ...r]);
 
   if (flag === '--preview') {
     for (const t of stills.split(',').map(Number)) {
@@ -32,7 +36,7 @@ const fps = +(fpsArg || 30);
     outBase + '.video.mp4'], { stdio: ['pipe', 'inherit', 'inherit'] });
   const n = Math.round(duration * fps);
   for (let i = 0; i < n; i++) {
-    await page.evaluate(t => CLIP.render(t), i / fps);
+    await page.evaluate(t => CLIP.render(t), (i / fps) * SPEED);
     const buf = await page.screenshot({ type: 'png' });
     if (!ff.stdin.write(buf)) await new Promise(r => ff.stdin.once('drain', r));
     if (i % 30 === 0) process.stdout.write(`\r${path.basename(outBase)} ${i}/${n}`);

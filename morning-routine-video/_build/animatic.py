@@ -10,6 +10,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 PROJ = ROOT.parent
 G = PROJ / "03_graphics"
+# Voice speed (Beth at ElevenLabs speed 0.9). Segment timings below are written for the 1.0 read and
+# are scaled by 1/SPEED at build time; MG clips are already rendered at this speed (build.py SPEED).
+SPEED = 0.9
+VOICE_SUFFIX = "_Beth_Speed090.mp3"
 FF = "/usr/local/lib/python3.11/dist-packages/imageio_ffmpeg/binaries/ffmpeg-linux-x86_64-v7.0.2"
 
 SECTIONS = {
@@ -140,11 +144,21 @@ def placeholder(label, kind, out):
     Path(str(out.with_suffix("")) + "_t0.00.png").rename(out)
 
 
+def probe(path):
+    r = subprocess.run([FF, "-hide_banner", "-i", str(path)], capture_output=True, text=True).stderr
+    h, m, sec = r.split("Duration: ")[1].split(",")[0].split(":")
+    return int(h) * 3600 + int(m) * 60 + float(sec)
+
+
 def build(sec):
     S = SECTIONS[sec]
     ins, vf, af, vlabels, alabels = [], [], [], [], []
     for i, seg in enumerate(S["segs"]):
         kind, src, cin, dur = seg[:4]
+        dur = round(dur / SPEED, 3)
+        stretch = 1.0
+        if kind == "mg":
+            cin = round(cin / SPEED, 3)
         label = seg[4] if len(seg) > 4 else ""
         path = G / src if src else None
         if kind == "host" or not path.exists():
@@ -154,15 +168,25 @@ def build(sec):
             vf.append(f"[{i}:v]zoompan=z='1+0.0008*on':d=1:s=1920x1080:fps=30,trim=duration={dur},setpts=PTS-STARTPTS[v{i}]")
             af.append(f"anullsrc=r=48000:cl=stereo,atrim=duration={dur}[a{i}]")
         else:
+            if kind == "3d":
+                # Flow shots are short (4-8 s): pull the in-point earlier if the longer slot runs past the end,
+                # and only slow the shot itself if even the full clip is too short.
+                have = probe(path)
+                if cin + dur > have - 0.05:
+                    cin = max(0.0, round(have - 0.05 - dur, 3))
+                    if have - 0.05 < dur:
+                        stretch = dur / (have - 0.05)
+                        print(f"  {src}: slowed to {1/stretch:.2f}x to fill {dur:.2f}s")
             ins += ["-i", str(path)]
-            vf.append(f"[{i}:v]trim=start={cin}:duration={dur},setpts=PTS-STARTPTS,fps=30,scale=1920:1080[v{i}]")
+            pts = f"setpts=(PTS-STARTPTS)*{stretch:.4f}" if stretch != 1.0 else "setpts=PTS-STARTPTS"
+            vf.append(f"[{i}:v]trim=start={cin}:duration={dur / stretch:.3f},{pts},fps=30,scale=1920:1080,trim=duration={dur}[v{i}]")
             if kind == "mg":
                 af.append(f"[{i}:a]atrim=start={cin}:duration={dur},asetpts=PTS-STARTPTS[a{i}]")
             else:
                 af.append(f"anullsrc=r=48000:cl=stereo,atrim=duration={dur}[a{i}]")
         vlabels.append(f"[v{i}]"); alabels.append(f"[a{i}]")
     n = len(S["segs"])
-    ins += ["-i", str(PROJ / S["voice"])]
+    ins += ["-i", str(PROJ / S["voice"].replace("_Beth_TestRead.mp3", VOICE_SUFFIX))]
     fc = ";".join(vf + af) + f";{''.join(vlabels)}concat=n={n}:v=1:a=0,format=yuv420p[v];" \
          f"{''.join(alabels)}concat=n={n}:v=0:a=1,volume=0.55[sfx];[{n}:a]aresample=48000,aformat=channel_layouts=stereo[vo];" \
          f"[vo][sfx]amix=inputs=2:duration=first:normalize=0[a]"
