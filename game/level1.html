@@ -21,7 +21,7 @@ canvas{display:block;position:fixed;left:0;top:0;touch-action:none}
    ===================================================================== */
 const VW = 540, VH = 960;
 const CFG = { relaxed: false, sound: true };
-const TIMES = { snake: 50, slab: 50, oxygen: 70 };   // seconds, Normal mode
+const TIMES = { rat: 50, hold: 50, air: 70 };   // seconds, Normal mode
 const mult = () => (CFG.relaxed ? 1.5 : 1);
 
 const cv = document.getElementById('c'), ctx = cv.getContext('2d');
@@ -90,25 +90,26 @@ const SFX = {
   lose: () => { tone(330, .3, 'sawtooth', .07, .7); tone(220, .5, 'sawtooth', .07, .5, .25); },
   win: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, .25, 'triangle', .1, 1, i * .11)),
   splash: () => tone(900, .4, 'sine', .06, .2),
+  blast: t => t === 'bomb' ? tone(90, .35, 'sawtooth', .1, .5)
+    : t === 'rainbow' ? [0, 1, 2, 3, 4].forEach(i => tone(600 + i * 150, .12, 'triangle', .07, 1, i * .04))
+    : tone(300, .3, 'sawtooth', .06, 3),
 };
 const buzz = ms => { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {} };
 
-// ---------- block art (cached sprites)
+// ---------- block art (cached sprites). Blocks are sweets: giant to a tiny hero.
 const COLORS = {
   red:    { base: '#e8262b', light: '#ff8a7a', dark: '#8f0d12' },
   yellow: { base: '#ffbf1a', light: '#fff09a', dark: '#b86c00' },
   blue:   { base: '#2068ff', light: '#8fbaff', dark: '#0b36a0' },
   green:  { base: '#2fcf3a', light: '#a8f79a', dark: '#117a19' },
+  rainbow:{ base: '#6b3f22', light: '#b07a4e', dark: '#2e180b' },
 };
+const SPRINKLES = ['#ff4d6d', '#ffd23a', '#3fa7ff', '#4fd65a', '#ffffff', '#c86bff'];
 const SPR = {};
-function blockSprite(color, s) {
-  const key = color + s; if (SPR[key]) return SPR[key];
-  const k = 3, c = document.createElement('canvas'); c.width = c.height = s * k;
-  const g = c.getContext('2d'); g.scale(k, k);
-  const C = COLORS[color], cx = s / 2, cy = s / 2;
-  g.fillStyle = 'rgba(0,0,0,.25)'; g.beginPath(); g.ellipse(cx, cy + s * .37, s * .33, s * .07, 0, 0, 7); g.fill();
+function shapePath(g, color, s) {
+  const cx = s / 2, cy = s / 2;
   g.beginPath();
-  if (color === 'red') g.arc(cx, cy + s * .03, s * .38, 0, Math.PI * 2);
+  if (color === 'red' || color === 'rainbow') g.arc(cx, cy + s * .03, s * .39, 0, Math.PI * 2);
   else if (color === 'blue') rr(g, s * .12, s * .12, s * .76, s * .76, s * .18);
   else if (color === 'yellow') {
     for (let i = 0; i < 6; i++) { const a = Math.PI / 6 + i * Math.PI / 3; g.lineTo(cx + Math.cos(a) * s * .43, cy + Math.sin(a) * s * .43); }
@@ -121,24 +122,126 @@ function blockSprite(color, s) {
     g.quadraticCurveTo(cx - s * .44, cy + s * .1, cx - s * .3, cy - s * .06);
     g.quadraticCurveTo(cx - s * .16, cy - s * .18, cx - s * .12, cy - s * .38); g.closePath();
   }
+}
+function blockSprite(color, s, special) {
+  const key = color + s + (special || ''); if (SPR[key]) return SPR[key];
+  const k = 3, c = document.createElement('canvas'); c.width = c.height = s * k;
+  const g = c.getContext('2d'); g.scale(k, k);
+  const C = COLORS[color], cx = s / 2, cy = s / 2;
+  g.fillStyle = 'rgba(0,0,0,.25)'; g.beginPath(); g.ellipse(cx, cy + s * .37, s * .33, s * .07, 0, 0, 7); g.fill();
+  if (special === 'bomb') { // glowing wrapper
+    g.fillStyle = 'rgba(255,240,150,.55)'; g.beginPath(); g.arc(cx, cy, s * .5, 0, 7); g.fill();
+  }
+  shapePath(g, color, s);
   const grd = g.createRadialGradient(cx - s * .12, cy - s * .15, s * .04, cx, cy, s * .5);
   grd.addColorStop(0, C.light); grd.addColorStop(.5, C.base); grd.addColorStop(1, C.dark);
   g.fillStyle = grd; g.fill(); g.lineWidth = s * .04; g.strokeStyle = C.dark; g.stroke();
+  if (color === 'rainbow') { // chocolate ball with sprinkles
+    for (let i = 0; i < 16; i++) {
+      const a = i * 2.39996, r = s * .3 * Math.sqrt((i + .5) / 16);
+      g.save(); g.translate(cx + Math.cos(a) * r, cy + s * .03 + Math.sin(a) * r); g.rotate(a * 3);
+      g.fillStyle = SPRINKLES[i % SPRINKLES.length]; rr(g, -s * .045, -s * .015, s * .09, s * .03, s * .015); g.fill(); g.restore();
+    }
+  }
+  g.save(); shapePath(g, color, s); g.clip();
+  if (special === 'h' || special === 'v') { // stripes = rocket
+    g.translate(cx, cy); if (special === 'v') g.rotate(Math.PI / 2);
+    g.fillStyle = 'rgba(255,255,255,.92)';
+    g.fillRect(-s * .5, -s * .14, s, s * .08); g.fillRect(-s * .5, s * .06, s, s * .08);
+  }
+  g.restore();
   g.fillStyle = 'rgba(255,255,255,.6)'; g.beginPath(); g.ellipse(cx - s * .1, cy - s * .17, s * .13, s * .065, -.5, 0, 7); g.fill();
   if (color === 'red') {
     g.strokeStyle = '#5a3a12'; g.lineWidth = s * .05; g.beginPath(); g.moveTo(cx, cy - s * .3); g.lineTo(cx + s * .03, cy - s * .43); g.stroke();
     g.fillStyle = '#3fbf3a'; g.beginPath(); g.ellipse(cx + s * .12, cy - s * .4, s * .09, s * .045, -.4, 0, 7); g.fill();
   }
+  if (special === 'h' || special === 'v') { // arrow tips
+    g.save(); g.translate(cx, cy); if (special === 'v') g.rotate(Math.PI / 2);
+    g.fillStyle = '#fff'; g.strokeStyle = 'rgba(0,0,0,.5)'; g.lineWidth = 1;
+    for (const d of [-1, 1]) { g.beginPath(); g.moveTo(d * s * .5, 0); g.lineTo(d * s * .36, -s * .1); g.lineTo(d * s * .36, s * .1); g.closePath(); g.fill(); g.stroke(); }
+    g.restore();
+  }
+  if (special === 'bomb') star(g, cx, cy, s * .15, '#fffbe0');
   return (SPR[key] = c);
 }
-function stoneSprite(R) {
-  const key = 'stone' + R; if (SPR[key]) return SPR[key];
+function beanSprite(R) {
+  const key = 'bean' + R; if (SPR[key]) return SPR[key];
   const k = 3, c = document.createElement('canvas'); c.width = c.height = R * 2 * k;
   const g = c.getContext('2d'); g.scale(k, k);
-  const grd = g.createRadialGradient(R * .7, R * .6, R * .1, R, R, R);
-  grd.addColorStop(0, '#d6d3e4'); grd.addColorStop(.6, '#8f8aa6'); grd.addColorStop(1, '#4e4964');
-  g.fillStyle = grd; g.beginPath(); g.arc(R, R, R * .97, 0, 7); g.fill();
+  const grd = g.createRadialGradient(R * .75, R * .7, R * .1, R, R, R * 1.1);
+  grd.addColorStop(0, '#a8693a'); grd.addColorStop(.6, '#6e3d1c'); grd.addColorStop(1, '#3a1d0b');
+  g.fillStyle = grd; g.beginPath(); g.ellipse(R, R, R * .98, R * .74, 0, 0, 7); g.fill();
+  g.strokeStyle = '#2a1206'; g.lineWidth = 1.4; g.beginPath();
+  g.moveTo(R * .2, R); g.bezierCurveTo(R * .7, R * .7, R * 1.3, R * 1.3, R * 1.8, R); g.stroke();
   return (SPR[key] = c);
+}
+
+// ---------- real-world backdrops: painted small, then scaled up so they read as out-of-focus photography
+function blurBG(draw, f = 7) {
+  const sw = Math.ceil(VW / f), sh = Math.ceil(VH / f);
+  const sm = document.createElement('canvas'); sm.width = sw; sm.height = sh;
+  const g = sm.getContext('2d'); g.scale(1 / f, 1 / f); draw(g);
+  const md = document.createElement('canvas'); md.width = sw * 3; md.height = sh * 3;
+  const m = md.getContext('2d'); m.imageSmoothingEnabled = true; m.imageSmoothingQuality = 'high'; m.drawImage(sm, 0, 0, md.width, md.height);
+  const out = document.createElement('canvas'); out.width = VW; out.height = VH;
+  const o = out.getContext('2d'); o.imageSmoothingEnabled = true; o.imageSmoothingQuality = 'high'; o.drawImage(md, 0, 0, VW, VH);
+  return out;
+}
+function bokeh(o, n, colors, rMin, rMax, alpha = .22) {
+  for (let i = 0; i < n; i++) {
+    const x = rand(0, VW), y = rand(0, VH), r = rand(rMin, rMax);
+    const grd = o.createRadialGradient(x, y, r * .2, x, y, r);
+    const col = pick(colors);
+    grd.addColorStop(0, col.replace('A', alpha * .6)); grd.addColorStop(.85, col.replace('A', alpha)); grd.addColorStop(1, col.replace('A', 0));
+    o.fillStyle = grd; o.beginPath(); o.arc(x, y, r, 0, 7); o.fill();
+  }
+}
+function softBlob(g, x, y, rx, ry, c0, c1) {
+  const grd = g.createRadialGradient(x, y, 0, x, y, Math.max(rx, ry));
+  grd.addColorStop(0, c0); grd.addColorStop(1, c1);
+  g.save(); g.translate(x, y); g.scale(rx / Math.max(rx, ry), ry / Math.max(rx, ry)); g.translate(-x, -y);
+  g.fillStyle = grd; g.beginPath(); g.arc(x, y, Math.max(rx, ry), 0, 7); g.fill(); g.restore();
+}
+const BG = {};
+function buildBackdrops() {
+  // 1. Kitchen floor: warm wall, window glow, a giant table leg, a pot plant, skirting board
+  BG.kitchen = blurBG(g => {
+    const w = g.createLinearGradient(0, 0, 0, VH); w.addColorStop(0, '#f1dcbc'); w.addColorStop(.75, '#d2a87c'); w.addColorStop(1, '#a87750');
+    g.fillStyle = w; g.fillRect(0, 0, VW, VH);
+    softBlob(g, 470, 90, 300, 260, 'rgba(255,250,230,1)', 'rgba(255,250,230,0)');
+    g.fillStyle = '#6b4127'; g.fillRect(360, 0, 90, 760);
+    g.fillStyle = '#8a5735'; g.fillRect(372, 0, 22, 760);
+    g.fillStyle = '#2f6b2c'; [[60, 160, 90], [130, 110, 70], [20, 260, 70], [150, 230, 60]].forEach(([x, y, r]) => { g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); });
+    g.fillStyle = '#b5532f'; g.fillRect(40, 320, 140, 150);
+    g.fillStyle = '#f4efe6'; g.fillRect(0, 760, VW, 130);
+    g.fillStyle = '#7c4f30'; g.fillRect(0, 880, VW, 80);
+  });
+  bokeh(BG.kitchen.getContext('2d'), 14, ['rgba(255,245,210,A)', 'rgba(255,220,170,A)'], 18, 60);
+  // 2. Pantry shelf: dark wood, blurred jars of pasta, lentils and rice
+  BG.pantry = blurBG(g => {
+    const w = g.createLinearGradient(0, 0, 0, VH); w.addColorStop(0, '#4a2e1d'); w.addColorStop(1, '#2a170d');
+    g.fillStyle = w; g.fillRect(0, 0, VW, VH);
+    softBlob(g, 120, 140, 220, 200, 'rgba(255,214,150,.65)', 'rgba(255,214,150,0)');
+    const jar = (x, y, wd, ht, fill) => { g.fillStyle = 'rgba(220,235,245,.35)'; rr(g, x, y, wd, ht, 26); g.fill(); g.fillStyle = fill; rr(g, x + 8, y + ht * .35, wd - 16, ht * .62, 18); g.fill(); g.fillStyle = 'rgba(255,255,255,.5)'; g.fillRect(x + 14, y + 20, 10, ht - 50); };
+    jar(10, 40, 130, 300, '#e88a2c'); jar(170, 90, 110, 250, '#f2e6c8'); jar(310, 20, 150, 330, '#c2462e'); jar(470, 80, 90, 260, '#e8c25a');
+    g.fillStyle = '#7a4c2c'; g.fillRect(0, 350, VW, 34); g.fillRect(0, 900, VW, 60);
+    jar(30, 420, 120, 260, '#8b5a2b'); jar(400, 460, 140, 300, '#d9d2b8');
+  });
+  bokeh(BG.pantry.getContext('2d'), 10, ['rgba(255,210,140,A)'], 20, 55, .18);
+  // 3. Kitchen sink: steel basin, a giant chrome tap, the plughole, all seen through water
+  BG.sink = blurBG(g => {
+    const w = g.createLinearGradient(0, 0, 0, VH); w.addColorStop(0, '#c7d3dd'); w.addColorStop(1, '#6d8091');
+    g.fillStyle = w; g.fillRect(0, 0, VW, VH);
+    softBlob(g, 380, 260, 260, 360, 'rgba(255,255,255,.7)', 'rgba(255,255,255,0)');
+    g.fillStyle = '#9fb0bf'; rr(g, 60, -40, 120, 260, 50); g.fill();
+    g.fillStyle = '#e8eef3'; rr(g, 80, -40, 30, 240, 15); g.fill();
+    g.fillStyle = '#3e4c58'; g.beginPath(); g.ellipse(300, 900, 130, 50, 0, 0, 7); g.fill();
+    g.fillStyle = '#1e262d'; g.beginPath(); g.ellipse(300, 900, 70, 26, 0, 0, 7); g.fill();
+  });
+  const so = BG.sink.getContext('2d'), wg = so.createLinearGradient(0, 0, 0, VH);
+  wg.addColorStop(0, 'rgba(60,160,240,.42)'); wg.addColorStop(1, 'rgba(10,50,150,.72)');
+  so.fillStyle = wg; so.fillRect(0, 0, VW, VH);
+  bokeh(so, 16, ['rgba(220,245,255,A)'], 8, 30, .25);
 }
 
 // ---------- particles
@@ -168,7 +271,10 @@ function drawParts(g) {
 // ---------- block grid
 // Match-3 board. Swap two touching blocks; a swap only sticks if it lines up 3+ of one colour.
 // Boards are finite (no refill) because each phase is about emptying space for the hero.
+// Specials: 4 in a row makes a rocket (h clears its row, v its column), an L or T makes a bomb (3x3),
+// 5 in a row makes a choc bomb (rainbow) that clears every block of the colour it is swapped with.
 const DIRS = [[0, 1], [1, 0], [0, -1], [-1, 0]];
+const key = q => q.r * 100 + q.c;
 class Grid {
   constructor(o) {
     Object.assign(this, o);
@@ -178,8 +284,8 @@ class Grid {
       for (let c = 0; c < this.cols; c++) { this.valid[r].push(!!this.mask(r, c)); this.cells[r].push(null); }
     }
     for (let tries = 0; tries < 60; tries++) { this.fill(); if (this.findMove()) break; }
-    this.popping = []; this.version = 0;
-    this.state = 'idle'; this.anim = null; this.combo = 0;
+    this.popping = []; this.fx = []; this.version = 0;
+    this.state = 'idle'; this.anim = null; this.combo = 0; this.lastSwap = null;
   }
   // random colours, but never 3 in a row at the start
   fill() {
@@ -189,7 +295,7 @@ class Grid {
       if (L1 && L2 && L1.color === L2.color) bad.add(L1.color);
       if (U1 && U2 && U1.color === U2.color) bad.add(U1.color);
       const opts = this.colors.filter(k => !bad.has(k));
-      this.cells[r][c] = { color: pick(opts.length ? opts : this.colors), oy: 0, vy: 0, sq: 0 };
+      this.cells[r][c] = { color: pick(opts.length ? opts : this.colors), special: null, oy: 0, vy: 0, sq: 0 };
     }
   }
   inside(r, c) { return r >= 0 && r < this.rows && c >= 0 && c < this.cols && this.valid[r][c]; }
@@ -206,18 +312,24 @@ class Grid {
       if ((dr || dc) && this.inside(r + dr, c + dc)) out.push({ r: r + dr, c: c + dc });
     return out;
   }
+  same(b, o) { return b && o && b.color === o.color && b.color !== 'rainbow'; }
   rawSwap(a, b) { const t = this.cells[a.r][a.c]; this.cells[a.r][a.c] = this.cells[b.r][b.c]; this.cells[b.r][b.c] = t; }
   runLen(r, c, dr, dc) {
     const b = this.get(r, c); let n = 0;
-    for (let k = 1; ; k++) { const o = this.get(r + dr * k, c + dc * k); if (!o || o.color !== b.color) return n; n++; }
+    for (let k = 1; ; k++) { if (!this.same(b, this.get(r + dr * k, c + dc * k))) return n; n++; }
   }
   matchAt(r, c) {
-    if (!this.get(r, c)) return false;
+    const b = this.get(r, c); if (!b || b.color === 'rainbow') return false;
     return this.runLen(r, c, 0, -1) + this.runLen(r, c, 0, 1) >= 2 || this.runLen(r, c, -1, 0) + this.runLen(r, c, 1, 0) >= 2;
+  }
+  isRainbowSwap(a, b) {
+    const A = this.get(a.r, a.c), B = this.get(b.r, b.c);
+    return !!(A && B && (A.color === 'rainbow' || B.color === 'rainbow'));
   }
   canSwap(a, b) {
     if (!this.inside(b.r, b.c) || !this.get(a.r, a.c)) return false;
     if (!this.get(b.r, b.c) && this.gravity) return false; // sliding into a gap only works without gravity
+    if (this.isRainbowSwap(a, b)) return true;
     this.rawSwap(a, b);
     const ok = this.matchAt(a.r, a.c) || this.matchAt(b.r, b.c);
     this.rawSwap(a, b);
@@ -231,28 +343,39 @@ class Grid {
         const a = { r, c }, b = { r: r + dr, c: c + dc };
         if (!this.canSwap(a, b)) continue;
         if (!priority) return { a, b };
-        const s = priority(r, c);
+        const s = priority(r, c) - (this.isRainbowSwap(a, b) ? 3 : 0);
         if (s < bestScore) { bestScore = s; best = { a, b }; }
       }
     }
     return best;
   }
-  findMatches() {
-    const out = new Map();
-    const scan = (r0, c0, dr, dc) => {
-      let r = r0, c = c0;
+  // lines of 3+, merged into groups when they share a cell (so L and T shapes count as one)
+  findGroups() {
+    const runs = [];
+    const scan = (r, c, dr, dc, dir) => {
       while (r < this.rows && c < this.cols) {
         const b = this.get(r, c);
-        if (!b) { r += dr; c += dc; continue; }
-        let n = 1; while (this.get(r + dr * n, c + dc * n) && this.get(r + dr * n, c + dc * n).color === b.color) n++;
-        if (n >= 3) for (let k = 0; k < n; k++) out.set((r + dr * k) * 100 + c + dc * k, { r: r + dr * k, c: c + dc * k });
+        if (!b || b.color === 'rainbow') { r += dr; c += dc; continue; }
+        let n = 1; while (this.same(b, this.get(r + dr * n, c + dc * n))) n++;
+        if (n >= 3) { const cells = []; for (let k = 0; k < n; k++) cells.push({ r: r + dr * k, c: c + dc * k }); runs.push({ cells, dir }); }
         r += dr * n; c += dc * n;
       }
     };
-    for (let r = 0; r < this.rows; r++) scan(r, 0, 0, 1);
-    for (let c = 0; c < this.cols; c++) scan(0, c, 1, 0);
-    return [...out.values()];
+    for (let r = 0; r < this.rows; r++) scan(r, 0, 0, 1, 'h');
+    for (let c = 0; c < this.cols; c++) scan(0, c, 1, 0, 'v');
+    const groups = runs.map(run => ({ runs: [run], cells: new Map(run.cells.map(q => [key(q), q])) }));
+    for (let merged = true; merged;) {
+      merged = false;
+      outer: for (let i = 0; i < groups.length; i++) for (let j = i + 1; j < groups.length; j++) {
+        if ([...groups[j].cells.keys()].some(k => groups[i].cells.has(k))) {
+          groups[j].runs.forEach(r => groups[i].runs.push(r)); groups[j].cells.forEach((v, k) => groups[i].cells.set(k, v));
+          groups.splice(j, 1); merged = true; break outer;
+        }
+      }
+    }
+    return groups;
   }
+  findMatches() { const out = []; for (const g of this.findGroups()) out.push(...g.cells.values()); return out; }
   trySwap(a, b) {
     if (this.state !== 'idle' || !this.inside(b.r, b.c) || !this.get(a.r, a.c)) return false;
     if (!this.get(b.r, b.c) && this.gravity) return false;
@@ -264,15 +387,50 @@ class Grid {
     if (this.state !== 'idle' || !this.get(cell.r, cell.c)) return false;
     this.clear([cell]); this.state = 'cascade'; return true;
   }
-  clear(list) {
-    for (const { r, c } of list) {
-      const b = this.cells[r][c]; if (!b) continue;
-      const [cx, cy] = this.center(r, c);
-      this.popping.push({ x: cx, y: cy + b.oy, color: b.color, t: 0 });
-      burst(cx + this.wx, cy + b.oy + this.wy, COLORS[b.color].base, 7);
-      this.cells[r][c] = null;
+  effectCells(q, b) {
+    const out = [];
+    if (b.special === 'h') for (let c = 0; c < this.cols; c++) out.push({ r: q.r, c });
+    else if (b.special === 'v') for (let r = 0; r < this.rows; r++) out.push({ r, c: q.c });
+    else if (b.special === 'bomb') for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) out.push({ r: q.r + dr, c: q.c + dc });
+    else if (b.color === 'rainbow') {
+      const tally = {};
+      for (const row of this.cells) for (const o of row) if (o && o.color !== 'rainbow') tally[o.color] = (tally[o.color] || 0) + 1;
+      const top = Object.keys(tally).sort((x, y) => tally[y] - tally[x])[0];
+      for (let r = 0; r < this.rows; r++) for (let c = 0; c < this.cols; c++) if (this.get(r, c) && this.get(r, c).color === top) out.push({ r, c });
+    }
+    return out.filter(o => this.get(o.r, o.c));
+  }
+  // clears cells, sets off any specials caught in the blast, then turns `make` cells into new specials
+  clear(list, make = []) {
+    const keep = new Map(make.map(m => [key(m.at), m]));
+    const queue = [...list], done = new Map();
+    while (queue.length) {
+      const q = queue.pop(), k = key(q);
+      if (done.has(k)) continue;
+      const b = this.get(q.r, q.c); if (!b) continue;
+      done.set(k, q);
+      if ((b.special || b.color === 'rainbow') && !keep.has(k)) {
+        this.fx.push({ type: b.color === 'rainbow' ? 'rainbow' : b.special, r: q.r, c: q.c, t: 0 });
+        SFX.blast(b.special || 'rainbow');
+        queue.push(...this.effectCells(q, b));
+      }
+    }
+    let n = 0;
+    for (const [k, q] of done) {
+      if (keep.has(k)) continue;
+      const b = this.cells[q.r][q.c], [cx, cy] = this.center(q.r, q.c);
+      this.popping.push({ x: cx, y: cy + b.oy, color: b.color, special: b.special, t: 0 });
+      burst(cx + this.wx, cy + b.oy + this.wy, COLORS[b.color].base, 6);
+      this.cells[q.r][q.c] = null; n++;
+    }
+    for (const m of make) {
+      const b = this.cells[m.at.r][m.at.c]; if (!b) continue;
+      b.special = m.sp === 'rainbow' ? null : m.sp; if (m.sp === 'rainbow') b.color = 'rainbow';
+      b.sq = 1; this.fx.push({ type: 'make', r: m.at.r, c: m.at.c, t: 0 });
+      gridEvent(this, 'make', m.sp);
     }
     this.applyGravity(); this.version++;
+    return n;
   }
   applyGravity() {
     if (!this.gravity) return;
@@ -287,9 +445,26 @@ class Grid {
   }
   settled() { for (const row of this.cells) for (const b of row) if (b && b.oy < 0) return false; return true; }
   resolve() {
-    const m = this.findMatches();
-    if (m.length) { this.combo++; this.clear(m); gridEvent(this, 'match', m.length, this.combo); this.state = 'cascade'; return; }
-    this.state = 'idle'; this.combo = 0; this.afterMove();
+    const groups = this.findGroups();
+    if (!groups.length) { this.state = 'idle'; this.combo = 0; this.lastSwap = null; this.afterMove(); return; }
+    const list = [], make = [];
+    for (const g of groups) {
+      list.push(...g.cells.values());
+      const longest = g.runs.reduce((a, r) => (r.cells.length > a.cells.length ? r : a));
+      const hasH = g.runs.some(r => r.dir === 'h'), hasV = g.runs.some(r => r.dir === 'v');
+      const sp = longest.cells.length >= 5 ? 'rainbow' : hasH && hasV ? 'bomb' : longest.cells.length === 4 ? (longest.dir === 'h' ? 'v' : 'h') : null;
+      if (!sp) continue;
+      const free = q => !this.get(q.r, q.c).special;
+      let at = this.lastSwap && [this.lastSwap.b, this.lastSwap.a].find(q => g.cells.has(key(q)) && free(q));
+      if (!at && sp === 'bomb') { const cnt = new Map(); g.runs.forEach(r => r.cells.forEach(q => cnt.set(key(q), (cnt.get(key(q)) || 0) + 1))); at = [...g.cells.values()].find(q => cnt.get(key(q)) > 1 && free(q)); }
+      if (!at) at = longest.cells.slice(1, -1).find(free) || [...g.cells.values()].find(free);
+      if (at) make.push({ at, sp });
+    }
+    this.lastSwap = null;
+    this.combo++;
+    const n = this.clear(list, make);
+    gridEvent(this, 'match', n, this.combo);
+    this.state = 'cascade';
   }
   // keep the board solvable: stranded blocks crumble, a dead board reshuffles
   afterMove() {
@@ -310,13 +485,15 @@ class Grid {
   }
   shuffle() {
     const pos = [], cols = [];
-    for (let r = 0; r < this.rows; r++) for (let c = 0; c < this.cols; c++) if (this.get(r, c)) { pos.push({ r, c }); cols.push(this.get(r, c).color); }
+    for (let r = 0; r < this.rows; r++) for (let c = 0; c < this.cols; c++) {
+      const b = this.get(r, c); if (b && b.color !== 'rainbow') { pos.push({ r, c }); cols.push(b.color); }
+    }
     const assign = () => {
       for (let i = cols.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [cols[i], cols[j]] = [cols[j], cols[i]]; }
       pos.forEach((p, i) => { const b = this.cells[p.r][p.c]; b.color = cols[i]; b.sq = 1; });
     };
-    for (let t = 0; t < 60; t++) { assign(); if (!this.findMatches().length && this.findMove()) return true; }
-    for (let t = 0; t < 60; t++) { assign(); if (this.findMatches().length || this.findMove()) return true; }
+    for (let t = 0; t < 60; t++) { assign(); if (!this.findGroups().length && this.findMove()) return true; }
+    for (let t = 0; t < 60; t++) { assign(); if (this.findGroups().length || this.findMove()) return true; }
     return false;
   }
   colEmpty(c) { for (let r = 0; r < this.rows; r++) if (this.valid[r][c] && this.cells[r][c]) return false; return true; }
@@ -329,9 +506,28 @@ class Grid {
     }
     for (const p of this.popping) p.t += dt;
     this.popping = this.popping.filter(p => p.t < .22);
+    for (const f of this.fx) f.t += dt;
+    this.fx = this.fx.filter(f => f.t < .4);
     if (this.state === 'swap') {
       const A = this.anim; A.t += dt;
-      if (A.t >= A.dur) { this.anim = null; if (A.ok) { this.rawSwap(A.a, A.b); this.combo = 0; this.resolve(); } else this.state = 'idle'; }
+      if (A.t >= A.dur) {
+        this.anim = null;
+        if (!A.ok) { this.state = 'idle'; return; }
+        this.rawSwap(A.a, A.b); this.combo = 0;
+        if (this.isRainbowSwap(A.a, A.b)) {
+          // choc bomb: clear every block of the other colour (two choc bombs clear the lot)
+          const P = this.get(A.b.r, A.b.c), Q = this.get(A.a.r, A.a.c);
+          const rb = P.color === 'rainbow' ? A.b : A.a, other = rb === A.b ? Q : P;
+          const list = [rb];
+          for (let r = 0; r < this.rows; r++) for (let c = 0; c < this.cols; c++) {
+            const o = this.get(r, c); if (o && (other.color === 'rainbow' || o.color === other.color)) list.push({ r, c });
+          }
+          this.get(rb.r, rb.c).color = other.color === 'rainbow' ? 'red' : other.color; // spend it so it does not fire twice
+          this.fx.push({ type: 'rainbow', r: rb.r, c: rb.c, t: 0 }); SFX.blast('rainbow');
+          this.combo = 1; const n = this.clear(list);
+          gridEvent(this, 'match', n, 1); this.state = 'cascade';
+        } else { this.lastSwap = { a: A.a, b: A.b }; this.resolve(); }
+      }
     } else if (this.state === 'cascade' && this.settled() && !this.popping.length) this.resolve();
   }
   drawTray(g, rim, fill) {
@@ -347,8 +543,9 @@ class Grid {
     const s = this.cell, A = this.anim;
     const skip = (r, c) => A && ((A.a.r === r && A.a.c === c) || (A.b.r === r && A.b.c === c));
     const drawOne = (b, cx, cy, big) => {
-      const sx = (big ? 1.1 : 1) * (1 + b.sq * .12), sy = (big ? 1.1 : 1) * (1 - b.sq * .12);
-      g.drawImage(blockSprite(b.color, s), cx - s / 2 * sx, cy - s / 2 * sy + (1 - sy) * s * .4, s * sx, s * sy);
+      const pulse = b.special || b.color === 'rainbow' ? 1 + Math.sin(G.time * 6) * .04 : 1;
+      const sx = (big ? 1.1 : 1) * (1 + b.sq * .12) * pulse, sy = (big ? 1.1 : 1) * (1 - b.sq * .12) * pulse;
+      g.drawImage(blockSprite(b.color, s, b.special), cx - s / 2 * sx, cy - s / 2 * sy + (1 - sy) * s * .4, s * sx, s * sy);
     };
     for (let r = 0; r < this.rows; r++) for (let c = 0; c < this.cols; c++) {
       const b = this.cells[r][c]; if (!b || skip(r, c)) continue;
@@ -366,80 +563,148 @@ class Grid {
     for (const p of this.popping) {
       const k = p.t / .22, sc = 1 + k * .6;
       g.globalAlpha = 1 - k;
-      g.drawImage(blockSprite(p.color, s), p.x - s / 2 * sc, p.y - s / 2 * sc, s * sc, s * sc);
+      g.drawImage(blockSprite(p.color, s, p.special), p.x - s / 2 * sc, p.y - s / 2 * sc, s * sc, s * sc);
+    }
+    g.globalAlpha = 1;
+    // special effects
+    for (const f of this.fx) {
+      const k = f.t / .4, [cx, cy] = this.center(f.r, f.c);
+      g.globalAlpha = 1 - k;
+      if (f.type === 'h' || f.type === 'v') {
+        const w = s * .55 * (1 - k * .7);
+        g.fillStyle = '#fffbe0';
+        if (f.type === 'h') g.fillRect(this.x - 10, cy - w / 2, this.cols * s + 20, w);
+        else g.fillRect(cx - w / 2, this.y - 10, w, this.rows * s + 20);
+      } else if (f.type === 'bomb' || f.type === 'rainbow') {
+        g.strokeStyle = f.type === 'bomb' ? '#ffe680' : '#ffffff'; g.lineWidth = 10 * (1 - k) + 2;
+        g.beginPath(); g.arc(cx, cy, s * (.4 + k * (f.type === 'bomb' ? 1.6 : 4)), 0, 7); g.stroke();
+      } else if (f.type === 'make') {
+        star(g, cx, cy, s * (.3 + k * .8), 'rgba(255,255,255,.9)');
+      }
     }
     g.globalAlpha = 1;
   }
 }
 
-// ---------- hero (placeholder art for your own character)
-const hero = { x: 48, y: 880, pose: 'scared', face: 1, visible: true, inCart: false, tilt: 0 };
+// ---------- hero: a tiny girl (placeholder for your final character art)
+const hero = { x: 48, y: 880, pose: 'scared', face: 1, visible: true, inCart: false, scale: .9 };
+const HC = { line: '#2a1810', skin: '#8d5a36', jacket: '#f37a1f', jacketDark: '#c95a0f', shirt: '#f6c84a', skirt: '#2d7fb8', hair: '#1c120d', shoe: '#1a1210' };
 function drawHero(g, T) {
   if (!hero.visible) return;
-  const { pose, face } = hero;
+  const { pose, face } = hero, sc = hero.scale || 1;
   g.save(); g.translate(hero.x, hero.y);
   if (hero.inCart) g.translate(0, -12);
-  if (pose === 'swim') { g.translate(0, -36); g.rotate(Math.sin(T * 2.2) * .18 + hero.tilt); g.translate(0, 36); }
-  if (pose === 'fall') { g.translate(0, -36); g.rotate(Math.sin(T * 9) * .3); g.translate(0, 36); }
+  g.scale(sc, sc);
+  if (pose === 'swim' || pose === 'fall') { g.translate(0, -36); g.rotate(pose === 'fall' ? Math.sin(T * 9) * .3 : Math.sin(T * 2.2) * .12); g.translate(0, 36); }
   g.scale(face, 1);
   const walk = pose === 'walk' ? Math.sin(T * 15) : 0;
-  const bob = pose === 'walk' ? -Math.abs(Math.sin(T * 15)) * 3 : pose === 'scared' ? Math.sin(T * 40) * .8 : Math.sin(T * 3);
+  const bob = pose === 'walk' ? -Math.abs(Math.sin(T * 15)) * 3 : pose === 'scared' ? Math.sin(T * 40) * .8 : pose === 'push' ? Math.sin(T * 16) * .9 : Math.sin(T * 3);
   g.lineCap = 'round'; g.lineJoin = 'round';
-  // cape
-  g.fillStyle = '#c81d2b';
-  g.beginPath(); g.moveTo(-6, -46 + bob);
-  g.quadraticCurveTo(-26 - Math.sin(T * 6) * 4, -30 + bob, -22 - Math.sin(T * 5) * 6, -12);
-  g.lineTo(6, -16 + bob); g.closePath(); g.fill();
   // legs
-  g.strokeStyle = '#1b2550'; g.lineWidth = 8;
-  let k1 = walk * 7, k2 = -walk * 7;
-  if (pose === 'swim' || pose === 'fall') { k1 = Math.sin(T * 7) * 6; k2 = -k1; }
-  if (pose === 'push') { k1 = -8; k2 = -2; }
-  g.beginPath(); g.moveTo(-5, -20 + bob); g.lineTo(-5 + k1, -4); g.moveTo(5, -20 + bob); g.lineTo(5 + k2, -4); g.stroke();
-  g.fillStyle = '#111'; g.beginPath(); g.ellipse(-3 + k1, -2, 6, 3.5, 0, 0, 7); g.ellipse(7 + k2, -2, 6, 3.5, 0, 0, 7); g.fill();
-  // body
-  g.fillStyle = '#2459d6'; rr(g, -13, -47 + bob, 26, 30, 9); g.fill();
-  g.fillStyle = '#1a3f9c'; g.fillRect(-13, -24 + bob, 26, 4);
-  star(g, 0, -34 + bob, 7, '#ffd23a');
-  // arms
-  g.strokeStyle = '#f0bf95'; g.lineWidth = 6;
-  const sh = -41 + bob;
-  g.beginPath();
-  if (pose === 'push') { g.moveTo(6, sh); g.lineTo(24, sh - 4); g.moveTo(-4, sh + 3); g.lineTo(22, sh + 6); }
-  else if (pose === 'scared') { const w = Math.sin(T * 30) * 2; g.moveTo(-10, sh); g.lineTo(-20 + w, sh - 18); g.moveTo(10, sh); g.lineTo(20 - w, sh - 18); }
-  else if (pose === 'cheer') { g.moveTo(-10, sh); g.lineTo(-18, sh - 22); g.moveTo(10, sh); g.lineTo(18, sh - 22); }
-  else if (pose === 'swim' || pose === 'fall') { const w = Math.sin(T * 6) * 9; g.moveTo(-10, sh); g.lineTo(-24, sh - 6 + w); g.moveTo(10, sh); g.lineTo(26, sh - 6 - w); }
-  else if (pose === 'walk') { g.moveTo(-9, sh); g.lineTo(-12 - walk * 7, sh + 15); g.moveTo(9, sh); g.lineTo(12 + walk * 7, sh + 15); }
-  else { g.moveTo(-10, sh); g.lineTo(-13, sh + 16); g.moveTo(10, sh); g.lineTo(13, sh + 16); }
-  g.stroke();
+  let k1 = walk * 6, k2 = -walk * 6;
+  if (pose === 'swim' || pose === 'fall') { k1 = Math.sin(T * 7) * 5; k2 = -k1; }
+  if (pose === 'push') { k1 = -10; k2 = -4; }
+  g.strokeStyle = HC.skin; g.lineWidth = 4;
+  g.beginPath(); g.moveTo(-4, -20 + bob); g.lineTo(-4 + k1, -3); g.moveTo(4, -20 + bob); g.lineTo(4 + k2, -3); g.stroke();
+  g.fillStyle = HC.shoe; g.beginPath(); g.ellipse(-2 + k1, -2, 4.5, 2.6, 0, 0, 7); g.ellipse(6 + k2, -2, 4.5, 2.6, 0, 0, 7); g.fill();
+  // lean into a push
+  if (pose === 'push') { g.translate(0, -20); g.rotate(.22); g.translate(0, 20); }
+  g.strokeStyle = HC.line; g.lineWidth = 1.4;
+  // skirt
+  g.fillStyle = HC.skirt; g.beginPath(); g.moveTo(-9, -32 + bob); g.lineTo(9, -32 + bob); g.lineTo(13, -17 + bob); g.lineTo(-13, -17 + bob); g.closePath(); g.fill(); g.stroke();
+  // shirt + open jacket
+  g.fillStyle = HC.shirt; rr(g, -7, -50 + bob, 14, 20, 4); g.fill();
+  g.fillStyle = HC.jacket;
+  g.beginPath(); g.moveTo(-10, -50 + bob); g.lineTo(-2, -50 + bob); g.lineTo(-3, -28 + bob); g.lineTo(-12, -27 + bob); g.closePath(); g.fill(); g.stroke();
+  g.beginPath(); g.moveTo(2, -50 + bob); g.lineTo(10, -50 + bob); g.lineTo(12, -27 + bob); g.lineTo(3, -28 + bob); g.closePath(); g.fill(); g.stroke();
+  // arms: orange sleeve, then hand
+  const arm = (x0, y0, x1, y1) => {
+    const mx = lerp(x0, x1, .72), my = lerp(y0, y1, .72);
+    g.strokeStyle = HC.jacketDark; g.lineWidth = 6; g.beginPath(); g.moveTo(x0, y0); g.lineTo(mx, my); g.stroke();
+    g.strokeStyle = HC.jacket; g.lineWidth = 4.4; g.beginPath(); g.moveTo(x0, y0); g.lineTo(mx, my); g.stroke();
+    g.strokeStyle = HC.skin; g.lineWidth = 3.2; g.beginPath(); g.moveTo(mx, my); g.lineTo(x1, y1); g.stroke();
+  };
+  const sh = -46 + bob, w = Math.sin(T * (pose === 'scared' ? 30 : 6)) * (pose === 'scared' ? 2 : 8);
+  if (pose === 'push') { arm(6, sh, 24, sh - 3); arm(-4, sh + 2, 23, sh + 5); }
+  else if (pose === 'scared') { arm(-8, sh, -18 + w, sh - 17); arm(8, sh, 18 - w, sh - 17); }
+  else if (pose === 'cheer') { arm(-8, sh, -17, sh - 21); arm(8, sh, 17, sh - 21); }
+  else if (pose === 'swim' || pose === 'fall') { arm(-8, sh, -23, sh - 6 + w); arm(8, sh, 24, sh - 8 - w); }
+  else if (pose === 'walk') { arm(-7, sh, -10 - walk * 6, sh + 15); arm(7, sh, 10 + walk * 6, sh + 15); }
+  else { arm(-8, sh, -12, sh + 15); arm(8, sh, 24, sh - 4); }
   // head
-  const hy = -64 + bob;
-  g.fillStyle = '#f3c49c'; g.beginPath(); g.arc(1, hy, 16, 0, 7); g.fill();
-  g.fillStyle = '#3a2214';
-  g.beginPath(); g.arc(-1, hy - 3, 17, Math.PI * 1.02, Math.PI * 1.98); g.quadraticCurveTo(10, hy - 26, -4, hy - 22); g.closePath(); g.fill();
-  g.beginPath(); g.moveTo(-14, hy - 8); g.lineTo(-20, hy - 22); g.lineTo(-6, hy - 16); g.fill();
+  const hy = -64 + bob, sway = pose === 'swim' ? Math.sin(T * 3) * 3 : 0;
+  g.fillStyle = HC.skin; g.fillRect(-2, hy + 10, 4, 6);
+  // hair puffs: bundles of short locs
+  const puff = (px, py, dir) => {
+    g.strokeStyle = HC.hair; g.lineWidth = 2.2;
+    g.beginPath();
+    for (let i = 0; i < 9; i++) { const a = -Math.PI / 2 + dir * .5 + (i - 4) * .32, L = 7 + (i % 3) * 1.5; g.moveTo(px, py); g.lineTo(px + Math.cos(a) * L + sway * .3, py + Math.sin(a) * L); }
+    g.stroke(); g.fillStyle = HC.hair; g.beginPath(); g.arc(px, py, 4.5, 0, 7); g.fill();
+  };
+  puff(-9, hy - 12, -1); puff(11, hy - 12, 1);
+  // loose locs hanging behind
+  g.strokeStyle = HC.hair; g.lineWidth = 1.8; g.beginPath();
+  for (let i = 0; i < 3; i++) { g.moveTo(-10 + i * 2, hy - 2); g.quadraticCurveTo(-14 + i * 2 + sway, hy + 8, -12 + i * 2 + sway, hy + 18 - i * 2); }
+  g.stroke();
+  g.fillStyle = HC.skin; g.strokeStyle = HC.line; g.lineWidth = 1.4;
+  g.beginPath(); g.arc(1, hy, 13.5, 0, 7); g.fill(); g.stroke();
+  g.fillStyle = HC.hair; g.beginPath(); g.arc(1, hy - 1, 14, Math.PI * 1.08, Math.PI * 1.92); g.quadraticCurveTo(4, hy - 8, -12, hy - 4); g.closePath(); g.fill();
+  g.fillStyle = HC.skin; g.beginPath(); g.arc(-11, hy + 2, 3, 0, 7); g.fill();
   // face
   const wide = pose === 'scared' || pose === 'fall';
-  g.fillStyle = '#fff';
-  g.beginPath(); g.ellipse(4, hy - 1, 3.6, wide ? 5 : 4, 0, 0, 7); g.ellipse(12, hy - 1, 3.2, wide ? 4.6 : 3.8, 0, 0, 7); g.fill();
-  g.fillStyle = '#1a1a1a'; g.beginPath(); g.arc(5, hy, 2, 0, 7); g.arc(13, hy, 1.8, 0, 7); g.fill();
-  g.strokeStyle = '#7a3a2a'; g.lineWidth = 2;
-  if (wide) { g.fillStyle = '#5a1a1a'; g.beginPath(); g.ellipse(9, hy + 8, 2.6, 3.4, 0, 0, 7); g.fill(); }
-  else if (pose === 'push') { g.beginPath(); g.moveTo(5, hy + 8); g.lineTo(13, hy + 8); g.stroke(); }
-  else { g.beginPath(); g.arc(9, hy + 5, 4, .2, Math.PI - .2); g.stroke(); }
+  g.fillStyle = '#1a0f0a';
+  g.beginPath(); g.ellipse(3, hy + 1, 2.5, wide ? 3.8 : 3.1, 0, 0, 7); g.ellipse(10.5, hy + 1, 2.3, wide ? 3.6 : 3, 0, 0, 7); g.fill();
+  g.fillStyle = '#fff'; g.beginPath(); g.arc(3.8, hy - .3, .9, 0, 7); g.arc(11.2, hy - .3, .8, 0, 7); g.fill();
+  g.fillStyle = 'rgba(230,110,90,.35)'; g.beginPath(); g.arc(1, hy + 6, 2.4, 0, 7); g.arc(12.5, hy + 6, 2, 0, 7); g.fill();
+  g.strokeStyle = '#4a1c12'; g.lineWidth = 1.3;
+  if (wide) { g.fillStyle = '#4a1c12'; g.beginPath(); g.ellipse(7.5, hy + 8, 1.8, 2.4, 0, 0, 7); g.fill(); }
+  else if (pose === 'push') { g.beginPath(); g.moveTo(5, hy + 8); g.lineTo(10, hy + 8); g.stroke(); }
+  else { g.beginPath(); g.arc(7.5, hy + 5.5, 2.6, .3, Math.PI - .3); g.stroke(); }
   g.restore();
   if (hero.inCart) drawCart(g, hero.x, hero.y);
 }
-function drawCart(g, x, y) {
+function drawCart(g, x, y) { // a toy wooden cart
   g.save(); g.translate(x, y);
-  g.fillStyle = '#6b4226'; g.beginPath(); g.moveTo(-30, -30); g.lineTo(30, -30); g.lineTo(24, -4); g.lineTo(-24, -4); g.closePath(); g.fill();
-  g.strokeStyle = '#3d2412'; g.lineWidth = 3; g.stroke();
-  g.strokeStyle = '#8c5a35'; g.beginPath(); g.moveTo(-27, -20); g.lineTo(27, -20); g.stroke();
-  g.fillStyle = '#2b2b2b'; g.beginPath(); g.arc(-15, -2, 7, 0, 7); g.arc(15, -2, 7, 0, 7); g.fill();
+  g.fillStyle = '#d14b3a'; g.beginPath(); g.moveTo(-28, -30); g.lineTo(28, -30); g.lineTo(23, -5); g.lineTo(-23, -5); g.closePath(); g.fill();
+  g.strokeStyle = '#7a2218'; g.lineWidth = 2.5; g.stroke();
+  g.fillStyle = '#f2c94c'; g.fillRect(-24, -22, 48, 4);
+  g.fillStyle = '#2b2b2b'; g.beginPath(); g.arc(-14, -3, 6.5, 0, 7); g.arc(14, -3, 6.5, 0, 7); g.fill();
+  g.fillStyle = '#bbb'; g.beginPath(); g.arc(-14, -3, 2.4, 0, 7); g.arc(14, -3, 2.4, 0, 7); g.fill();
   g.restore();
 }
 
-// ---------- snake
+// ---------- villains: each level can pick one
+function drawRat(g, path, s, T) {
+  g.lineCap = 'round';
+  let prev = path.at(s - 56), pnx = 0, pny = 0;
+  for (let i = 1; i <= 22; i++) { // tail
+    const p = path.at(s - 56 - i * 9), w = Math.sin(T * 6 + i * .5) * i * .3, nx = -Math.sin(p.a) * w, ny = Math.cos(p.a) * w;
+    g.strokeStyle = '#d6a09c'; g.lineWidth = Math.max(1.6, 8 * (1 - i / 22));
+    g.beginPath(); g.moveTo(prev.x + pnx, prev.y + pny); g.lineTo(p.x + nx, p.y + ny); g.stroke();
+    prev = p; pnx = nx; pny = ny;
+  }
+  const b = path.at(s - 28), st = Math.sin(T * 22) * 5;
+  g.save(); g.translate(b.x, b.y); g.rotate(b.a);
+  g.fillStyle = '#d79b9b';
+  [[-18 + st, 21], [14 - st, 21], [-18 - st, -21], [14 + st, -21]].forEach(([x, y]) => { g.beginPath(); g.ellipse(x, y, 6, 4, 0, 0, 7); g.fill(); });
+  const bg = g.createRadialGradient(-6, -8, 4, 0, 0, 42); bg.addColorStop(0, '#8b7d73'); bg.addColorStop(1, '#4a3f39');
+  g.fillStyle = bg; g.beginPath(); g.ellipse(0, 0, 40, 25, 0, 0, 7); g.fill();
+  g.strokeStyle = '#2c2420'; g.lineWidth = 2; g.stroke();
+  g.restore();
+  const h = path.at(s);
+  g.save(); g.translate(h.x, h.y); g.rotate(h.a);
+  for (const d of [-1, 1]) { g.fillStyle = '#5a4d46'; g.beginPath(); g.arc(-6, d * 17, 10, 0, 7); g.fill(); g.fillStyle = '#e3a5a5'; g.beginPath(); g.arc(-6, d * 17, 6, 0, 7); g.fill(); }
+  g.fillStyle = '#655851'; g.strokeStyle = '#2c2420'; g.lineWidth = 2;
+  g.beginPath(); g.ellipse(6, 0, 24, 17, 0, 0, 7); g.fill(); g.stroke();
+  g.beginPath(); g.ellipse(26, 0, 11, 9, 0, 0, 7); g.fill();
+  g.fillStyle = '#e88a9a'; g.beginPath(); g.arc(36, 0, 4, 0, 7); g.fill();
+  g.fillStyle = '#111'; g.beginPath(); g.arc(13, -9, 4, 0, 7); g.arc(13, 9, 4, 0, 7); g.fill();
+  g.fillStyle = '#ff5a4a'; g.beginPath(); g.arc(14.5, -10, 1.3, 0, 7); g.arc(14.5, 8, 1.3, 0, 7); g.fill();
+  g.strokeStyle = 'rgba(30,20,20,.7)'; g.lineWidth = 1;
+  g.beginPath(); for (const d of [-1, 1]) for (const k of [4, 10, 16]) { g.moveTo(30, d * 4); g.lineTo(48, d * k); } g.stroke();
+  if (Math.sin(T * 5) > .4) { g.fillStyle = '#fffbe8'; g.fillRect(31, -3, 5, 6); }
+  g.restore();
+}
 function drawSnake(g, path, s, T) {
   const N = 34, sp = 13, segs = [];
   for (let i = N; i >= 0; i--) {
@@ -451,77 +716,78 @@ function drawSnake(g, path, s, T) {
   for (const q of segs) {
     g.fillStyle = q.i % 2 ? '#2f8a33' : '#3aa03c';
     g.beginPath(); g.arc(q.x, q.y, q.r, 0, 7); g.fill();
-    g.fillStyle = 'rgba(190,255,150,.35)'; g.beginPath(); g.arc(q.x - q.r * .25, q.y - q.r * .3, q.r * .45, 0, 7); g.fill();
   }
   const h = path.at(s);
   g.save(); g.translate(h.x, h.y); g.rotate(h.a);
-  if (Math.sin(T * 5) > .55) {
-    g.strokeStyle = '#d0213a'; g.lineWidth = 3; g.beginPath(); g.moveTo(30, 0); g.lineTo(46, 0); g.lineTo(52, -5); g.moveTo(46, 0); g.lineTo(52, 5); g.stroke();
-  }
-  g.fillStyle = '#123d18'; g.beginPath(); g.ellipse(8, 0, 36, 26, 0, 0, 7); g.fill();
   g.fillStyle = '#3aa03c'; g.beginPath(); g.ellipse(8, 0, 33, 23, 0, 0, 7); g.fill();
   g.fillStyle = '#e9d23a'; g.beginPath(); g.ellipse(18, -13, 8, 6, 0, 0, 7); g.ellipse(18, 13, 8, 6, 0, 0, 7); g.fill();
   g.fillStyle = '#111'; g.beginPath(); g.ellipse(20, -13, 2, 5, 0, 0, 7); g.ellipse(20, 13, 2, 5, 0, 0, 7); g.fill();
-  g.fillStyle = '#0d2a10'; g.beginPath(); g.arc(36, -5, 2, 0, 7); g.arc(36, 5, 2, 0, 7); g.fill();
   g.restore();
 }
+const VILLAINS = { rat: drawRat, snake: drawSnake };
 
 // =====================================================================
 // PHASES
 // =====================================================================
 const P1 = {
-  name: 'Snake chase', base: 0, captionY: 470, label: 'SNAKE', icon: '🐍', failText: 'The snake caught your hero!',
+  name: 'Rat chase', base: 0, captionY: 470, label: 'RAT', icon: '🐀', failText: 'The rat caught her!', bg: 'kitchen', villain: 'rat',
   init() {
     const H = [2, 3, 3, 4, 4, 5, 5, 6], rows = 6, cell = 52;
     this.grid = new Grid({ x: 84, y: 880 - rows * cell, cols: 8, rows, cell, gravity: 1, colors: ['red', 'yellow', 'blue'],
       mask: (r, c) => r >= rows - H[c], wx: 0, wy: this.base });
     this.path = new Path([[-140, 110], [330, 110], [410, 128], [452, 190], [440, 262], [380, 300], [150, 300], [82, 330], [48, 400], [48, 856], [560, 856]]);
     this.sFloor = this.path.cum[9];
-    this.snakeS = 0; this.t = 0; this.cleared = 0;
-    this.speed = (this.sFloor - 60) / (TIMES.snake * mult());
+    this.villainS = 0; this.t = 0; this.cleared = 0;
+    this.speed = (this.sFloor - 60) / (TIMES.rat * mult());
   },
-  placeHero() { Object.assign(hero, { x: 48, y: 880, pose: 'scared', face: 1, visible: true, inCart: false }); },
+  placeHero() { Object.assign(hero, { x: 48, y: 880, pose: 'scared', face: 1, visible: true, inCart: false, scale: .9 }); },
   heroS() { return this.sFloor + (hero.x - 48); },
-  meter() { return clamp((this.heroS() - 60 - this.snakeS) / (this.sFloor - 60), 0, 1); },
-  targetX() {
-    let n = 0; while (n < 8 && this.grid.colEmpty(n)) n++;
-    return n === 8 ? 530 : n === 0 ? 48 : this.grid.x + (n - .5) * this.grid.cell;
-  },
+  meter() { return clamp((this.heroS() - 60 - this.villainS) / (this.sFloor - 60), 0, 1); },
+  openCols() { let n = 0; while (n < 8 && this.grid.colEmpty(n)) n++; return n; },
+  // she always presses up against the next column of sweets
+  targetX() { const n = this.openCols(); return n === 8 ? 530 : Math.max(48, this.grid.x + n * this.grid.cell - 16); },
   hintPriority: (r, c) => c * 2,
-  intro() { caption('Oh no! A mutant snake is coming!', 2.6); later(2.6, () => !this.cleared && caption('Swipe a block to line up 3 of the same colour!', 4)); },
-  onClear() { this.cleared++; if (this.cleared === 1) caption('Empty every column so your hero can run to the exit', 3.5); },
+  intro() { caption('Eek! A giant rat is coming!', 2.6); later(2.6, () => !this.cleared && caption('Swap sweets to line up 3 and clear her path!', 4)); },
+  onClear() { this.cleared++; if (this.cleared === 1) caption('Empty each column so she can push through to the gap', 3.5); },
   update(dt, playing) {
     this.grid.update(dt);
     if (!playing) return;
-    this.t += dt; this.snakeS += this.speed * dt;
+    this.t += dt; this.villainS += this.speed * dt;
     const tx = this.targetX(), d = tx - hero.x;
-    if (Math.abs(d) > 2) { hero.x += Math.sign(d) * Math.min(Math.abs(d), 140 * dt); hero.pose = 'walk'; hero.face = Math.sign(d); }
-    else { hero.pose = this.meter() < .5 ? 'scared' : 'idle'; hero.face = 1; }
+    if (Math.abs(d) > 2) { hero.x += Math.sign(d) * Math.min(Math.abs(d), 150 * dt); hero.pose = 'walk'; hero.face = Math.sign(d); }
+    else if (this.meter() < .3 && Math.sin(G.time * 2.5) > .75) { hero.pose = 'scared'; hero.face = -1; }
+    else {
+      hero.pose = 'push'; hero.face = 1;
+      if (Math.random() < dt * 1.5) parts.push({ x: hero.x + 4, y: hero.y - 66, vx: rand(-60, -20), vy: -60, life: 0, max: .5, color: '#bfe6ff', r: 2.5, g: 500 });
+    }
     if (hero.x >= 520) phaseWon();
-    else if (this.snakeS >= this.heroS() - 60) phaseLost();
+    else if (this.villainS >= this.heroS() - 60) phaseLost();
   },
   draw(g, T) {
-    // snake groove
+    // gap behind the skirting board that the rat scurries through
     g.lineCap = 'round'; g.lineJoin = 'round';
     const pts = this.path.pts.slice(0, 10);
     const stroke = (w, col) => { g.strokeStyle = col; g.lineWidth = w; g.beginPath(); pts.forEach((p, i) => (i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1]))); g.stroke(); };
-    stroke(80, '#9c7fd8'); stroke(66, '#6e2d22'); stroke(58, '#5b231b');
-    // floor ledge
-    g.fillStyle = '#9c7fd8'; g.fillRect(-60, 880, 660, 14);
-    g.fillStyle = '#5e2c22'; g.fillRect(-60, 894, 660, 120);
-    // exit door
-    g.fillStyle = '#2a0f0a'; rr(g, 498, 784, 50, 98, 18); g.fill();
-    const glow = g.createLinearGradient(498, 784, 548, 880); glow.addColorStop(0, '#fff6c2'); glow.addColorStop(1, '#ffbf3a');
-    g.fillStyle = glow; g.globalAlpha = .55 + Math.sin(T * 3) * .15; rr(g, 504, 792, 40, 88, 14); g.fill(); g.globalAlpha = 1;
-    g.fillStyle = '#fff'; g.font = '700 13px system-ui,sans-serif'; g.textAlign = 'center'; g.fillText('EXIT', 524, 776);
-    this.grid.drawTray(g, '#9c7fd8', '#c79a72');
+    stroke(82, 'rgba(255,248,236,.9)'); stroke(68, '#4a2c1c'); stroke(58, '#2b1a12');
+    // floorboard
+    g.fillStyle = '#b07a50'; g.fillRect(-60, 880, 660, 5);
+    g.fillStyle = '#8d5d3b'; g.fillRect(-60, 885, 660, 120);
+    g.strokeStyle = 'rgba(60,30,15,.4)'; g.lineWidth = 2;
+    for (const x of [70, 250, 430]) { g.beginPath(); g.moveTo(x, 885); g.lineTo(x, 960); g.stroke(); }
+    // the way out: a bright gap under the door
+    g.fillStyle = '#2a1810'; rr(g, 498, 784, 50, 98, 10); g.fill();
+    const glow = g.createLinearGradient(498, 784, 548, 880); glow.addColorStop(0, '#fffbe8'); glow.addColorStop(1, '#ffd36a');
+    g.fillStyle = glow; g.globalAlpha = .6 + Math.sin(T * 3) * .15; rr(g, 504, 792, 40, 88, 8); g.fill(); g.globalAlpha = 1;
+    textOutlined(g, 'EXIT', 522, 770, 14, '#fff');
+    // a clear plastic sweet tray
+    this.grid.drawTray(g, 'rgba(255,255,255,.75)', 'rgba(255,236,214,.55)');
     this.grid.drawBlocks(g, G.phase === 0 ? selected : null);
-    drawSnake(g, this.path, this.snakeS, T);
+    VILLAINS[this.villain](g, this.path, this.villainS, T);
   },
 };
 
 const P2 = {
-  name: 'Stone flood', base: 960, captionY: 92, label: 'SLAB', icon: '🪨', failText: 'The slab gave way!',
+  name: 'Bean avalanche', base: 960, captionY: 92, label: 'HOLD', icon: '🥄', failText: 'The beans burst through!', bg: 'pantry',
   R: 10, gx: 156, gy: 620,
   init() {
     this.grid = new Grid({ x: this.gx, y: this.gy, cols: 7, rows: 5, cell: 52, gravity: 1, colors: ['red', 'yellow', 'blue', 'green'],
@@ -533,16 +799,17 @@ const P2 = {
     const n = xs.length;
     this.n0 = n; this.X = new Float32Array(xs); this.Y = new Float32Array(ys);
     this.PX = new Float32Array(xs); this.PY = new Float32Array(ys); this.alive = new Uint8Array(n).fill(1);
+    this.ANG = new Float32Array(n).map(() => rand(0, Math.PI));
     this.HS = 20; this.HW = 22; this.HH = 64;
     this.head = new Int32Array(this.HW * this.HH); this.next = new Int32Array(n);
     this.hp = 100; this.cleared = 0; this.remaining = n; this.shake = 0;
     for (let i = 0; i < 40; i++) this.step(1 / 120);
   },
-  placeHero() { Object.assign(hero, { x: 120, y: this.base + 880, pose: 'push', face: 1, visible: true, inCart: false }); },
+  placeHero() { Object.assign(hero, { x: 120, y: this.base + 880, pose: 'push', face: 1, visible: true, inCart: false, scale: .9 }); },
   meter() { return clamp(this.hp / 100, 0, 1); },
   frac() { return this.remaining / this.n0; },
   hintPriority(r, c) { return (4 - r) * 1.5 + Math.abs(c - 3) * .3; },
-  intro() { caption('The way back is sealed! Hold the slab!', 2.6); later(2.6, () => !this.cleared && caption('Empty a whole column so the stones can drain away', 4)); },
+  intro() { caption('A coffee bean avalanche! Hold the ruler!', 2.6); later(2.6, () => !this.cleared && caption('Empty a whole column so the beans drain away', 4)); },
   onClear() { this.cleared++; },
   step(dt) {
     const { X, Y, PX, PY, alive, R, head, next, HS, HW, HH, grid } = this;
@@ -604,112 +871,147 @@ const P2 = {
     this.remaining = rem;
     if (!playing) return;
     const f = this.frac();
-    this.hp -= (100 / (TIMES.slab * mult())) * Math.pow(Math.max(f, .05), .75) * dt;
+    this.hp -= (100 / (TIMES.hold * mult())) * Math.pow(Math.max(f, .05), .75) * dt;
     this.shake = this.hp < 35 ? (35 - this.hp) / 35 : 0;
     hero.x = 120 + (Math.random() - .5) * this.shake * 2; hero.pose = 'push';
-    if (this.cleared && f < .75 && !this.saidDrain) { this.saidDrain = 1; caption('It\'s draining! Keep the channel open', 2.5); }
+    if (Math.random() < dt * 1.5) parts.push({ x: hero.x + 4, y: hero.y - 66, vx: rand(-60, -20), vy: -60, life: 0, max: .5, color: '#bfe6ff', r: 2.5, g: 500 });
+    if (this.cleared && f < .75 && !this.saidDrain) { this.saidDrain = 1; caption('They\'re draining! Keep the channel open', 2.5); }
     if (f <= .3) phaseWon();
     else if (this.hp <= 0) phaseLost();
   },
   draw(g, T) {
-    // switchback minecart track on the left
-    g.strokeStyle = '#4a2a1a'; g.lineWidth = 6; g.lineCap = 'round';
+    // toy cart track zig-zagging down the shelf
+    g.lineCap = 'round';
+    g.strokeStyle = '#3b2213'; g.lineWidth = 7;
     g.beginPath(); TRACK2.forEach((p, i) => (i ? g.lineTo(p[0], p[1] - 960 + 2) : g.moveTo(p[0], p[1] - 960 + 2))); g.stroke();
-    g.strokeStyle = '#8a6a4a'; g.lineWidth = 2; g.setLineDash([3, 7]);
-    g.beginPath(); TRACK2.forEach((p, i) => (i ? g.lineTo(p[0], p[1] - 960 + 6) : g.moveTo(p[0], p[1] - 960 + 6))); g.stroke(); g.setLineDash([]);
-    // reservoir
-    g.fillStyle = '#5a241b'; g.fillRect(157, 140, 363, 740);
-    g.fillStyle = '#9c7fd8'; g.fillRect(520, 120, 30, 840); g.fillRect(150, 120, 380, 10);
+    g.strokeStyle = '#d9a95e'; g.lineWidth = 3;
+    g.beginPath(); TRACK2.forEach((p, i) => (i ? g.lineTo(p[0], p[1] - 960) : g.moveTo(p[0], p[1] - 960))); g.stroke();
+    // glass jar the beans are pouring from
+    g.fillStyle = 'rgba(255,255,255,.07)'; g.fillRect(157, 140, 363, 740);
+    g.fillStyle = 'rgba(215,235,250,.55)'; g.fillRect(520, 120, 16, 840); g.fillRect(150, 118, 386, 10);
+    g.fillStyle = 'rgba(255,255,255,.7)'; g.fillRect(524, 150, 3, 600);
     // drain chute under the grate
-    g.fillStyle = '#1e0c08'; g.fillRect(157, 880, 363, 100);
-    g.strokeStyle = '#7d6aa8'; g.lineWidth = 3;
+    g.fillStyle = '#140a05'; g.fillRect(157, 880, 363, 100);
+    g.strokeStyle = '#b8a48a'; g.lineWidth = 3;
     for (let x = 160; x < 520; x += 12) { g.beginPath(); g.moveTo(x, 880); g.lineTo(x, 890); g.stroke(); }
-    // left ledge + drop shaft
-    g.fillStyle = '#9c7fd8'; g.fillRect(90, 880, 70, 14); g.fillRect(-60, 880, 80, 14);
-    g.fillStyle = '#5e2c22'; g.fillRect(90, 894, 67, 80); g.fillRect(-60, 894, 80, 80);
-    g.fillStyle = '#12304f'; g.fillRect(20, 880, 70, 100);
-    // slab
-    const sx = 143 + (Math.random() - .5) * this.shake * 3;
-    g.fillStyle = '#8b8698'; g.fillRect(sx, 130, 14, 750);
-    g.strokeStyle = '#4b4658'; g.lineWidth = 2; g.strokeRect(sx, 130, 14, 750);
-    if (this.hp < 66) { g.strokeStyle = '#2a2633'; g.beginPath(); g.moveTo(sx + 2, 500); g.lineTo(sx + 10, 530); g.lineTo(sx + 4, 560); g.stroke(); }
-    if (this.hp < 33) { g.beginPath(); g.moveTo(sx + 12, 650); g.lineTo(sx + 3, 690); g.lineTo(sx + 11, 720); g.lineTo(sx + 2, 760); g.stroke(); }
-    this.grid.drawTray(g, '#9c7fd8', '#7a3a2c');
+    // shelf ledge, and the drop down to the sink
+    g.fillStyle = '#b07a50'; g.fillRect(90, 880, 70, 12); g.fillRect(-60, 880, 80, 12);
+    g.fillStyle = '#6e4428'; g.fillRect(90, 892, 67, 80); g.fillRect(-60, 892, 80, 80);
+    g.fillStyle = '#20384f'; g.fillRect(20, 880, 70, 100);
+    // the ruler she is holding the beans back with
+    const sx = 140 + (Math.random() - .5) * this.shake * 3;
+    g.fillStyle = '#e8bd6a'; g.fillRect(sx, 130, 17, 750);
+    g.strokeStyle = '#8a6224'; g.lineWidth = 1.5; g.strokeRect(sx, 130, 17, 750);
+    g.beginPath(); for (let y = 140; y < 875; y += 10) { g.moveTo(sx, y); g.lineTo(sx + ((y - 140) % 50 ? 4 : 8), y); } g.stroke();
+    g.strokeStyle = '#3a2610'; g.lineWidth = 2;
+    if (this.hp < 66) { g.beginPath(); g.moveTo(sx + 2, 500); g.lineTo(sx + 12, 530); g.lineTo(sx + 5, 560); g.stroke(); }
+    if (this.hp < 33) { g.beginPath(); g.moveTo(sx + 14, 650); g.lineTo(sx + 4, 690); g.lineTo(sx + 13, 720); g.lineTo(sx + 3, 760); g.stroke(); }
+    this.grid.drawTray(g, '#efe6d6', 'rgba(70,40,20,.6)');
     this.grid.drawBlocks(g, G.phase === 1 ? selected : null);
-    const spr = stoneSprite(this.R), R = this.R;
-    for (let i = 0; i < this.n0; i++) if (this.alive[i]) g.drawImage(spr, this.X[i] - R, this.Y[i] - R, R * 2, R * 2);
+    const spr = beanSprite(this.R), R = this.R;
+    for (let i = 0; i < this.n0; i++) {
+      if (!this.alive[i]) continue;
+      g.save(); g.translate(this.X[i], this.Y[i]); g.rotate(this.ANG[i]); g.drawImage(spr, -R, -R, R * 2, R * 2); g.restore();
+    }
   },
 };
 const TRACK2 = [[-40, 1050], [130, 1110], [20, 1290], [130, 1470], [20, 1650], [120, 1840]];
 
 const P3 = {
-  name: 'Underwater', base: 1920, captionY: 735, label: 'AIR', icon: '🫧', failText: 'Your hero ran out of air!',
+  name: 'Sink escape', base: 1920, captionY: 735, label: 'AIR', icon: '🫧', failText: 'She ran out of air!', bg: 'sink',
   SC: 5,
   init() {
     this.grid = new Grid({ x: 120, y: 60, cols: 8, rows: 12, cell: 48, gravity: 0, colors: ['red', 'yellow', 'green'],
       mask: (r, c) => r >= 2 || c === this.SC, wx: 0, wy: this.base });
-    this.o2 = 100; this.cleared = 0; this.reach = new Set(); this.bubbles = [];
+    this.o2 = 100; this.cleared = 0; this.reach = new Set(); this.bubbles = []; this.route = null; this.routeVer = -1;
   },
-  placeHero() { Object.assign(hero, { x: 300, y: this.base + 800, pose: 'swim', face: 1, visible: true, inCart: false, tilt: 0 }); },
+  placeHero() { Object.assign(hero, { x: 300, y: this.base + 820, pose: 'swim', face: 1, visible: true, inCart: false, scale: .7 }); },
   meter() { return clamp(this.o2 / 100, 0, 1); },
   hintPriority(r, c) { return Math.abs(c - P3.SC) * 1.2 + (r < 2 ? -3 : 0) - r * .25; },
-  intro() { caption('Oh no! The exit is blocked!', 2.4); later(2.4, () => !this.cleared && caption('Carve a path from the water up to the EXIT', 4)); },
+  intro() { caption('She fell in the sink! The way out is blocked!', 2.6); later(2.6, () => !this.cleared && caption('Clear a path up to the EXIT', 4)); },
   onClear() { this.cleared++; },
-  // empty cells connected to open water (bottom row or left column)
-  search() {
+  waterStarts() {
+    const gr = this.grid, out = [];
+    for (let r = 2; r < gr.rows; r++) for (let c = 0; c < gr.cols; c++)
+      if (!gr.cells[r][c] && (r === gr.rows - 1 || c === 0)) out.push({ r, c });
+    return out;
+  },
+  // breadth-first search over empty cells; returns the cell path to `goal`, plus everything reached
+  bfs(starts, goal) {
     const gr = this.grid, prev = new Map(), q = [];
-    for (let r = 2; r < gr.rows; r++) for (let c = 0; c < gr.cols; c++) {
-      if (gr.cells[r][c] || !(r === gr.rows - 1 || c === 0)) continue;
-      const k = r * 100 + c; prev.set(k, -1); q.push({ r, c });
-    }
-    let goal = null;
+    for (const s of starts) { prev.set(key(s), -1); q.push(s); }
+    let found = null;
     while (q.length) {
       const cur = q.shift();
-      if (cur.r === 0 && cur.c === this.SC) { goal = cur; break; }
+      if (goal && cur.r === goal.r && cur.c === goal.c) { found = cur; break; }
       for (const nb of gr.neighbors(cur.r, cur.c)) {
-        const k = nb.r * 100 + nb.c;
-        if (prev.has(k) || gr.cells[nb.r][nb.c]) continue;
-        prev.set(k, cur.r * 100 + cur.c); q.push(nb);
+        if (prev.has(key(nb)) || gr.cells[nb.r][nb.c]) continue;
+        prev.set(key(nb), key(cur)); q.push(nb);
       }
     }
-    this.reach = new Set(prev.keys());
-    if (!goal) return null;
-    const path = []; let k = goal.r * 100 + goal.c;
-    while (k !== -1) { path.unshift({ r: (k / 100) | 0, c: k % 100 }); k = prev.get(k); }
-    return path;
+    let path = null;
+    if (found) { path = []; for (let k = key(found); k !== -1; k = prev.get(k)) path.unshift({ r: (k / 100) | 0, c: k % 100 }); }
+    return { path, prev };
+  },
+  feet(q) { const [x, y] = this.grid.center(q.r, q.c); return [x, y + this.base + 18]; },
+  // where she swims to: the open cell closest to the exit, entering from the water if she is not inside yet
+  routeTo(goal) {
+    const gr = this.grid, pts = [];
+    const hc = gr.cellAt(hero.x, hero.y - this.base - 18);
+    let path = hc && !gr.cells[hc.r][hc.c] ? this.bfs([hc], goal).path : null;
+    if (!path) {
+      path = this.bfs(this.waterStarts(), goal).path;
+      if (path) { const f = path[0], [x, y] = this.feet(f); pts.push(f.r === gr.rows - 1 ? [x, this.base + gr.y + gr.rows * gr.cell + 50] : [gr.x - 24, y]); }
+    }
+    if (path) path.forEach(q => pts.push(this.feet(q)));
+    return pts;
   },
   update(dt, playing) {
-    this.grid.update(dt);
+    const gr = this.grid;
+    gr.update(dt);
     if (Math.random() < dt * 6) this.bubbles.push({ x: rand(0, 540), y: 980, r: rand(2, 6), v: rand(40, 90) });
-    if (hero.visible && hero.pose === 'swim' && Math.random() < dt * 3) this.bubbles.push({ x: hero.x + 10, y: hero.y - this.base - 70, r: rand(2, 4), v: rand(50, 80) });
+    if (hero.visible && hero.pose === 'swim' && Math.random() < dt * 3) this.bubbles.push({ x: hero.x + 6, y: hero.y - this.base - 48, r: rand(2, 4), v: rand(50, 80) });
     for (const b of this.bubbles) { b.y -= b.v * dt; b.x += Math.sin(b.y * .05) * .3; }
     this.bubbles = this.bubbles.filter(b => b.y > -20);
-    const path = this.search();
+    const { prev } = this.bfs(this.waterStarts(), null);
+    this.reach = new Set(prev.keys());
     if (!playing) return;
-    this.o2 -= (100 / (TIMES.oxygen * mult())) * dt;
-    hero.x = 300 + Math.sin(G.time * .8) * 30; hero.y = this.base + 800 + Math.sin(G.time * 1.6) * 8; hero.pose = 'swim';
-    hero.face = Math.cos(G.time * .8) > 0 ? 1 : -1;
+    this.o2 -= (100 / (TIMES.air * mult())) * dt;
+    hero.pose = 'swim';
+    // she keeps swimming up into whatever space you open
+    if (this.routeVer !== gr.version) {
+      this.routeVer = gr.version;
+      let best = null, bs = Infinity;
+      for (const k of this.reach) { const r = (k / 100) | 0, c = k % 100, s = r * 2 + Math.abs(c - this.SC); if (s < bs) { bs = s; best = { r, c }; } }
+      this.route = best ? this.routeTo(best) : [[gr.x + (this.SC + .5) * gr.cell, this.base + gr.y + gr.rows * gr.cell + 62]];
+    }
+    const wp = this.route && this.route[0];
+    if (wp) {
+      const dx = wp[0] - hero.x, dy = wp[1] - hero.y, d = Math.hypot(dx, dy);
+      if (d < 3) { if (this.route.length > 1) this.route.shift(); }
+      else { const v = Math.min(d, 150 * dt); hero.x += dx / d * v; hero.y += dy / d * v; if (Math.abs(dx) > 2) hero.face = dx > 0 ? 1 : -1; }
+    }
     if (this.o2 < 30 && !this.saidAir) { this.saidAir = 1; caption('Hurry, she\'s running out of air!', 2.5); }
-    if (path) { this.winPath = path; phaseWon(); }
+    if (this.reach.has(this.SC)) phaseWon();
     else if (this.o2 <= 0) phaseLost();
   },
   draw(g, T) {
     const gr = this.grid, s = gr.cell;
-    // rock
-    g.fillStyle = '#2a3550';
+    // porcelain sides of the sink
+    g.fillStyle = '#dfe5ec';
     g.fillRect(-60, -20, 80, 700); g.fillRect(110, -20, 10, 700); g.fillRect(504, -20, 96, 700);
     for (let c = 0; c < gr.cols; c++) if (c !== this.SC) g.fillRect(gr.x + c * s, -20, s, gr.y + 2 * s + 20);
+    g.fillStyle = 'rgba(70,100,130,.25)'; g.fillRect(-60, 660, 80, 20); g.fillRect(504, 660, 96, 20);
     // exit light
     const ex = gr.x + this.SC * s;
     const lg = g.createLinearGradient(0, 0, 0, 70); lg.addColorStop(0, 'rgba(255,250,200,.95)'); lg.addColorStop(1, 'rgba(255,250,200,0)');
     g.fillStyle = lg; g.globalAlpha = .7 + Math.sin(T * 3) * .2; g.fillRect(ex - 6, 4, s + 12, 60); g.globalAlpha = 1;
-    g.fillStyle = '#fff'; g.font = '800 14px system-ui,sans-serif'; g.textAlign = 'center'; g.fillText('EXIT ↑', ex + s / 2, 30);
-    // tray: reachable water cells glow
-    gr.drawTray(g, '#3f5a8a', 'rgba(8,36,84,.55)');
+    textOutlined(g, 'EXIT ↑', ex + s / 2, 28, 14, '#fff');
+    // tray: open water she can reach glows
+    gr.drawTray(g, '#c9d4df', 'rgba(8,36,84,.5)');
     g.fillStyle = 'rgba(150,235,255,.32)';
     for (const k of this.reach) { const r = (k / 100) | 0, c = k % 100; g.fillRect(gr.x + c * s, gr.y + r * s, s, s); }
     gr.drawBlocks(g, G.phase === 2 ? selected : null);
-    // bubbles
     g.strokeStyle = 'rgba(220,245,255,.7)'; g.lineWidth = 1.5;
     for (const b of this.bubbles) { g.beginPath(); g.arc(b.x, b.y, b.r, 0, 7); g.stroke(); }
   },
@@ -719,7 +1021,7 @@ const PHASES = [P1, P2, P3];
 // =====================================================================
 // GAME STATE
 // =====================================================================
-const G = { state: 'title', phase: 0, camY: 0, time: 0, phaseT: 0, seq: null, results: [], lastClear: 0, shake: 0 };
+const G = { told: {}, state: 'title', phase: 0, camY: 0, time: 0, phaseT: 0, seq: null, results: [], lastClear: 0, shake: 0 };
 let captionObj = null, timers = [];
 function caption(text, dur = 3) { captionObj = { text, t: 0, dur }; }
 function later(t, fn) { timers.push({ t, fn, phase: G.phase, epoch: G.epoch }); }
@@ -771,7 +1073,7 @@ const doStep = fn => ({ dur: 0, start: fn });
 const waitStep = dur => ({ dur });
 function seq12() {
   return [
-    doStep(() => { hero.pose = 'cheer'; caption('Phew! Jump in the minecart!', 2.4); }),
+    doStep(() => { hero.pose = 'cheer'; caption('Phew! Hop in the toy cart!', 2.4); }),
     waitStep(.5),
     pathStep([[hero.x, 880], [600, 880]], 200, { pose: 'walk' }),
     doStep(() => (hero.visible = false)),
@@ -784,23 +1086,19 @@ function seq12() {
 }
 function seq23() {
   return [
-    doStep(() => { hero.pose = 'cheer'; caption('The stones are gone! Dive into the water!', 2.6); }),
+    doStep(() => { hero.pose = 'cheer'; caption('The beans are gone! Jump down to the sink!', 2.6); }),
     waitStep(.8),
     pathStep([[hero.x, hero.y], [55, hero.y]], 160, { pose: 'walk' }),
     pathStep([[55, 1840], [55, 1960]], 520, { pose: 'fall', follow: [960, 1920, 380] }),
-    doStep(() => splash(55, 1922)),
+    doStep(() => { splash(55, 1922); hero.scale = .7; }),
     pathStep([[55, 1960], [70, 2300], [300, 2720]], 260, { pose: 'swim', follow: [1920, 1920, 0] }),
     camStep(1920, .3),
     () => { startPhase(2); },
   ];
 }
 function seqWin() {
-  const gr = P3.grid, pts = [[hero.x, hero.y]];
-  const first = P3.winPath[0], [fx, fy] = gr.center(first.r, first.c);
-  if (first.r === gr.rows - 1) pts.push([fx, P3.base + gr.y + gr.rows * gr.cell + 30]);
-  else pts.push([gr.x - 30 + 20, P3.base + fy]);
-  for (const p of P3.winPath) { const [x, y] = gr.center(p.r, p.c); pts.push([x, y + P3.base + 30]); }
-  pts.push([gr.x + (P3.SC + .5) * gr.cell, P3.base + 20]);
+  const gr = P3.grid;
+  const pts = [[hero.x, hero.y], ...P3.routeTo({ r: 0, c: P3.SC }), [gr.x + (P3.SC + .5) * gr.cell, P3.base + 12]];
   return [
     doStep(() => caption('The way is open! Swim for it!', 2.5)),
     pathStep(pts, 300, { pose: 'swim' }),
@@ -845,6 +1143,11 @@ function gridEvent(gr, type, n, combo) {
     PHASES[i].onClear(n);
   } else if (type === 'crumble') { SFX.thud(); caption('Stuck blocks crumbled away', 1.8); }
   else if (type === 'shuffle') caption('No moves left. Shuffling!', 1.8);
+  else if (type === 'make') {
+    const tips = { h: 'Rocket! Match it to blast a whole row', v: 'Rocket! Match it to blast a whole column', bomb: 'Bomb! Match it to blow up the sweets around it', rainbow: 'Choc bomb! Swap it with any sweet to clear that colour' };
+    if (!G.told[n]) { G.told[n] = 1; caption(tips[n], 2.8); }
+    tone(880, .15, 'triangle', .08, 1.5);
+  }
 }
 cv.addEventListener('pointerdown', e => {
   e.preventDefault(); audioInit();
@@ -888,18 +1191,11 @@ window.addEventListener('keydown', e => { if (e.key === 'n' && G.state === 'play
 // RENDER
 // =====================================================================
 function drawBackground(g, top, bottom, T) {
-  if (top < 1920) {
-    const grd = g.createLinearGradient(0, 0, 0, 1920);
-    grd.addColorStop(0, '#b65b45'); grd.addColorStop(.5, '#a24b38'); grd.addColorStop(1, '#8a3c2d');
-    g.fillStyle = grd; g.fillRect(-400, Math.max(top, -2000), 1340, Math.min(bottom, 1920) - Math.max(top, -2000));
-    g.fillStyle = 'rgba(0,0,0,.05)';
-    for (let i = 0; i < 26; i++) { const y = i * 74; if (y > top - 80 && y < bottom) g.fillRect(-400, y, 1340, 2); }
-  }
-  if (bottom > 1920) {
-    const grd = g.createLinearGradient(0, 1920, 0, 2880);
-    grd.addColorStop(0, '#3d9cf0'); grd.addColorStop(1, '#0b3b8f');
-    g.fillStyle = grd; g.fillRect(-400, Math.max(top, 1920), 1340, bottom - Math.max(top, 1920));
-    g.save(); g.globalAlpha = .08; g.fillStyle = '#fff';
+  for (const P of PHASES) if (P.base <= bottom && P.base + VH >= top) g.drawImage(BG[P.bg], 0, P.base, VW, VH);
+  if (top < 0) { g.fillStyle = '#f1dcbc'; g.fillRect(-400, top, 1340, -top); }
+  if (bottom > 2880) { g.fillStyle = '#163f86'; g.fillRect(-400, 2880, 1340, bottom - 2880); }
+  if (bottom > 1920) { // light rippling through the sink water
+    g.save(); g.globalAlpha = .07; g.fillStyle = '#fff';
     for (let i = 0; i < 6; i++) {
       const x = 60 + i * 95 + Math.sin(T * .5 + i) * 30;
       g.beginPath(); g.moveTo(x, 1920); g.lineTo(x + 40, 1920); g.lineTo(x - 60, 2880); g.lineTo(x - 120, 2880); g.fill();
@@ -982,19 +1278,19 @@ function drawTitle(g, v) {
   overlay(g, v, .55);
   textOutlined(g, 'HERO', 270, 210, 92, '#ffe24a', 900);
   textOutlined(g, 'ESCAPE', 270, 300, 76, '#ffffff', 900);
-  textOutlined(g, 'Level 1 · playable prototype', 270, 370, 20, '#f4ecff', 700);
+  textOutlined(g, 'A tiny hero in a giant world · Level 1', 270, 370, 20, '#f4ecff', 700);
   button(g, 120, 430, 300, 76, '▶  PLAY LEVEL 1', () => startLevel(0), true);
   g.font = '700 15px system-ui,sans-serif'; g.fillStyle = '#e6dcf7'; g.textAlign = 'center'; g.fillText('Test a single phase', 270, 545);
-  button(g, 60, 565, 130, 54, '1 · Snake', () => startLevel(0));
-  button(g, 205, 565, 130, 54, '2 · Stones', () => startLevel(1));
-  button(g, 350, 565, 130, 54, '3 · Water', () => startLevel(2));
+  button(g, 60, 565, 130, 54, '1 · Rat', () => startLevel(0));
+  button(g, 205, 565, 130, 54, '2 · Beans', () => startLevel(1));
+  button(g, 350, 565, 130, 54, '3 · Sink', () => startLevel(2));
   button(g, 60, 650, 420, 50, `Timers: ${CFG.relaxed ? 'Relaxed (+50%)' : 'Normal'}`, () => (CFG.relaxed = !CFG.relaxed));
   button(g, 60, 712, 420, 50, `Sound: ${CFG.sound ? 'ON' : 'OFF'}`, () => (CFG.sound = !CFG.sound));
   g.font = '600 14px system-ui,sans-serif'; g.fillStyle = '#cfc3e6';
   g.fillText('Swipe a block into its neighbour to line up 3+ of a colour.', 270, 828);
   g.fillText('Stuck? Tap the hammer, then tap any block to smash it.', 270, 850);
-  g.fillText('Stranded blocks crumble and dead boards reshuffle.', 270, 872);
-  g.fillText('Placeholder art: the hero will be replaced by your character.', 270, 900);
+  g.fillText('Match 4 = rocket · L or T shape = bomb · 5 = choc bomb', 270, 872);
+  g.fillText('Prototype art: final character and photo backdrops to come.', 270, 900);
 }
 
 function drawLose(g, v) {
@@ -1090,6 +1386,7 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 // title screen shows the level behind it
+buildBackdrops();
 PHASES.forEach(p => p.init()); P1.placeHero();
 window.HeroEscape = { G, PHASES, hero, startLevel, phaseWon };
 requestAnimationFrame(frame);
