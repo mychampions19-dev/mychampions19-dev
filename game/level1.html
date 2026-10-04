@@ -20,8 +20,8 @@ canvas{display:block;position:fixed;left:0;top:0;touch-action:none}
    Phase 3: Underwater    (carve a path up to the exit before air runs out)
    ===================================================================== */
 const VW = 540, VH = 960;
-const CFG = { diagonal: true, relaxed: false, sound: true };
-const TIMES = { snake: 42, slab: 38, oxygen: 40 };   // seconds, Normal mode
+const CFG = { relaxed: false, sound: true };
+const TIMES = { snake: 50, slab: 50, oxygen: 70 };   // seconds, Normal mode
 const mult = () => (CFG.relaxed ? 1.5 : 1);
 
 const cv = document.getElementById('c'), ctx = cv.getContext('2d');
@@ -166,46 +166,103 @@ function drawParts(g) {
 }
 
 // ---------- block grid
+// Match-3 board. Swap two touching blocks; a swap only sticks if it lines up 3+ of one colour.
+// Boards are finite (no refill) because each phase is about emptying space for the hero.
+const DIRS = [[0, 1], [1, 0], [0, -1], [-1, 0]];
 class Grid {
   constructor(o) {
     Object.assign(this, o);
     this.valid = []; this.cells = [];
     for (let r = 0; r < this.rows; r++) {
       this.valid.push([]); this.cells.push([]);
-      for (let c = 0; c < this.cols; c++) {
-        const v = !!this.mask(r, c);
-        this.valid[r].push(v);
-        this.cells[r].push(v ? { color: pick(this.colors), oy: 0, vy: 0, sq: 0 } : null);
-      }
+      for (let c = 0; c < this.cols; c++) { this.valid[r].push(!!this.mask(r, c)); this.cells[r].push(null); }
     }
-    this.popping = [];
-    this.version = 0;
+    for (let tries = 0; tries < 60; tries++) { this.fill(); if (this.findMove()) break; }
+    this.popping = []; this.version = 0;
+    this.state = 'idle'; this.anim = null; this.combo = 0;
+  }
+  // random colours, but never 3 in a row at the start
+  fill() {
+    for (let r = 0; r < this.rows; r++) for (let c = 0; c < this.cols; c++) {
+      if (!this.valid[r][c]) continue;
+      const bad = new Set(), L1 = this.get(r, c - 1), L2 = this.get(r, c - 2), U1 = this.get(r - 1, c), U2 = this.get(r - 2, c);
+      if (L1 && L2 && L1.color === L2.color) bad.add(L1.color);
+      if (U1 && U2 && U1.color === U2.color) bad.add(U1.color);
+      const opts = this.colors.filter(k => !bad.has(k));
+      this.cells[r][c] = { color: pick(opts.length ? opts : this.colors), oy: 0, vy: 0, sq: 0 };
+    }
   }
   inside(r, c) { return r >= 0 && r < this.rows && c >= 0 && c < this.cols && this.valid[r][c]; }
   get(r, c) { return this.inside(r, c) ? this.cells[r][c] : null; }
   center(r, c) { return [this.x + (c + .5) * this.cell, this.y + (r + .5) * this.cell]; }
-  cellAt(px, py, tol) {
+  cellAt(px, py) {
     const c = Math.floor((px - this.x) / this.cell), r = Math.floor((py - this.y) / this.cell);
-    if (!this.inside(r, c)) return null;
-    if (tol) { const [cx, cy] = this.center(r, c); if (Math.hypot(px - cx, py - cy) > this.cell * tol) return null; }
-    return { r, c };
+    return this.inside(r, c) ? { r, c } : null;
   }
-  adjacent(a, b) {
-    const dr = Math.abs(a.r - b.r), dc = Math.abs(a.c - b.c);
-    return CFG.diagonal ? dr <= 1 && dc <= 1 && dr + dc > 0 : dr + dc === 1;
-  }
+  // used by the underwater path search: 8-way so diagonal gaps count
   neighbors(r, c) {
     const out = [];
-    for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
-      if (!dr && !dc) continue;
-      if (!CFG.diagonal && dr && dc) continue;
-      if (this.inside(r + dr, c + dc)) out.push({ r: r + dr, c: c + dc });
-    }
+    for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++)
+      if ((dr || dc) && this.inside(r + dr, c + dc)) out.push({ r: r + dr, c: c + dc });
     return out;
   }
-  isLonely(r, c) {
-    const b = this.get(r, c); if (!b) return false;
-    return !this.neighbors(r, c).some(n => { const o = this.get(n.r, n.c); return o && o.color === b.color; });
+  rawSwap(a, b) { const t = this.cells[a.r][a.c]; this.cells[a.r][a.c] = this.cells[b.r][b.c]; this.cells[b.r][b.c] = t; }
+  runLen(r, c, dr, dc) {
+    const b = this.get(r, c); let n = 0;
+    for (let k = 1; ; k++) { const o = this.get(r + dr * k, c + dc * k); if (!o || o.color !== b.color) return n; n++; }
+  }
+  matchAt(r, c) {
+    if (!this.get(r, c)) return false;
+    return this.runLen(r, c, 0, -1) + this.runLen(r, c, 0, 1) >= 2 || this.runLen(r, c, -1, 0) + this.runLen(r, c, 1, 0) >= 2;
+  }
+  canSwap(a, b) {
+    if (!this.inside(b.r, b.c) || !this.get(a.r, a.c)) return false;
+    if (!this.get(b.r, b.c) && this.gravity) return false; // sliding into a gap only works without gravity
+    this.rawSwap(a, b);
+    const ok = this.matchAt(a.r, a.c) || this.matchAt(b.r, b.c);
+    this.rawSwap(a, b);
+    return ok;
+  }
+  findMove(priority) {
+    let best = null, bestScore = Infinity;
+    for (let r = 0; r < this.rows; r++) for (let c = 0; c < this.cols; c++) {
+      if (!this.get(r, c)) continue;
+      for (const [dr, dc] of DIRS) {
+        const a = { r, c }, b = { r: r + dr, c: c + dc };
+        if (!this.canSwap(a, b)) continue;
+        if (!priority) return { a, b };
+        const s = priority(r, c);
+        if (s < bestScore) { bestScore = s; best = { a, b }; }
+      }
+    }
+    return best;
+  }
+  findMatches() {
+    const out = new Map();
+    const scan = (r0, c0, dr, dc) => {
+      let r = r0, c = c0;
+      while (r < this.rows && c < this.cols) {
+        const b = this.get(r, c);
+        if (!b) { r += dr; c += dc; continue; }
+        let n = 1; while (this.get(r + dr * n, c + dc * n) && this.get(r + dr * n, c + dc * n).color === b.color) n++;
+        if (n >= 3) for (let k = 0; k < n; k++) out.set((r + dr * k) * 100 + c + dc * k, { r: r + dr * k, c: c + dc * k });
+        r += dr * n; c += dc * n;
+      }
+    };
+    for (let r = 0; r < this.rows; r++) scan(r, 0, 0, 1);
+    for (let c = 0; c < this.cols; c++) scan(0, c, 1, 0);
+    return [...out.values()];
+  }
+  trySwap(a, b) {
+    if (this.state !== 'idle' || !this.inside(b.r, b.c) || !this.get(a.r, a.c)) return false;
+    if (!this.get(b.r, b.c) && this.gravity) return false;
+    const ok = this.canSwap(a, b);
+    this.anim = { a, b, t: 0, dur: ok ? .16 : .32, ok }; this.state = 'swap';
+    return ok;
+  }
+  smash(cell) {
+    if (this.state !== 'idle' || !this.get(cell.r, cell.c)) return false;
+    this.clear([cell]); this.state = 'cascade'; return true;
   }
   clear(list) {
     for (const { r, c } of list) {
@@ -225,26 +282,57 @@ class Grid {
       const blocks = [];
       for (const r of rows) if (this.cells[r][c]) blocks.push({ b: this.cells[r][c], r });
       rows.forEach(r => (this.cells[r][c] = null));
-      blocks.forEach((o, i) => {
-        const tr = rows[i];
-        o.b.oy += (o.r - tr) * this.cell;
-        this.cells[tr][c] = o.b;
-      });
+      blocks.forEach((o, i) => { const tr = rows[i]; o.b.oy += (o.r - tr) * this.cell; this.cells[tr][c] = o.b; });
     }
+  }
+  settled() { for (const row of this.cells) for (const b of row) if (b && b.oy < 0) return false; return true; }
+  resolve() {
+    const m = this.findMatches();
+    if (m.length) { this.combo++; this.clear(m); gridEvent(this, 'match', m.length, this.combo); this.state = 'cascade'; return; }
+    this.state = 'idle'; this.combo = 0; this.afterMove();
+  }
+  // keep the board solvable: stranded blocks crumble, a dead board reshuffles
+  afterMove() {
+    if (!this.count()) return;
+    if (this.gravity) {
+      const lone = [];
+      for (let r = 0; r < this.rows; r++) for (let c = 0; c < this.cols; c++)
+        if (this.get(r, c) && !DIRS.some(([dr, dc]) => this.get(r + dr, c + dc))) lone.push({ r, c });
+      if (lone.length) { this.clear(lone); gridEvent(this, 'crumble', lone.length); this.state = 'cascade'; return; }
+    }
+    if (this.findMove()) return;
+    if (this.shuffle()) { gridEvent(this, 'shuffle'); this.state = 'cascade'; return; }
+    const tally = {};
+    for (const row of this.cells) for (const b of row) if (b) tally[b.color] = (tally[b.color] || 0) + 1;
+    const fewest = Object.keys(tally).sort((x, y) => tally[x] - tally[y])[0], list = [];
+    for (let r = 0; r < this.rows; r++) for (let c = 0; c < this.cols; c++) if (this.get(r, c) && this.get(r, c).color === fewest) list.push({ r, c });
+    this.clear(list); gridEvent(this, 'crumble', list.length); this.state = 'cascade';
+  }
+  shuffle() {
+    const pos = [], cols = [];
+    for (let r = 0; r < this.rows; r++) for (let c = 0; c < this.cols; c++) if (this.get(r, c)) { pos.push({ r, c }); cols.push(this.get(r, c).color); }
+    const assign = () => {
+      for (let i = cols.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [cols[i], cols[j]] = [cols[j], cols[i]]; }
+      pos.forEach((p, i) => { const b = this.cells[p.r][p.c]; b.color = cols[i]; b.sq = 1; });
+    };
+    for (let t = 0; t < 60; t++) { assign(); if (!this.findMatches().length && this.findMove()) return true; }
+    for (let t = 0; t < 60; t++) { assign(); if (this.findMatches().length || this.findMove()) return true; }
+    return false;
   }
   colEmpty(c) { for (let r = 0; r < this.rows; r++) if (this.valid[r][c] && this.cells[r][c]) return false; return true; }
   count() { let n = 0; for (const row of this.cells) for (const b of row) if (b) n++; return n; }
   update(dt) {
     for (const row of this.cells) for (const b of row) {
       if (!b) continue;
-      if (b.oy < 0) {
-        b.vy += 2800 * dt; b.oy += b.vy * dt;
-        if (b.oy >= 0) { b.oy = 0; b.vy = 0; b.sq = 1; }
-      }
+      if (b.oy < 0) { b.vy += 2800 * dt; b.oy += b.vy * dt; if (b.oy >= 0) { b.oy = 0; b.vy = 0; b.sq = 1; } }
       if (b.sq > 0) b.sq = Math.max(0, b.sq - dt * 5);
     }
     for (const p of this.popping) p.t += dt;
     this.popping = this.popping.filter(p => p.t < .22);
+    if (this.state === 'swap') {
+      const A = this.anim; A.t += dt;
+      if (A.t >= A.dur) { this.anim = null; if (A.ok) { this.rawSwap(A.a, A.b); this.combo = 0; this.resolve(); } else this.state = 'idle'; }
+    } else if (this.state === 'cascade' && this.settled() && !this.popping.length) this.resolve();
   }
   drawTray(g, rim, fill) {
     const s = this.cell;
@@ -255,15 +343,25 @@ class Grid {
     for (let r = 0; r < this.rows; r++) for (let c = 0; c < this.cols; c++)
       if (this.valid[r][c]) g.fillRect(this.x + c * s, this.y + r * s, s, s);
   }
-  drawBlocks(g, chainSet) {
-    const s = this.cell;
-    for (let r = 0; r < this.rows; r++) for (let c = 0; c < this.cols; c++) {
-      const b = this.cells[r][c]; if (!b) continue;
-      const [cx, cy0] = this.center(r, c), cy = cy0 + b.oy;
-      const sel = chainSet && chainSet.has(r * 100 + c);
-      const sx = (sel ? 1.12 : 1) * (1 + b.sq * .12), sy = (sel ? 1.12 : 1) * (1 - b.sq * .12);
-      if (sel) { g.fillStyle = 'rgba(255,255,255,.55)'; g.beginPath(); g.arc(cx, cy, s * .5, 0, 7); g.fill(); }
+  drawBlocks(g, sel) {
+    const s = this.cell, A = this.anim;
+    const skip = (r, c) => A && ((A.a.r === r && A.a.c === c) || (A.b.r === r && A.b.c === c));
+    const drawOne = (b, cx, cy, big) => {
+      const sx = (big ? 1.1 : 1) * (1 + b.sq * .12), sy = (big ? 1.1 : 1) * (1 - b.sq * .12);
       g.drawImage(blockSprite(b.color, s), cx - s / 2 * sx, cy - s / 2 * sy + (1 - sy) * s * .4, s * sx, s * sy);
+    };
+    for (let r = 0; r < this.rows; r++) for (let c = 0; c < this.cols; c++) {
+      const b = this.cells[r][c]; if (!b || skip(r, c)) continue;
+      const [cx, cy] = this.center(r, c), isSel = sel && sel.r === r && sel.c === c;
+      if (isSel) { g.fillStyle = 'rgba(255,255,255,.6)'; g.beginPath(); g.arc(cx, cy, s * .5 + Math.sin(G.time * 8) * 2, 0, 7); g.fill(); }
+      drawOne(b, cx, cy + b.oy, isSel);
+    }
+    if (A) {
+      const k = A.ok ? ease(Math.min(1, A.t / A.dur)) : Math.sin(Math.PI * Math.min(1, A.t / A.dur)) * .4;
+      const pa = this.center(A.a.r, A.a.c), pb = this.center(A.b.r, A.b.c);
+      const ba = this.cells[A.a.r][A.a.c], bb = this.cells[A.b.r][A.b.c];
+      if (bb) drawOne(bb, lerp(pb[0], pa[0], k), lerp(pb[1], pa[1], k), false);
+      if (ba) drawOne(ba, lerp(pa[0], pb[0], k), lerp(pa[1], pb[1], k), true);
     }
     for (const p of this.popping) {
       const k = p.t / .22, sc = 1 + k * .6;
@@ -271,24 +369,6 @@ class Grid {
       g.drawImage(blockSprite(p.color, s), p.x - s / 2 * sc, p.y - s / 2 * sc, s * sc, s * sc);
     }
     g.globalAlpha = 1;
-  }
-  findHint(priority) {
-    let best = null, bestScore = Infinity;
-    for (let r = 0; r < this.rows; r++) for (let c = 0; c < this.cols; c++) {
-      const b = this.get(r, c); if (!b) continue;
-      const chain = [{ r, c }];
-      const seen = new Set([r * 100 + c]);
-      while (chain.length < 4) {
-        const last = chain[chain.length - 1];
-        const nx = this.neighbors(last.r, last.c).find(n => !seen.has(n.r * 100 + n.c) && this.get(n.r, n.c) && this.get(n.r, n.c).color === b.color);
-        if (!nx) break;
-        chain.push(nx); seen.add(nx.r * 100 + nx.c);
-      }
-      if (chain.length < 2) continue;
-      const score = priority(r, c) - chain.length * .6;
-      if (score < bestScore) { bestScore = score; best = chain; }
-    }
-    return best;
   }
 }
 
@@ -408,7 +488,7 @@ const P1 = {
     return n === 8 ? 530 : n === 0 ? 48 : this.grid.x + (n - .5) * this.grid.cell;
   },
   hintPriority: (r, c) => c * 2,
-  intro() { caption('Oh no! A mutant snake is coming!', 2.6); later(2.6, () => !this.cleared && caption('Swipe matching blocks to clear a path!', 4)); },
+  intro() { caption('Oh no! A mutant snake is coming!', 2.6); later(2.6, () => !this.cleared && caption('Swipe a block to line up 3 of the same colour!', 4)); },
   onClear() { this.cleared++; if (this.cleared === 1) caption('Empty every column so your hero can run to the exit', 3.5); },
   update(dt, playing) {
     this.grid.update(dt);
@@ -435,7 +515,7 @@ const P1 = {
     g.fillStyle = glow; g.globalAlpha = .55 + Math.sin(T * 3) * .15; rr(g, 504, 792, 40, 88, 14); g.fill(); g.globalAlpha = 1;
     g.fillStyle = '#fff'; g.font = '700 13px system-ui,sans-serif'; g.textAlign = 'center'; g.fillText('EXIT', 524, 776);
     this.grid.drawTray(g, '#9c7fd8', '#c79a72');
-    this.grid.drawBlocks(g, G.phase === 0 ? chainSet() : null);
+    this.grid.drawBlocks(g, G.phase === 0 ? selected : null);
     drawSnake(g, this.path, this.snakeS, T);
   },
 };
@@ -462,7 +542,7 @@ const P2 = {
   meter() { return clamp(this.hp / 100, 0, 1); },
   frac() { return this.remaining / this.n0; },
   hintPriority(r, c) { return (4 - r) * 1.5 + Math.abs(c - 3) * .3; },
-  intro() { caption('The way back is sealed! Hold the slab!', 2.6); later(2.6, () => !this.cleared && caption('Clear a whole column so the stones can drain away', 4)); },
+  intro() { caption('The way back is sealed! Hold the slab!', 2.6); later(2.6, () => !this.cleared && caption('Empty a whole column so the stones can drain away', 4)); },
   onClear() { this.cleared++; },
   step(dt) {
     const { X, Y, PX, PY, alive, R, head, next, HS, HW, HH, grid } = this;
@@ -555,7 +635,7 @@ const P2 = {
     if (this.hp < 66) { g.strokeStyle = '#2a2633'; g.beginPath(); g.moveTo(sx + 2, 500); g.lineTo(sx + 10, 530); g.lineTo(sx + 4, 560); g.stroke(); }
     if (this.hp < 33) { g.beginPath(); g.moveTo(sx + 12, 650); g.lineTo(sx + 3, 690); g.lineTo(sx + 11, 720); g.lineTo(sx + 2, 760); g.stroke(); }
     this.grid.drawTray(g, '#9c7fd8', '#7a3a2c');
-    this.grid.drawBlocks(g, G.phase === 1 ? chainSet() : null);
+    this.grid.drawBlocks(g, G.phase === 1 ? selected : null);
     const spr = stoneSprite(this.R), R = this.R;
     for (let i = 0; i < this.n0; i++) if (this.alive[i]) g.drawImage(spr, this.X[i] - R, this.Y[i] - R, R * 2, R * 2);
   },
@@ -568,8 +648,6 @@ const P3 = {
   init() {
     this.grid = new Grid({ x: 120, y: 60, cols: 8, rows: 12, cell: 48, gravity: 0, colors: ['red', 'yellow', 'green'],
       mask: (r, c) => r >= 2 || c === this.SC, wx: 0, wy: this.base });
-    // the shaft pair must match, or the top block could end up impossible to clear
-    this.grid.cells[0][this.SC].color = this.grid.cells[1][this.SC].color;
     this.o2 = 100; this.cleared = 0; this.reach = new Set(); this.bubbles = [];
   },
   placeHero() { Object.assign(hero, { x: 300, y: this.base + 800, pose: 'swim', face: 1, visible: true, inCart: false, tilt: 0 }); },
@@ -630,7 +708,7 @@ const P3 = {
     gr.drawTray(g, '#3f5a8a', 'rgba(8,36,84,.55)');
     g.fillStyle = 'rgba(150,235,255,.32)';
     for (const k of this.reach) { const r = (k / 100) | 0, c = k % 100; g.fillRect(gr.x + c * s, gr.y + r * s, s, s); }
-    gr.drawBlocks(g, G.phase === 2 ? chainSet() : null);
+    gr.drawBlocks(g, G.phase === 2 ? selected : null);
     // bubbles
     g.strokeStyle = 'rgba(220,245,255,.7)'; g.lineWidth = 1.5;
     for (const b of this.bubbles) { g.beginPath(); g.arc(b.x, b.y, b.r, 0, 7); g.stroke(); }
@@ -656,7 +734,8 @@ function startPhase(i) {
   G.epoch = (G.epoch || 0) + 1;
   G.phase = i; const P = PHASES[i];
   P.placeHero(); G.camY = P.base; G.state = 'play'; G.phaseT = 0; G.lastClear = 0; G.hint = null; G.hintVersion = -1;
-  chain = []; timers = []; captionObj = null;
+  drag = null; selected = null; timers = []; captionObj = null;
+  G.hammers = 2; G.hammerArmed = false; G.lastMove = 0; G.combo = null;
   P.intro();
 }
 function retryPhase() { const i = G.phase; PHASES[i].init(); G.results.length = i; startPhase(i); }
@@ -664,12 +743,12 @@ function phaseWon() {
   if (G.state !== 'play') return;
   const P = PHASES[G.phase];
   G.results[G.phase] = { meter: P.meter(), time: G.phaseT };
-  chain = []; SFX.win(); buzz(30);
+  selected = null; G.hammerArmed = false; SFX.win(); buzz(30);
   runSeq(G.phase === 0 ? seq12() : G.phase === 1 ? seq23() : seqWin());
 }
 function phaseLost() {
   if (G.state !== 'play') return;
-  G.state = 'lose'; chain = []; SFX.lose(); buzz([60, 40, 60]); G.shake = .5;
+  G.state = 'lose'; selected = null; G.hammerArmed = false; SFX.lose(); buzz([60, 40, 60]); G.shake = .5;
   hero.pose = 'scared';
 }
 
@@ -745,56 +824,63 @@ function updateSeq(dt) {
 }
 
 // =====================================================================
-// INPUT — swipe through same-colour neighbours, release to clear
+// INPUT — swipe a block into a neighbour (or tap one, then the other)
 // =====================================================================
-let chain = [], pointerDown = false, lastPt = null, buttons = [];
-const chainSet = () => new Set(chain.map(c => c.r * 100 + c.c));
+let drag = null, selected = null, buttons = [];
 function toStage(e) { return { x: (e.clientX - offX) / scale, y: (e.clientY - offY) / scale }; }
 function activeGrid() { return G.state === 'play' ? PHASES[G.phase].grid : null; }
-function tryAdd(px, py) {
-  const gr = activeGrid(); if (!gr || !chain.length) return;
-  const cell = gr.cellAt(px, py - PHASES[G.phase].base, .45); if (!cell) return;
-  const b = gr.get(cell.r, cell.c), col = gr.get(chain[0].r, chain[0].c);
-  if (!b || !col || b.color !== col.color || b.oy < -gr.cell * .3) return;
-  const idx = chain.findIndex(c => c.r === cell.r && c.c === cell.c);
-  if (idx !== -1 && idx === chain.length - 2) { chain.pop(); SFX.tick(chain.length); return; }
-  if (idx !== -1) return;
-  if (!gr.adjacent(chain[chain.length - 1], cell)) return;
-  chain.push(cell); SFX.tick(chain.length); buzz(5);
+function doSwap(gr, a, b) {
+  selected = null;
+  if (!gr.inside(b.r, b.c)) return;
+  if (gr.trySwap(a, b)) { tone(600, .08, 'triangle', .06, 1.5); G.lastMove = G.phaseT; }
+  else if (gr.state === 'swap') SFX.thud();
+}
+// called by a Grid when something happens on it
+function gridEvent(gr, type, n, combo) {
+  const i = PHASES.findIndex(P => P.grid === gr);
+  if (i !== G.phase || G.state !== 'play') return;
+  if (type === 'match') {
+    SFX.pop(n + combo); buzz(combo > 1 ? 25 : 12); G.lastClear = G.phaseT;
+    if (combo > 1) G.combo = { text: combo > 3 ? 'AMAZING!' : combo > 2 ? 'GREAT!' : 'NICE!', start: G.time };
+    PHASES[i].onClear(n);
+  } else if (type === 'crumble') { SFX.thud(); caption('Stuck blocks crumbled away', 1.8); }
+  else if (type === 'shuffle') caption('No moves left. Shuffling!', 1.8);
 }
 cv.addEventListener('pointerdown', e => {
   e.preventDefault(); audioInit();
   const p = toStage(e);
   for (const b of buttons) if (p.x >= b.x && p.x <= b.x + b.w && p.y >= b.y && p.y <= b.y + b.h) { b.fn(); SFX.tick(2); return; }
-  const gr = activeGrid(); if (!gr) return;
-  const wy = p.y + G.camY;
-  const cell = gr.cellAt(p.x, wy - PHASES[G.phase].base, .62);
-  if (cell && gr.get(cell.r, cell.c) && gr.get(cell.r, cell.c).oy > -gr.cell * .3) { chain = [cell]; SFX.tick(1); }
-  pointerDown = true; lastPt = { x: p.x, y: wy };
+  const gr = activeGrid(); if (!gr || gr.state !== 'idle') return;
+  const ly = p.y + G.camY - PHASES[G.phase].base, cell = gr.cellAt(p.x, ly);
+  if (G.hammerArmed) {
+    if (cell && gr.get(cell.r, cell.c)) { gr.smash(cell); G.hammers--; G.hammerArmed = false; SFX.thud(); buzz(30); G.shake = .25; }
+    return;
+  }
+  drag = cell ? { cell, x: p.x, y: ly, used: false } : null;
+  if (!cell) selected = null;
   try { cv.setPointerCapture(e.pointerId); } catch (err) {}
 }, { passive: false });
 cv.addEventListener('pointermove', e => {
   e.preventDefault();
-  if (!pointerDown || !chain.length) return;
-  const p = toStage(e), wy = p.y + G.camY;
-  const steps = Math.ceil(Math.hypot(p.x - lastPt.x, wy - lastPt.y) / 8) || 1;
-  for (let i = 1; i <= steps; i++) tryAdd(lerp(lastPt.x, p.x, i / steps), lerp(lastPt.y, wy, i / steps));
-  lastPt = { x: p.x, y: wy };
-}, { passive: false });
-function release() {
-  pointerDown = false;
   const gr = activeGrid();
-  if (gr && chain.length) {
-    const single = chain.length === 1 && gr.isLonely(chain[0].r, chain[0].c);
-    if (chain.length >= 2 || single) {
-      gr.clear(chain); SFX.pop(chain.length); buzz(chain.length > 3 ? 25 : 12);
-      G.lastClear = G.phaseT; PHASES[G.phase].onClear(chain.length);
-    }
+  if (!drag || drag.used || !gr || !gr.get(drag.cell.r, drag.cell.c)) return;
+  const p = toStage(e), dx = p.x - drag.x, dy = p.y + G.camY - PHASES[G.phase].base - drag.y;
+  if (Math.hypot(dx, dy) < gr.cell * .3) return;
+  drag.used = true;
+  const t = Math.abs(dx) > Math.abs(dy) ? { r: drag.cell.r, c: drag.cell.c + Math.sign(dx) } : { r: drag.cell.r + Math.sign(dy), c: drag.cell.c };
+  doSwap(gr, drag.cell, t);
+}, { passive: false });
+cv.addEventListener('pointerup', () => {
+  const gr = activeGrid();
+  if (gr && drag && !drag.used) {
+    const c = drag.cell;
+    if (selected && Math.abs(selected.r - c.r) + Math.abs(selected.c - c.c) === 1 && gr.get(selected.r, selected.c)) doSwap(gr, selected, c);
+    else if (selected && selected.r === c.r && selected.c === c.c) selected = null;
+    else if (gr.get(c.r, c.c)) { selected = c; SFX.tick(1); }
   }
-  chain = [];
-}
-cv.addEventListener('pointerup', release);
-cv.addEventListener('pointercancel', () => { pointerDown = false; chain = []; });
+  drag = null;
+});
+cv.addEventListener('pointercancel', () => { drag = null; });
 ['touchstart', 'touchmove', 'gesturestart'].forEach(ev => document.addEventListener(ev, e => e.preventDefault(), { passive: false }));
 window.addEventListener('keydown', e => { if (e.key === 'n' && G.state === 'play') phaseWon(); });
 
@@ -864,6 +950,11 @@ function drawHUD(g, v) {
   g.fillStyle = '#fff'; g.font = '800 11px system-ui,sans-serif'; g.textAlign = 'center'; g.fillText(P.label, mx + mw / 2, my + 11);
   // restart
   button(g, 470, top + 9, 46, 40, '↻', () => retryPhase(), false);
+  // hammer booster
+  if (G.state === 'play') {
+    const hy = Math.min(v.bottom, VH + 60) - 74;
+    if (G.hammers > 0 || G.hammerArmed) button(g, 14, hy, 150, 56, G.hammerArmed ? 'Tap a block' : `🔨 Hammer ×${G.hammers}`, () => { G.hammerArmed = !G.hammerArmed; }, G.hammerArmed);
+  }
   // danger vignette
   if (G.state === 'play' && m < .25) {
     const a = (.25 - m) * 2.4 * (.6 + .4 * Math.sin(G.time * 10));
@@ -897,12 +988,12 @@ function drawTitle(g, v) {
   button(g, 60, 565, 130, 54, '1 · Snake', () => startLevel(0));
   button(g, 205, 565, 130, 54, '2 · Stones', () => startLevel(1));
   button(g, 350, 565, 130, 54, '3 · Water', () => startLevel(2));
-  button(g, 60, 640, 420, 50, `Diagonal swipes: ${CFG.diagonal ? 'ON' : 'OFF'}`, () => (CFG.diagonal = !CFG.diagonal));
-  button(g, 60, 702, 420, 50, `Timers: ${CFG.relaxed ? 'Relaxed (+50%)' : 'Normal'}`, () => (CFG.relaxed = !CFG.relaxed));
-  button(g, 60, 764, 420, 50, `Sound: ${CFG.sound ? 'ON' : 'OFF'}`, () => (CFG.sound = !CFG.sound));
+  button(g, 60, 650, 420, 50, `Timers: ${CFG.relaxed ? 'Relaxed (+50%)' : 'Normal'}`, () => (CFG.relaxed = !CFG.relaxed));
+  button(g, 60, 712, 420, 50, `Sound: ${CFG.sound ? 'ON' : 'OFF'}`, () => (CFG.sound = !CFG.sound));
   g.font = '600 14px system-ui,sans-serif'; g.fillStyle = '#cfc3e6';
-  g.fillText('Swipe through 2+ touching blocks of one colour, then lift.', 270, 850);
-  g.fillText('A block with no matching neighbour clears with a tap.', 270, 872);
+  g.fillText('Swipe a block into its neighbour to line up 3+ of a colour.', 270, 828);
+  g.fillText('Stuck? Tap the hammer, then tap any block to smash it.', 270, 850);
+  g.fillText('Stranded blocks crumble and dead boards reshuffle.', 270, 872);
   g.fillText('Placeholder art: the hero will be replaced by your character.', 270, 900);
 }
 
@@ -954,25 +1045,20 @@ function render() {
   }
   drawHero(ctx, T);
   drawParts(ctx);
-  // chain line
-  if (chain.length && G.state === 'play') {
-    const P = PHASES[G.phase], gr = P.grid, col = gr.get(chain[0].r, chain[0].c);
-    if (col) {
-      ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-      const line = (w, c) => { ctx.strokeStyle = c; ctx.lineWidth = w; ctx.beginPath(); chain.forEach((q, i) => { const [x, y] = gr.center(q.r, q.c); i ? ctx.lineTo(x, y + P.base) : ctx.moveTo(x, y + P.base); }); ctx.stroke(); };
-      line(16, '#fff'); line(9, COLORS[col.color].base);
-      const last = chain[chain.length - 1], [lx, ly] = gr.center(last.r, last.c);
-      if (chain.length > 1) textOutlined(ctx, '×' + chain.length, lx + 24, ly + P.base - 28, 22, '#fff');
-    }
+  // combo text
+  if (G.combo && G.state === 'play') {
+    const k = G.time - G.combo.start;
+    if (k < 1) { ctx.globalAlpha = Math.min(1, (1 - k) * 3); textOutlined(ctx, G.combo.text, 270, PHASES[G.phase].base + PHASES[G.phase].captionY + 46 - k * 30, 34 + (1 - Math.min(1, k * 4)) * 14, '#fff'); ctx.globalAlpha = 1; }
+    else G.combo = null;
   }
-  // tutorial hand
-  if (G.state === 'play' && !chain.length && G.phaseT - G.lastClear > (G.lastClear ? 6 : 1.2)) {
+  // tutorial hand: shows a valid swipe
+  if (G.state === 'play' && !drag && !G.hammerArmed && PHASES[G.phase].grid.state === 'idle' && G.phaseT - G.lastMove > (G.lastMove ? 6 : 1.2)) {
     const P = PHASES[G.phase], gr = P.grid;
-    if (G.hintVersion !== gr.version) { G.hint = gr.findHint(P.hintPriority.bind(P)); G.hintVersion = gr.version; }
+    if (G.hintVersion !== gr.version) { G.hint = gr.findMove(P.hintPriority.bind(P)); G.hintVersion = gr.version; }
     if (G.hint) {
-      const k = (T * .7) % 1, seg = k * (G.hint.length - 1 + .6), i = Math.min(G.hint.length - 1, Math.floor(seg)), f = Math.min(1, seg - i);
-      const a = gr.center(G.hint[i].r, G.hint[i].c), b = gr.center(G.hint[Math.min(i + 1, G.hint.length - 1)].r, G.hint[Math.min(i + 1, G.hint.length - 1)].c);
-      ctx.globalAlpha = .9; drawHand(ctx, lerp(a[0], b[0], f), lerp(a[1], b[1], f) + P.base); ctx.globalAlpha = 1;
+      const k = (T * .8) % 1, f = ease(clamp((k - .2) / .5, 0, 1));
+      const a = gr.center(G.hint.a.r, G.hint.a.c), b = gr.center(G.hint.b.r, G.hint.b.c);
+      ctx.globalAlpha = .9 * Math.min(1, (1 - k) * 5); drawHand(ctx, lerp(a[0], b[0], f), lerp(a[1], b[1], f) + P.base); ctx.globalAlpha = 1;
     }
   }
   ctx.restore();
