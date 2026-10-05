@@ -21,7 +21,7 @@ canvas{display:block;position:fixed;left:0;top:0;touch-action:none}
    ===================================================================== */
 const VW = 540, VH = 960;
 const CFG = { relaxed: false, sound: true };
-const TIMES = { rat: 50, hold: 50, air: 70 };   // seconds, Normal mode
+const TIMES = { rat: 50, hold: 50, air: 50 };   // seconds, Normal mode
 const mult = () => (CFG.relaxed ? 1.5 : 1);
 
 const cv = document.getElementById('c'), ctx = cv.getContext('2d');
@@ -238,10 +238,7 @@ function buildBackdrops() {
     g.fillStyle = '#3e4c58'; g.beginPath(); g.ellipse(300, 900, 130, 50, 0, 0, 7); g.fill();
     g.fillStyle = '#1e262d'; g.beginPath(); g.ellipse(300, 900, 70, 26, 0, 0, 7); g.fill();
   });
-  const so = BG.sink.getContext('2d'), wg = so.createLinearGradient(0, 0, 0, VH);
-  wg.addColorStop(0, 'rgba(60,160,240,.42)'); wg.addColorStop(1, 'rgba(10,50,150,.72)');
-  so.fillStyle = wg; so.fillRect(0, 0, VW, VH);
-  bokeh(so, 16, ['rgba(220,245,255,A)'], 8, 30, .25);
+  bokeh(BG.sink.getContext('2d'), 12, ['rgba(255,255,255,A)'], 10, 40, .2);
 }
 
 // ---------- particles
@@ -918,102 +915,91 @@ const P2 = {
 const TRACK2 = [[-40, 1050], [130, 1110], [20, 1290], [130, 1470], [20, 1650], [120, 1840]];
 
 const P3 = {
-  name: 'Sink escape', base: 1920, captionY: 735, label: 'AIR', icon: '🫧', failText: 'She ran out of air!', bg: 'sink',
-  SC: 5,
+  name: 'Sink escape', base: 1920, captionY: 400, label: 'AIR', icon: '🫧', failText: 'She ran out of air!', bg: 'sink',
+  // y positions inside the phase: the water surface starts high and each match pushes it down
+  FEET: 700, MOUTH: 650, START: 300, TOP: 150, DRAIN: 10, TAP: 4,
   init() {
-    this.grid = new Grid({ x: 120, y: 60, cols: 8, rows: 12, cell: 48, gravity: 0, colors: ['red', 'yellow', 'green'],
-      mask: (r, c) => r >= 2 || c === this.SC, wx: 0, wy: this.base });
-    this.o2 = 100; this.cleared = 0; this.reach = new Set(); this.bubbles = []; this.route = null; this.routeVer = -1;
+    this.grid = new Grid({ x: 110, y: 500, cols: 8, rows: 8, cell: 50, gravity: 1, colors: ['red', 'yellow', 'green', 'blue'],
+      mask: () => true, wx: 0, wy: this.base });
+    this.level = this.START; this.shown = this.START; this.air = 100; this.cleared = 0; this.bubbles = []; this.swirl = 0;
+    this.saidAir = this.saidBreathe = 0;
   },
-  placeHero() { Object.assign(hero, { x: 300, y: this.base + 820, pose: 'swim', face: 1, visible: true, inCart: false, scale: .7 }); },
-  meter() { return clamp(this.o2 / 100, 0, 1); },
-  hintPriority(r, c) { return Math.abs(c - P3.SC) * 1.2 + (r < 2 ? -3 : 0) - r * .25; },
-  intro() { caption('She fell in the sink! The way out is blocked!', 2.6); later(2.6, () => !this.cleared && caption('Clear a path up to the EXIT', 4)); },
-  onClear() { this.cleared++; },
-  waterStarts() {
-    const gr = this.grid, out = [];
-    for (let r = 2; r < gr.rows; r++) for (let c = 0; c < gr.cols; c++)
-      if (!gr.cells[r][c] && (r === gr.rows - 1 || c === 0)) out.push({ r, c });
-    return out;
+  placeHero() { Object.assign(hero, { x: 62, y: this.base + this.FEET - 14, pose: 'swim', face: 1, visible: true, inCart: false, scale: .8 }); },
+  meter() { return clamp(this.air / 100, 0, 1); },
+  submerged() { return this.shown < this.MOUTH; },
+  hintPriority(r, c) { return (7 - r) * 1.2 + Math.abs(c - 4) * .2; },
+  intro() {
+    caption('She fell in the sink, and the tap is still running!', 2.8);
+    later(2.8, () => !this.cleared && caption('Sweets are clogging the plughole. Match them to drain the water!', 4));
   },
-  // breadth-first search over empty cells; returns the cell path to `goal`, plus everything reached
-  bfs(starts, goal) {
-    const gr = this.grid, prev = new Map(), q = [];
-    for (const s of starts) { prev.set(key(s), -1); q.push(s); }
-    let found = null;
-    while (q.length) {
-      const cur = q.shift();
-      if (goal && cur.r === goal.r && cur.c === goal.c) { found = cur; break; }
-      for (const nb of gr.neighbors(cur.r, cur.c)) {
-        if (prev.has(key(nb)) || gr.cells[nb.r][nb.c]) continue;
-        prev.set(key(nb), key(cur)); q.push(nb);
-      }
-    }
-    let path = null;
-    if (found) { path = []; for (let k = key(found); k !== -1; k = prev.get(k)) path.unshift({ r: (k / 100) | 0, c: k % 100 }); }
-    return { path, prev };
-  },
-  feet(q) { const [x, y] = this.grid.center(q.r, q.c); return [x, y + this.base + 18]; },
-  // where she swims to: the open cell closest to the exit, entering from the water if she is not inside yet
-  routeTo(goal) {
-    const gr = this.grid, pts = [];
-    const hc = gr.cellAt(hero.x, hero.y - this.base - 18);
-    let path = hc && !gr.cells[hc.r][hc.c] ? this.bfs([hc], goal).path : null;
-    if (!path) {
-      path = this.bfs(this.waterStarts(), goal).path;
-      if (path) { const f = path[0], [x, y] = this.feet(f); pts.push(f.r === gr.rows - 1 ? [x, this.base + gr.y + gr.rows * gr.cell + 50] : [gr.x - 24, y]); }
-    }
-    if (path) path.forEach(q => pts.push(this.feet(q)));
-    return pts;
-  },
+  onClear(n) { this.cleared++; this.level = Math.min(this.FEET + 60, this.level + n * this.DRAIN); this.swirl = 1.2; },
   update(dt, playing) {
-    const gr = this.grid;
-    gr.update(dt);
-    if (Math.random() < dt * 6) this.bubbles.push({ x: rand(0, 540), y: 980, r: rand(2, 6), v: rand(40, 90) });
-    if (hero.visible && hero.pose === 'swim' && Math.random() < dt * 3) this.bubbles.push({ x: hero.x + 6, y: hero.y - this.base - 48, r: rand(2, 4), v: rand(50, 80) });
+    this.grid.update(dt);
+    this.shown = lerp(this.shown, this.level, 1 - Math.exp(-dt * 4));
+    this.swirl = Math.max(0, this.swirl - dt);
+    if (Math.random() < dt * 5) this.bubbles.push({ x: rand(110, 510), y: 930, r: rand(2, 6), v: rand(40, 90) });
+    if (hero.visible && this.submerged() && G.phase === 2 && Math.random() < dt * 3) this.bubbles.push({ x: hero.x + 6, y: hero.y - this.base - 44, r: rand(2, 4), v: rand(50, 80) });
     for (const b of this.bubbles) { b.y -= b.v * dt; b.x += Math.sin(b.y * .05) * .3; }
-    this.bubbles = this.bubbles.filter(b => b.y > -20);
-    const { prev } = this.bfs(this.waterStarts(), null);
-    this.reach = new Set(prev.keys());
+    this.bubbles = this.bubbles.filter(b => b.y > this.shown + 4);
     if (!playing) return;
-    this.o2 -= (100 / (TIMES.air * mult())) * dt;
-    hero.pose = 'swim';
-    // she keeps swimming up into whatever space you open
-    if (this.routeVer !== gr.version) {
-      this.routeVer = gr.version;
-      let best = null, bs = Infinity;
-      for (const k of this.reach) { const r = (k / 100) | 0, c = k % 100, s = r * 2 + Math.abs(c - this.SC); if (s < bs) { bs = s; best = { r, c }; } }
-      this.route = best ? this.routeTo(best) : [[gr.x + (this.SC + .5) * gr.cell, this.base + gr.y + gr.rows * gr.cell + 62]];
-    }
-    const wp = this.route && this.route[0];
-    if (wp) {
-      const dx = wp[0] - hero.x, dy = wp[1] - hero.y, d = Math.hypot(dx, dy);
-      if (d < 3) { if (this.route.length > 1) this.route.shift(); }
-      else { const v = Math.min(d, 150 * dt); hero.x += dx / d * v; hero.y += dy / d * v; if (Math.abs(dx) > 2) hero.face = dx > 0 ? 1 : -1; }
-    }
-    if (this.o2 < 30 && !this.saidAir) { this.saidAir = 1; caption('Hurry, she\'s running out of air!', 2.5); }
-    if (this.reach.has(this.SC)) phaseWon();
-    else if (this.o2 <= 0) phaseLost();
+    this.level = Math.max(this.TOP, this.level - this.TAP / mult() * dt);
+    const sub = this.submerged();
+    if (sub) this.air -= (100 / (TIMES.air * mult())) * dt; else this.air = Math.min(100, this.air + 30 * dt);
+    if (sub) { hero.pose = 'swim'; hero.x = 62 + Math.sin(G.time * 1.3) * 4; hero.y = this.base + this.FEET - 14 + Math.sin(G.time * 2) * 4; }
+    else { hero.pose = this.shown < this.FEET - 20 ? 'scared' : 'cheer'; hero.x = 62; hero.y = this.base + this.FEET; }
+    hero.face = 1;
+    if (!sub && !this.saidBreathe) { this.saidBreathe = 1; caption('She can breathe! Keep draining!', 2.2); }
+    if (sub && this.air < 30 && !this.saidAir) { this.saidAir = 1; caption('Hurry, she\'s running out of air!', 2.5); }
+    if (this.shown >= this.FEET) phaseWon();
+    else if (this.air <= 0) phaseLost();
   },
   draw(g, T) {
-    const gr = this.grid, s = gr.cell;
-    // porcelain sides of the sink
-    g.fillStyle = '#dfe5ec';
-    g.fillRect(-60, -20, 80, 700); g.fillRect(110, -20, 10, 700); g.fillRect(504, -20, 96, 700);
-    for (let c = 0; c < gr.cols; c++) if (c !== this.SC) g.fillRect(gr.x + c * s, -20, s, gr.y + 2 * s + 20);
-    g.fillStyle = 'rgba(70,100,130,.25)'; g.fillRect(-60, 660, 80, 20); g.fillRect(504, 660, 96, 20);
-    // exit light
-    const ex = gr.x + this.SC * s;
-    const lg = g.createLinearGradient(0, 0, 0, 70); lg.addColorStop(0, 'rgba(255,250,200,.95)'); lg.addColorStop(1, 'rgba(255,250,200,0)');
-    g.fillStyle = lg; g.globalAlpha = .7 + Math.sin(T * 3) * .2; g.fillRect(ex - 6, 4, s + 12, 60); g.globalAlpha = 1;
-    textOutlined(g, 'EXIT ↑', ex + s / 2, 28, 14, '#fff');
-    // tray: open water she can reach glows
-    gr.drawTray(g, '#c9d4df', 'rgba(8,36,84,.5)');
-    g.fillStyle = 'rgba(150,235,255,.32)';
-    for (const k of this.reach) { const r = (k / 100) | 0, c = k % 100; g.fillRect(gr.x + c * s, gr.y + r * s, s, s); }
+    const gr = this.grid, L = this.shown;
+    // the running tap
+    const sw = 12 + Math.sin(T * 20) * 1.5;
+    g.fillStyle = 'rgba(225,245,255,.7)'; g.fillRect(126 - sw / 2, -20, sw, Math.max(0, L + 20));
+    g.fillStyle = 'rgba(255,255,255,.8)'; g.fillRect(124, -20, 3, Math.max(0, L + 20));
+    // sponge she is stuck on
+    g.fillStyle = '#e9cf45'; rr(g, 16, this.FEET, 88, 44, 8); g.fill();
+    g.fillStyle = '#3f8f3a'; rr(g, 16, this.FEET, 88, 12, 6); g.fill();
+    g.fillStyle = 'rgba(160,120,20,.45)';
+    for (let i = 0; i < 9; i++) { g.beginPath(); g.arc(26 + (i % 5) * 16, this.FEET + 22 + ((i / 5) | 0) * 12, 2.5, 0, 7); g.fill(); }
+    // plughole under the sweets
+    g.fillStyle = '#39434b'; g.beginPath(); g.ellipse(310, 924, 74, 20, 0, 0, 7); g.fill();
+    g.strokeStyle = '#9aa7b2'; g.lineWidth = 3; g.stroke();
+    g.strokeStyle = '#1c2228'; g.lineWidth = 3; g.beginPath();
+    for (let x = 260; x <= 360; x += 20) { g.moveTo(x, 912); g.lineTo(x, 936); } g.stroke();
+    gr.drawTray(g, '#d6dde5', 'rgba(255,255,255,.14)');
     gr.drawBlocks(g, G.phase === 2 ? selected : null);
+  },
+  // water sits over the hero so she looks submerged
+  drawOver(g, T) {
+    const L = this.shown;
+    if (L > 975) return;
+    const wg = g.createLinearGradient(0, L, 0, 980);
+    wg.addColorStop(0, 'rgba(90,180,250,.32)'); wg.addColorStop(1, 'rgba(20,70,170,.5)');
+    g.fillStyle = wg; g.beginPath(); g.moveTo(-60, 990);
+    for (let x = -60; x <= 600; x += 20) g.lineTo(x, L + Math.sin(x * .03 + T * 3) * 4);
+    g.lineTo(600, 990); g.closePath(); g.fill();
+    g.strokeStyle = 'rgba(255,255,255,.75)'; g.lineWidth = 3; g.beginPath();
+    for (let x = -60; x <= 600; x += 20) { const y = L + Math.sin(x * .03 + T * 3) * 4; x === -60 ? g.moveTo(x, y) : g.lineTo(x, y); }
+    g.stroke();
+    // splash where the tap hits the surface
+    g.fillStyle = 'rgba(255,255,255,.6)'; g.beginPath(); g.ellipse(126, L, 26 + Math.sin(T * 12) * 4, 7, 0, 0, 7); g.fill();
+    // whirlpool when it drains
+    if (this.swirl > 0) {
+      g.save(); g.globalAlpha = Math.min(1, this.swirl); g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 2.5;
+      for (let i = 0; i < 3; i++) { g.beginPath(); g.ellipse(310, 905, 30 + i * 18, 8 + i * 4, 0, T * 6 + i, T * 6 + i + 4); g.stroke(); }
+      g.restore();
+    }
     g.strokeStyle = 'rgba(220,245,255,.7)'; g.lineWidth = 1.5;
     for (const b of this.bubbles) { g.beginPath(); g.arc(b.x, b.y, b.r, 0, 7); g.stroke(); }
+    // level markers on the sink wall
+    g.setLineDash([6, 6]); g.lineWidth = 2;
+    g.strokeStyle = 'rgba(255,255,255,.7)'; g.beginPath(); g.moveTo(20, this.MOUTH); g.lineTo(108, this.MOUTH); g.stroke();
+    g.strokeStyle = 'rgba(120,255,140,.9)'; g.beginPath(); g.moveTo(20, this.FEET); g.lineTo(108, this.FEET); g.stroke();
+    g.setLineDash([]);
+    textOutlined(g, 'AIR', 120, this.MOUTH, 13, '#fff'); textOutlined(g, 'SAFE', 124, this.FEET - 2, 13, '#9dffae');
   },
 };
 const PHASES = [P1, P2, P3];
@@ -1085,25 +1071,26 @@ function seq12() {
   ];
 }
 function seq23() {
+  const surf = P3.base + P3.START, rest = P3.base + P3.FEET - 14;
   return [
     doStep(() => { hero.pose = 'cheer'; caption('The beans are gone! Jump down to the sink!', 2.6); }),
     waitStep(.8),
     pathStep([[hero.x, hero.y], [55, hero.y]], 160, { pose: 'walk' }),
-    pathStep([[55, 1840], [55, 1960]], 520, { pose: 'fall', follow: [960, 1920, 380] }),
-    doStep(() => { splash(55, 1922); hero.scale = .7; }),
-    pathStep([[55, 1960], [70, 2300], [300, 2720]], 260, { pose: 'swim', follow: [1920, 1920, 0] }),
+    pathStep([[55, 1840], [55, surf]], 560, { pose: 'fall', follow: [960, 1920, 380] }),
+    doStep(() => { splash(55, surf); hero.scale = .8; }),
+    pathStep([[55, surf], [62, rest]], 200, { pose: 'swim', follow: [1920, 1920, 0] }),
     camStep(1920, .3),
     () => { startPhase(2); },
   ];
 }
 function seqWin() {
-  const gr = P3.grid;
-  const pts = [[hero.x, hero.y], ...P3.routeTo({ r: 0, c: P3.SC }), [gr.x + (P3.SC + .5) * gr.cell, P3.base + 12]];
+  const b = P3.base;
   return [
-    doStep(() => caption('The way is open! Swim for it!', 2.5)),
-    pathStep(pts, 300, { pose: 'swim' }),
-    doStep(() => { splash(hero.x, P3.base + 10); hero.visible = false; }),
-    waitStep(.4),
+    doStep(() => { hero.pose = 'cheer'; caption('The sink is drained! Climb out!', 2.5); }),
+    waitStep(.9),
+    pathStep([[hero.x, hero.y], [40, b + 520], [40, b + 120], [40, b - 40]], 320, { pose: 'walk' }),
+    doStep(() => { hero.visible = false; }),
+    waitStep(.3),
     () => { G.state = 'win'; SFX.win(); },
   ];
 }
@@ -1193,7 +1180,7 @@ window.addEventListener('keydown', e => { if (e.key === 'n' && G.state === 'play
 function drawBackground(g, top, bottom, T) {
   for (const P of PHASES) if (P.base <= bottom && P.base + VH >= top) g.drawImage(BG[P.bg], 0, P.base, VW, VH);
   if (top < 0) { g.fillStyle = '#f1dcbc'; g.fillRect(-400, top, 1340, -top); }
-  if (bottom > 2880) { g.fillStyle = '#163f86'; g.fillRect(-400, 2880, 1340, bottom - 2880); }
+  if (bottom > 2880) { g.fillStyle = '#6d8091'; g.fillRect(-400, 2880, 1340, bottom - 2880); }
   if (bottom > 1920) { // light rippling through the sink water
     g.save(); g.globalAlpha = .07; g.fillStyle = '#fff';
     for (let i = 0; i < 6; i++) {
@@ -1340,6 +1327,10 @@ function render() {
     ctx.save(); ctx.translate(0, P.base); P.draw(ctx, T); ctx.restore();
   }
   drawHero(ctx, T);
+  for (const P of PHASES) {
+    if (!P.drawOver || !P.grid || P.base > wBot || P.base + 980 < wTop) continue;
+    ctx.save(); ctx.translate(0, P.base); P.drawOver(ctx, T); ctx.restore();
+  }
   drawParts(ctx);
   // combo text
   if (G.combo && G.state === 'play') {
