@@ -204,6 +204,20 @@ function softBlob(g, x, y, rx, ry, c0, c1) {
   g.fillStyle = grd; g.beginPath(); g.arc(x, y, Math.max(rx, ry), 0, 7); g.fill(); g.restore();
 }
 const BG = {};
+// Photo backdrops replace the painted ones as soon as they load
+const PHOTO_BG = { kitchen: 'assets/bg-kitchen.jpg', pantry: 'assets/bg-pantry.jpg', sink: 'assets/bg-sink.jpg' };
+function loadPhotoBackdrops() {
+  for (const k in PHOTO_BG) {
+    const im = new Image();
+    im.onload = () => {
+      const c = document.createElement('canvas'); c.width = VW * 2; c.height = VH * 2;
+      const o = c.getContext('2d'); o.drawImage(im, 0, 0, c.width, c.height);
+      o.fillStyle = 'rgba(20,10,5,.12)'; o.fillRect(0, 0, c.width, c.height); // knock back slightly so the sweets pop
+      BG[k] = c;
+    };
+    im.src = PHOTO_BG[k];
+  }
+}
 function buildBackdrops() {
   // 1. Kitchen floor: warm wall, window glow, a giant table leg, a pot plant, skirting board
   BG.kitchen = blurBG(g => {
@@ -795,7 +809,7 @@ const P1 = {
     g.lineCap = 'round'; g.lineJoin = 'round';
     const pts = this.path.pts.slice(0, 10);
     const stroke = (w, col) => { g.strokeStyle = col; g.lineWidth = w; g.beginPath(); pts.forEach((p, i) => (i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1]))); g.stroke(); };
-    stroke(82, 'rgba(255,248,236,.9)'); stroke(68, '#4a2c1c'); stroke(58, '#2b1a12');
+    stroke(76, 'rgba(255,244,228,.35)'); stroke(64, 'rgba(45,24,12,.5)'); stroke(52, 'rgba(30,15,8,.35)');
     // floorboard
     g.fillStyle = '#b07a50'; g.fillRect(-60, 880, 660, 5);
     g.fillStyle = '#8d5d3b'; g.fillRect(-60, 885, 660, 120);
@@ -986,9 +1000,9 @@ const P3 = {
   draw(g, T) {
     const gr = this.grid, L = this.shown;
     // the running tap
-    const sw = 12 + Math.sin(T * 20) * 1.5;
-    g.fillStyle = 'rgba(225,245,255,.7)'; g.fillRect(126 - sw / 2, -20, sw, Math.max(0, L + 20));
-    g.fillStyle = 'rgba(255,255,255,.8)'; g.fillRect(124, -20, 3, Math.max(0, L + 20));
+    const sw = 12 + Math.sin(T * 20) * 1.5, TX = 166, TY = 118;
+    g.fillStyle = 'rgba(225,245,255,.7)'; g.fillRect(TX - sw / 2, TY, sw, Math.max(0, L - TY));
+    g.fillStyle = 'rgba(255,255,255,.8)'; g.fillRect(TX - 2, TY, 3, Math.max(0, L - TY));
     // sponge she is stuck on
     g.fillStyle = '#e9cf45'; rr(g, 16, this.FEET, 88, 44, 8); g.fill();
     g.fillStyle = '#3f8f3a'; rr(g, 16, this.FEET, 88, 12, 6); g.fill();
@@ -1015,7 +1029,7 @@ const P3 = {
     for (let x = -60; x <= 600; x += 20) { const y = L + Math.sin(x * .03 + T * 3) * 4; x === -60 ? g.moveTo(x, y) : g.lineTo(x, y); }
     g.stroke();
     // splash where the tap hits the surface
-    g.fillStyle = 'rgba(255,255,255,.6)'; g.beginPath(); g.ellipse(126, L, 26 + Math.sin(T * 12) * 4, 7, 0, 0, 7); g.fill();
+    g.fillStyle = 'rgba(255,255,255,.6)'; g.beginPath(); g.ellipse(166, L, 26 + Math.sin(T * 12) * 4, 7, 0, 0, 7); g.fill();
     // whirlpool when it drains
     if (this.swirl > 0) {
       g.save(); g.globalAlpha = Math.min(1, this.swirl); g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 2.5;
@@ -1407,7 +1421,7 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 // title screen shows the level behind it
-buildBackdrops();
+buildBackdrops(); loadPhotoBackdrops();
 PHASES.forEach(p => p.init()); P1.placeHero();
 window.HeroEscape = { G, PHASES, hero, startLevel, phaseWon };
 requestAnimationFrame(frame);
