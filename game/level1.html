@@ -11,6 +11,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);overflow:hid
 canvas{display:block;position:fixed;left:0;top:0;touch-action:none}
 </style>
 <canvas id="c" aria-label="Hero Escape game"></canvas>
+<script src="hero-art.js"></script>
 <script>
 'use strict';
 /* =====================================================================
@@ -586,8 +587,37 @@ class Grid {
 // ---------- hero: a tiny girl (placeholder for your final character art)
 const hero = { x: 48, y: 880, pose: 'scared', face: 1, visible: true, inCart: false, scale: .9 };
 const HC = { line: '#2a1810', skin: '#8d5a36', jacket: '#f37a1f', jacketDark: '#c95a0f', shirt: '#f6c84a', skirt: '#2d7fb8', hair: '#1c120d', shoe: '#1a1210' };
+// Cut-out hero art: TEST ONLY. Taken from a reference image the team does not own;
+// replace with original character art before anything is shown publicly.
+const HERO_ART = window.HERO_ART; // loaded from hero-art.js (kept out of git); absent = code-drawn hero
+const HERO_IMG = {}; let heroArtReady = 0;
+if (HERO_ART) for (const n in HERO_ART.parts) { const im = new Image(); im.onload = () => heroArtReady++; im.src = HERO_ART.parts[n].src; HERO_IMG[n] = im; }
+// The art is three pieces (upper body, left leg, right leg) posed in code, Spine-style
+function drawHeroSprite(g, T) {
+  const M = HERO_ART.meta, P = HERO_ART.parts, pose = hero.pose, s = 80 / M.h * (hero.scale || 1);
+  let rot = 0, dy = 0, lA = 0, rA = 0, sy = 1, pivotY = 0, shake = 0;
+  if (pose === 'walk') { const ph = T * 14; lA = Math.sin(ph) * .5; rA = -lA; dy = -Math.abs(Math.cos(ph)) * 2.5; rot = .05; }
+  else if (pose === 'push') { rot = .3 + Math.sin(T * 16) * .015; lA = -.45; rA = .05; }
+  else if (pose === 'scared') { shake = Math.sin(T * 45) * 1.2; lA = Math.sin(T * 30) * .08; rA = -lA; sy = .97; }
+  else if (pose === 'cheer') { dy = -Math.abs(Math.sin(T * 7)) * 9; lA = -.2; rA = .2; }
+  else if (pose === 'swim') { pivotY = -40; rot = -.25 + Math.sin(T * 2.2) * .15; lA = Math.sin(T * 7) * .5; rA = -lA; }
+  else if (pose === 'fall') { pivotY = -40; rot = Math.sin(T * 9) * .5; lA = Math.sin(T * 13) * .6; rA = -lA; }
+  else sy = 1 + Math.sin(T * 3) * .012;
+  g.save(); g.translate(hero.x + shake, hero.y + (hero.inCart ? -14 : 0));
+  g.translate(0, dy + pivotY * (hero.scale || 1)); g.rotate(rot * hero.face); g.translate(0, -pivotY * (hero.scale || 1));
+  g.scale(hero.face * s, s * sy);
+  const leg = (n, ang, hip) => {
+    const q = P[n]; g.save(); g.translate(hip[0] - M.feetX, hip[1] - M.h); g.rotate(ang);
+    g.drawImage(HERO_IMG[n], q.x - hip[0], q.y - hip[1]); g.restore();
+  };
+  leg('legL', lA, M.hipL); leg('legR', rA, M.hipR);
+  g.drawImage(HERO_IMG.body, P.body.x - M.feetX, P.body.y - M.h);
+  g.restore();
+  if (hero.inCart) drawCart(g, hero.x, hero.y);
+}
 function drawHero(g, T) {
   if (!hero.visible) return;
+  if (heroArtReady === 3) return drawHeroSprite(g, T);
   const { pose, face } = hero, sc = hero.scale || 1;
   g.save(); g.translate(hero.x, hero.y);
   if (hero.inCart) g.translate(0, -12);
